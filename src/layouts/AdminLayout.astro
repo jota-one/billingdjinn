@@ -1,0 +1,23 @@
+---
+import AuthGuard from '@components/AuthGuard.astro'
+import BaseLayout from '@layouts/BaseLayout.astro'
+import UserAuth from '@components/UserAuth.vue'
+---
+
+<AuthGuard />
+<BaseLayout>
+  <!-- Navbar admin minimaliste (sans footer) -->
+  <nav class="fixed top-0 left-0 w-full h-20 bg-black/80 backdrop-blur-md shadow-lg z-50 flex items-center px-6">
+    <a href="/" class="flex items-center gap-2 text-white font-bold text-xl">
+      <span class="i-fa-solid-file-invoice text-2xl"></span>
+      BillingDjinn
+    </a>
+    <div class="ml-auto">
+      <UserAuth client:only />
+    </div>
+  </nav>
+  <!-- SPA Admin : remplit exactement l'espace sous la navbar -->
+  <div class="mt-20 h-[calc(100vh-5rem)] overflow-hidden">
+    <slot />
+  </div>
+</BaseLayout>

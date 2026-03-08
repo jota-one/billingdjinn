@@ -1,0 +1,9 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro'
+import AdminSpa from '@components/Admin.vue'
+export const prerender = false;
+---
+
+<AdminLayout>
+  <AdminSpa client:only />
+</AdminLayout>
