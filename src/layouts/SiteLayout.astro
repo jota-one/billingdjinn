@@ -1,0 +1,59 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro'
+import UserAuth from '@components/UserAuth.vue'
+import AdminLink from '@components/AdminLink.vue'
+const isHome = Astro.url.pathname === '/';
+const { navBg = 'bg-transparent' } = Astro.props;
+
+const navClasses =
+  'fixed top-0 left-0 w-full h-20 backdrop-blur-md shadow-lg p-5 z-50 ' + navBg
+const logoContainerClasses = isHome ? 'mr-5 flex-1' : 'mr-5';
+---
+
+<BaseLayout>
+  <!-- Navbar -->
+  <nav class={navClasses}>
+    <div class="container flex justify-between items-center mx-auto">
+      <div class={logoContainerClasses}>
+        <h1 class="text-xl md:text-2xl font-bold">
+          <a href="/" class="flex items-center gap-2 text-white" aria-label="BillingDjinn">
+            <span class="i-fa-solid-file-invoice text-2xl"></span>
+            BillingDjinn
+          </a>
+        </h1>
+      </div>
+      <div class="hidden lg:flex gap-20 justify-between items-center mr-5" id="mainNavigation">
+        <ul class="flex gap-8">
+          <li class="text-md font-semibold text-white cursor-pointer"><a href="/">Accueil</a></li>
+          <AdminLink client:only />
+        </ul>
+      </div>
+      <div class="hidden lg:flex gap-5">
+        <UserAuth client:only />
+      </div>
+    </div>
+  </nav>
+  <div class="flex-1">
+    <slot />
+  </div>
+  <!-- Footer -->
+  <footer class="p-8 bg-gray-900 border-t">
+    <div class="container m-auto text-center text-base-content">
+      <span class="text-xs block">© 2025 BillingDjinn. Tous droits réservés.</span>
+    </div>
+  </footer>
+</BaseLayout>
+
+<script>
+  // Masquer la navigation si l'utilisateur n'est pas authentifié et qu'on est sur la homepage
+  const userJwt = sessionStorage.getItem('userJwt')
+  const isAuthenticated = userJwt && userJwt.length > 0
+  const isHome = window.location.pathname === '/'
+
+  if (!isAuthenticated && isHome) {
+    const mainNavigation = document.getElementById('mainNavigation')
+    if (mainNavigation) {
+      mainNavigation.style.display = 'none'
+    }
+  }
+</script>

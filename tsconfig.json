@@ -1,5 +1,18 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+  "include": ["**/*", ".astro/**/*.mjs"],
+  "exclude": ["dist", "pb"],
+  "compilerOptions": {
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@admin/*": ["./src/admin/*"],
+      "@components/*": ["./src/components/*"],
+      "@layouts/*": ["./src/layouts/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@images/*": ["./src/assets/*"],
+      "@config": ["./src/config/index.ts"],
+      "@types": ["./src/types/index.ts"],
+    },
+    "jsx": "preserve",
+  },
 }

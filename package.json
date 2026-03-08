@@ -1,14 +1,53 @@
 {
-  "name": "",
+  "name": "billingdjinn",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt",
+    "db": "cd pb && ./pocketbase serve --http=127.0.0.1:8092"
   },
   "dependencies": {
-    "astro": "^5.17.1"
+    "@astrojs/check": "^0.9.6",
+    "@astrojs/node": "^9.5.1",
+    "@astrojs/vue": "^5.1.3",
+    "@fontsource-variable/oswald": "^5.2.5",
+    "@primeuix/themes": "^2.0.3",
+    "@tailwindcss/vite": "^4.1.4",
+    "@vueuse/core": "^14.1.0",
+    "astro": "^5.17.1",
+    "chart.js": "^4.5.1",
+    "dayjs": "^1.11.19",
+    "marked": "^17.0.1",
+    "pocketbase": "^0.26.0",
+    "primevue": "^4.3.5",
+    "tailwindcss": "^4.1.4",
+    "vue": "^3.5.13",
+    "vue-router": "^4.2.5",
+    "vue3-markdown": "^1.2.17"
+  },
+  "devDependencies": {
+    "@egoist/tailwindcss-icons": "^1.9.0",
+    "@iconify-json/fa-solid": "^1.2.1",
+    "@iconify-json/fa6-solid": "^1.1.0",
+    "@iconify-json/fa7-solid": "^1.2.0",
+    "@iconify-json/ic": "^1.2.4",
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^25.3.5",
+    "@vueuse/integrations": "^14.1.0",
+    "daisyui": "^5.0.27",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.32.0",
+    "oxlint-tsgolint": "^0.16.0",
+    "sortablejs": "^1.15.6",
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.18"
+  },
+  "volta": {
+    "node": "22.19.0"
   }
 }

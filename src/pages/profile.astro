@@ -1,0 +1,13 @@
+---
+import SiteLayout from '@layouts/SiteLayout.astro'
+import AuthGuard from '@components/AuthGuard.astro'
+import UserProfile from '@components/UserProfile.vue'
+export const prerender = false;
+---
+
+<AuthGuard />
+<SiteLayout navBg="bg-primary/90">
+  <div class="container mx-auto mt-24 pb-8 px-4 max-w-2xl">
+    <UserProfile client:only />
+  </div>
+</SiteLayout>

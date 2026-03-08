@@ -1,0 +1,32 @@
+---
+// Composant de protection des pages
+// Redirige vers / si l'utilisateur n'est pas authentifié
+// Sauvegarde l'URL d'origine pour redirection post-login
+---
+
+<!-- Masquer le contenu par défaut pour éviter le flash -->
+<style is:inline>
+  html:not(.auth-checked) body {
+    visibility: hidden;
+  }
+</style>
+
+<!-- Script inline (bloquant) pour vérification immédiate -->
+<script is:inline>
+  (function() {
+    // Vérifier si l'utilisateur est authentifié
+    const userJwt = sessionStorage.getItem('userJwt')
+    const isAuthenticated = userJwt && userJwt.length > 0
+
+    // Si pas authentifié et pas sur la homepage
+    if (!isAuthenticated && window.location.pathname !== '/') {
+      // Sauvegarder l'URL actuelle pour redirection après login
+      sessionStorage.setItem('returnUrl', window.location.pathname + window.location.search)
+      // Rediriger vers la homepage
+      window.location.href = '/'
+    } else {
+      // Utilisateur authentifié, afficher le contenu
+      document.documentElement.classList.add('auth-checked')
+    }
+  })()
+</script>
