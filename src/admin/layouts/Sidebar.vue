@@ -17,6 +17,12 @@
           </RouterLink>
         </li>
         <li>
+          <RouterLink to="/settings" class="flex items-center gap-3" active-class="menu-active">
+            <span class="i-fa-solid-building text-xl"></span>
+            Mon entreprise
+          </RouterLink>
+        </li>
+        <li>
           <div class="flex items-center gap-3 cursor-pointer" @click="goOut">
             <span class="i-fa-solid-sign-out-alt text-xl"></span>
             Retour au site
@@ -24,7 +30,7 @@
         </li>
       </ul>
     </aside>
-    <div class="drawer-content p-4 overflow-y-auto">
+    <div class="drawer-content p-4 overflow-y-auto h-[calc(100vh-5rem)]">
       <label for="my-drawer" class="drawer-button cursor-pointer lg:hidden">
         <span class="i-fa-solid-bars text-xl"></span>
       </label>
