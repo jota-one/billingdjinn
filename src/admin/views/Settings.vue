@@ -93,22 +93,37 @@
           />
         </div>
 
-        <!-- Taux horaire -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Taux horaire standard (CHF)</span>
-          </label>
-          <InputNumber
-            v-model="form.hourly_rate"
-            :min="0"
-            mode="currency"
-            currency="CHF"
-            :max-fraction-digits="2"
-            suffix=" /h"
-            locale="fr-CH"
-            placeholder="100"
-            class="w-full"
-          />
+        <!-- Taux horaire / Délai de paiement -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Taux horaire standard (CHF)</span>
+            </label>
+            <InputNumber
+              v-model="form.hourly_rate"
+              :min="0"
+              mode="currency"
+              currency="CHF"
+              :max-fraction-digits="2"
+              suffix=" /h"
+              locale="fr-CH"
+              placeholder="100"
+              class="w-full"
+            />
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Délai de paiement (jours)</span>
+            </label>
+            <InputNumber
+              v-model="form.payment_terms"
+              :min="0"
+              :only-int="true"
+              suffix=" jours"
+              placeholder="30"
+              class="w-full"
+            />
+          </div>
         </div>
 
         <!-- TVA -->
@@ -183,6 +198,7 @@ const form = ref({
   email: '',
   bank_account: '',
   hourly_rate: null as number | null,
+  payment_terms: null as number | null,
   tva_enabled: false,
   tva_number: '',
   tva_rate: null as number | null,
@@ -227,6 +243,7 @@ onMounted(async () => {
       email: settings.value.email || '',
       bank_account: settings.value.bank_account || '',
       hourly_rate: settings.value.hourly_rate ?? null,
+      payment_terms: settings.value.payment_terms ?? null,
       tva_enabled: settings.value.tva_enabled ?? false,
       tva_number: settings.value.tva_number || '',
       tva_rate: settings.value.tva_rate ?? null,

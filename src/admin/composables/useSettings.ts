@@ -14,6 +14,7 @@ export interface TSettings {
   tva_number?: string
   tva_rate?: number
   hourly_rate?: number
+  payment_terms?: number
   created: string
   updated: string
 }
@@ -29,6 +30,7 @@ export interface TSettingsForm {
   tva_number?: string
   tva_rate?: number | null
   hourly_rate?: number | null
+  payment_terms?: number | null
 }
 
 export default function useSettings() {
@@ -74,6 +76,9 @@ export default function useSettings() {
     }
     if (payload.hourly_rate !== null && payload.hourly_rate !== undefined) {
       formData.append('hourly_rate', String(payload.hourly_rate))
+    }
+    if (payload.payment_terms !== null && payload.payment_terms !== undefined) {
+      formData.append('payment_terms', String(payload.payment_terms))
     }
 
     settings.value = await pb
