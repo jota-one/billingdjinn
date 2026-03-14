@@ -1,6 +1,6 @@
 # RoadMap du projet billing djinn
 
-Ce document maintient la liste des changements planifiés pour le projet et sert de référence partagée pour la priorisation, le périmètre et l’avancement.
+Ce document maintient la liste des changements planifiés pour le projet et sert de référence partagée pour la priorisation, le périmètre et l'avancement.
 
 Format recommandé pour le suivi: `- [AAAA-MM-JJ] Titre — note courte`.
 
@@ -8,21 +8,27 @@ Format recommandé pour le suivi: `- [AAAA-MM-JJ] Titre — note courte`.
 
 Liste des petites améliorations et refactorings potentiels.
 
+- Colonnes HT/TTC dans la liste des factures — actuellement `—`, à calculer via une view PocketBase (agrégation sur `invoice_lines`)
+
 
 ## Nouvelles fonctionnalités
 
-### Gestion des clients
-Pas de factures sans client. Il faut commencer par gérer les clients. On a besoin d'une UI classique CRUD pour les
-clients de notre petite entreprise. Liste avec nom, date acquisition et des colonnes d'aggrégation type "revenu annuel", "revenu cumulé", "date dernière facture" + bien sûr des icônes d'actions (facturer, modifier, supprimer)
+### Import / Export
+Export CSV/JSON des clients et des factures. Import CSV pour les clients (bulk), import JSON pour les factures historiques. Prioritaire pour la migration des factures existantes depuis 2022. Expertise disponible via le projet lexlsf.
 
-On va éviter les modales dans ce projet et privlégier des pages complètes, aussi pour l'ajout et l'édition des entités. Bien entendu, la suppression va se contenter d'une petite modale de confirmation générique.
+### Personnalisation des labels de facture
+Objet `labels` dans `company_settings` (JSON) permettant de surcharger les textes du PDF : entêtes de colonnes (Description, Qté, Prix unit., Total), sections (À l'attention de, Notes), totaux (Total HT, TVA, Total TTC), mentions de paiement. Utile pour les factures bilingues ou par convention client.
 
-### Settings de l'entreprise
-Un point à mettre en place très rapidement est la page de configuration de l'entreprise qui emet les factures. Il faut qu'on puisse y définir toutes les infos utiles dont on a besoin pour créer une facture, notamment: nom de l'entreprise, adresse, compte bancaire, logo, taxes à appliquer, taux horaire standard (sera probablement adaptable par client, voire plus finement), etc.
+### Personnalisation du layout de facture
+Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
 
-### Liste des factures
-Dans un logiciel de facturation, ça peut servir de pouvoir lister les factures. Par défaut, on liste de manière anti-chronologique.
+### Dashboard / accueil
+Une page d'accueil avec un aperçu de la situation financière: factures en attente, CA du mois en cours, CA de l'année, montants ouverts. À implémenter en dernier — nécessite que clients, factures et statuts soient en place pour avoir de la donnée à remonter.
+
 
 ## Historique (fait)
 
+- [2026-03-14] Export PDF + immutabilité — génération PDF via `pdfmake` (logo base64, lignes, TVA, totaux, IBAN). Snapshots `client_snapshot` / `company_snapshot` (JSON) gelés au passage en "Envoyée". Formulaire verrouillé dès lors, statut seul reste modifiable (retour à Brouillon impossible).
+- [2026-03-14] Factures — CRUD complet (liste, création, édition) avec lignes de facture, TVA surchargeable, numérotation auto `YYYY-NNN` (pratique, non légalement requis en CH), statuts (brouillon/envoyée/payée), date d'échéance calculée depuis `payment_terms`. Collections PocketBase `invoices` + `invoice_lines`.
+- [2026-03-13] Gestion des clients — CRUD complet avec liste DataTable, pages `/admin/clients`, `/admin/clients/new`, `/admin/clients/:id`. Collection PocketBase `clients` + ajout `payment_terms` aux settings entreprise.
 - [2026-03-12] Settings de l'entreprise — page `/admin/settings` avec form complet (nom, adresse, téléphone, email, IBAN, logo, TVA, taux horaire). Collection PocketBase `company_settings` singleton + migrations.
