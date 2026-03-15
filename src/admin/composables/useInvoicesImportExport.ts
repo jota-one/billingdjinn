@@ -4,6 +4,7 @@ import config from '../../config'
 import { buildSnapshots } from './useInvoices'
 import type { TInvoiceStatus, TInvoiceLine } from './useInvoices'
 import type { ImportResult } from '../types/import-export'
+import { parseDecimal } from '../types/import-export'
 import { INVOICE_CSV_COLUMNS, getUniqueFields, getImportableFields } from '../config/invoicesImportExport'
 
 export { INVOICE_CSV_COLUMNS }
@@ -249,7 +250,7 @@ export default function useInvoicesImportExport() {
             due_date: displayToIso(col(firstRow, 'due_date')) || null,
             status: parseStatus(col(firstRow, 'status')),
             tva_enabled: parseBool(col(firstRow, 'tva_enabled')),
-            tva_rate: col(firstRow, 'tva_rate') ? parseFloat(col(firstRow, 'tva_rate')) : null,
+            tva_rate: col(firstRow, 'tva_rate') ? parseDecimal(col(firstRow, 'tva_rate')) : null,
             notes: col(firstRow, 'notes') || '',
             client_snapshot: clientSnapshot,
             company_snapshot: companySnapshot,
@@ -263,8 +264,8 @@ export default function useInvoicesImportExport() {
             await pb.collection('invoice_lines').create({
               invoice: invoice.id,
               description,
-              quantity: parseFloat(col(row, 'quantity') || '1'),
-              unit_price: parseFloat(col(row, 'unit_price') || '0'),
+              quantity: parseDecimal(col(row, 'quantity') || '1'),
+              unit_price: parseDecimal(col(row, 'unit_price') || '0'),
               sort_order: sortOrder++,
             })
           }

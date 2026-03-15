@@ -1,4 +1,5 @@
 import type { FieldConfig } from '../types/import-export'
+import { parseDecimal } from '../types/import-export'
 
 export const INVOICES_FIELDS_CONFIG: FieldConfig[] = [
   // ── invoice header ──────────────────────────────────────────────────────────
@@ -41,7 +42,7 @@ export const INVOICES_FIELDS_CONFIG: FieldConfig[] = [
     exportable: true,
     importable: true,
     formatter: {
-      import: v => (v !== '' ? parseFloat(v) : null),
+      import: v => (v !== '' ? parseDecimal(v) : null),
     },
   },
   {
@@ -83,7 +84,7 @@ export const INVOICES_FIELDS_CONFIG: FieldConfig[] = [
     exportable: true,
     importable: true,
     formatter: {
-      import: v => (v !== '' ? parseFloat(v) : 1),
+      import: v => (v !== '' ? parseDecimal(v) : 1),
     },
   },
   {
@@ -92,7 +93,7 @@ export const INVOICES_FIELDS_CONFIG: FieldConfig[] = [
     exportable: true,
     importable: true,
     formatter: {
-      import: v => (v !== '' ? parseFloat(v) : 0),
+      import: v => (v !== '' ? parseDecimal(v) : 0),
     },
   },
 ]

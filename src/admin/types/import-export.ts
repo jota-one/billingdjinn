@@ -21,3 +21,7 @@ export type ImportResult = {
   success: number
   errors: Array<{ line: number; name: string; error: string }>
 }
+
+/** Parse a decimal number accepting both period and comma as decimal separator */
+export const parseDecimal = (v: string): number =>
+  parseFloat(v.replace(',', '.'))
