@@ -13,9 +13,6 @@ Liste des petites améliorations et refactorings potentiels.
 
 ## Nouvelles fonctionnalités
 
-### Import / Export
-Export CSV/JSON des clients et des factures. Import CSV pour les clients (bulk), import JSON pour les factures historiques. Prioritaire pour la migration des factures existantes depuis 2022. Expertise disponible via le projet lexlsf.
-
 ### Personnalisation des labels de facture
 Objet `labels` dans `company_settings` (JSON) permettant de surcharger les textes du PDF : entêtes de colonnes (Description, Qté, Prix unit., Total), sections (À l'attention de, Notes), totaux (Total HT, TVA, Total TTC), mentions de paiement. Utile pour les factures bilingues ou par convention client.
 
@@ -28,6 +25,7 @@ Une page d'accueil avec un aperçu de la situation financière: factures en atte
 
 ## Historique (fait)
 
+- [2026-03-15] Import / Export CSV — export et import CSV pour clients et factures. Moteur générique (`useImportExport`) + composables spécifiques. Format dénormalisé pour les factures (une ligne par ligne de facture, groupées par `invoice_number` à l'import).
 - [2026-03-14] Export PDF + immutabilité — génération PDF via `pdfmake` (logo base64, lignes, TVA, totaux, IBAN). Snapshots `client_snapshot` / `company_snapshot` (JSON) gelés au passage en "Envoyée". Formulaire verrouillé dès lors, statut seul reste modifiable (retour à Brouillon impossible).
 - [2026-03-14] Factures — CRUD complet (liste, création, édition) avec lignes de facture, TVA surchargeable, numérotation auto `YYYY-NNN` (pratique, non légalement requis en CH), statuts (brouillon/envoyée/payée), date d'échéance calculée depuis `payment_terms`. Collections PocketBase `invoices` + `invoice_lines`.
 - [2026-03-13] Gestion des clients — CRUD complet avec liste DataTable, pages `/admin/clients`, `/admin/clients/new`, `/admin/clients/:id`. Collection PocketBase `clients` + ajout `payment_terms` aux settings entreprise.
