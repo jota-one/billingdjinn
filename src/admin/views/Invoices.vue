@@ -5,7 +5,14 @@
       Factures
     </h2>
     <div class="card">
-      <div class="flex justify-end mb-2">
+      <div class="flex justify-end gap-2 mb-2">
+        <Button
+          label="Import / Export"
+          icon="i-fa-solid-file-arrow-up"
+          size="small"
+          severity="secondary"
+          @click="showImportExportModal = true"
+        />
         <RouterLink to="/invoices/new">
           <Button label="Nouvelle facture" icon="i-fa-solid-plus" size="small" />
         </RouterLink>
@@ -68,6 +75,19 @@
       :message="deleteMessage"
       @confirm="deleteConfirmed"
     />
+
+    <ImportExportModal
+      v-model="showImportExportModal"
+      title="Import / Export des factures"
+      entity-label="facture"
+      :columns="invoiceColumns"
+      help-text="Une ligne CSV = une ligne de facture. Groupez par invoice_number pour les factures multi-lignes. Dates au format DD.MM.YYYY. status: draft/sent/paid. tva_enabled: oui/non. client_email doit correspondre à un client existant. client_name est présent dans l'export pour la lisibilité uniquement — il est ignoré à l'import."
+      :is-exporting="isExporting"
+      :is-importing="isImporting"
+      :export-fn="exportToCSV"
+      :import-fn="importFromCSV"
+      @saved="loadInvoices"
+    />
   </div>
 </template>
 
@@ -79,13 +99,18 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import ConfirmModal from '../components/ConfirmModal.vue'
+import ImportExportModal from '../components/ImportExportModal.vue'
 import useInvoices, { STATUS_BADGE, STATUS_LABELS, type TInvoice, type TInvoiceStatus } from '../composables/useInvoices'
+import useInvoicesImportExport, { INVOICE_IMPORT_COLUMNS } from '../composables/useInvoicesImportExport'
 
 const { invoices, loadInvoices, deleteInvoice } = useInvoices()
+const { isExporting, isImporting, exportToCSV, importFromCSV } = useInvoicesImportExport()
 
 const showDeleteModal = ref(false)
+const showImportExportModal = ref(false)
 const invoiceToDelete = ref<TInvoice | null>(null)
 const deleteMessage = ref('')
+const invoiceColumns = [...INVOICE_IMPORT_COLUMNS]
 
 const formatDate = (date?: string) => (date ? dayjs(date).format('DD.MM.YYYY') : '—')
 

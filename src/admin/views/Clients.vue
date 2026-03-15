@@ -5,7 +5,14 @@
       Clients
     </h2>
     <div class="card">
-      <div class="flex justify-end mb-2">
+      <div class="flex justify-end gap-2 mb-2">
+        <Button
+          label="Import / Export"
+          icon="i-fa-solid-file-arrow-up"
+          size="small"
+          severity="secondary"
+          @click="showImportExportModal = true"
+        />
         <RouterLink to="/clients/new">
           <Button label="Nouveau client" icon="i-fa-solid-plus" size="small" />
         </RouterLink>
@@ -63,6 +70,19 @@
       :message="deleteMessage"
       @confirm="deleteConfirmed"
     />
+
+    <ImportExportModal
+      v-model="showImportExportModal"
+      title="Import / Export des clients"
+      entity-label="client"
+      :columns="clientColumns"
+      help-text="Dates au format DD.MM.YYYY. hourly_rate et payment_terms sont des nombres. Laissez id vide pour créer un nouveau client."
+      :is-exporting="isExporting"
+      :is-importing="isImporting"
+      :export-fn="exportToCSV"
+      :import-fn="importFromCSV"
+      @saved="loadClients"
+    />
   </div>
 </template>
 
@@ -74,14 +94,20 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import ConfirmModal from '../components/ConfirmModal.vue'
+import ImportExportModal from '../components/ImportExportModal.vue'
 import useClients from '../composables/useClients'
+import useClientsImportExport from '../composables/useClientsImportExport'
+import { getExportableFields } from '../config/clientsImportExport'
 import type { TClient } from '../composables/useClients'
 
 const { clients, loadClients, deleteClient } = useClients()
+const { isExporting, isImporting, exportToCSV, importFromCSV } = useClientsImportExport()
 
 const showDeleteModal = ref(false)
+const showImportExportModal = ref(false)
 const clientToDelete = ref<TClient | null>(null)
 const deleteMessage = ref('')
+const clientColumns = getExportableFields().map(f => f.key)
 
 const formatDate = (date?: string) => {
   if (!date) return '—'

@@ -186,7 +186,7 @@ function buildInvoiceData(payload: TInvoiceForm): Record<string, unknown> {
   }
 }
 
-async function buildSnapshots(
+export async function buildSnapshots(
   clientId: string,
   pb: PocketBase,
 ): Promise<{ clientSnapshot: TClientSnapshot; companySnapshot: TCompanySnapshot }> {
