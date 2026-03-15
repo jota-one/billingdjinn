@@ -25,6 +25,7 @@ Une page d'accueil avec un aperçu de la situation financière: factures en atte
 
 ## Historique (fait)
 
+- [2026-03-15] Devise multi-monnaie — champ `currency` sur `company_settings` et `clients` (override). Cascade vers les snapshots et le PDF. CHF par défaut, options CHF/EUR/USD/GBP.
 - [2026-03-15] Import / Export CSV — export et import CSV pour clients et factures. Moteur générique (`useImportExport`) + composables spécifiques. Format dénormalisé pour les factures (une ligne par ligne de facture, groupées par `invoice_number` à l'import).
 - [2026-03-14] Export PDF + immutabilité — génération PDF via `pdfmake` (logo base64, lignes, TVA, totaux, IBAN). Snapshots `client_snapshot` / `company_snapshot` (JSON) gelés au passage en "Envoyée". Formulaire verrouillé dès lors, statut seul reste modifiable (retour à Brouillon impossible).
 - [2026-03-14] Factures — CRUD complet (liste, création, édition) avec lignes de facture, TVA surchargeable, numérotation auto `YYYY-NNN` (pratique, non légalement requis en CH), statuts (brouillon/envoyée/payée), date d'échéance calculée depuis `payment_terms`. Collections PocketBase `invoices` + `invoice_lines`.
