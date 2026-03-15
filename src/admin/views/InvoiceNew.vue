@@ -10,7 +10,7 @@
       </h2>
     </div>
 
-    <InvoiceForm v-model:form="form" v-model:lines="lines" :clients="clients" :default-rate="defaultRate" />
+    <InvoiceForm v-model:form="form" v-model:lines="lines" :clients="clients" :default-rate="defaultRate" :currency="defaultCurrency" />
 
     <div class="flex justify-end mt-6">
       <Button
@@ -65,6 +65,7 @@ const lines = ref<TInvoiceLineForm[]>([
 
 const selectedClient = computed(() => clients.value.find(c => c.id === form.value.client))
 const defaultRate = computed(() => selectedClient.value?.hourly_rate ?? settings.value?.hourly_rate ?? 0)
+const defaultCurrency = computed(() => selectedClient.value?.currency || settings.value?.currency || 'CHF')
 
 const computeDueDate = (baseDate: string, terms: number | undefined): string => {
   if (!baseDate || !terms) return ''

@@ -93,17 +93,17 @@
           />
         </div>
 
-        <!-- Taux horaire / Délai de paiement -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Taux horaire / Délai de paiement / Devise -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold">Taux horaire standard (CHF)</span>
+              <span class="label-text font-semibold">Taux horaire standard</span>
             </label>
             <InputNumber
               v-model="form.hourly_rate"
               :min="0"
               mode="currency"
-              currency="CHF"
+              :currency="form.currency || 'CHF'"
               :max-fraction-digits="2"
               suffix=" /h"
               locale="fr-CH"
@@ -123,6 +123,17 @@
               placeholder="30"
               class="w-full"
             />
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Devise par défaut</span>
+            </label>
+            <select v-model="form.currency" class="select select-bordered w-full">
+              <option value="CHF">CHF</option>
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+              <option value="GBP">GBP</option>
+            </select>
           </div>
         </div>
 
@@ -199,6 +210,7 @@ const form = ref({
   bank_account: '',
   hourly_rate: null as number | null,
   payment_terms: null as number | null,
+  currency: 'CHF',
   tva_enabled: false,
   tva_number: '',
   tva_rate: null as number | null,
@@ -244,6 +256,7 @@ onMounted(async () => {
       bank_account: settings.value.bank_account || '',
       hourly_rate: settings.value.hourly_rate ?? null,
       payment_terms: settings.value.payment_terms ?? null,
+      currency: settings.value.currency || 'CHF',
       tva_enabled: settings.value.tva_enabled ?? false,
       tva_number: settings.value.tva_number || '',
       tva_rate: settings.value.tva_rate ?? null,

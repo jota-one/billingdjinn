@@ -25,6 +25,7 @@ export const CLIENTS_FIELDS_CONFIG: FieldConfig[] = [
       import: v => (v !== '' ? parseInt(v, 10) : null),
     },
   },
+  { key: 'currency', label: 'Devise', exportable: true, importable: true },
 ]
 
 export const getExportableFields = () => CLIENTS_FIELDS_CONFIG.filter(f => f.exportable)

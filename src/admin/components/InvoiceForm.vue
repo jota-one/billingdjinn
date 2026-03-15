@@ -63,7 +63,7 @@
             <tr>
               <th class="w-full">Description</th>
               <th style="min-width:90px">Qté</th>
-              <th style="min-width:130px">Prix unit. CHF</th>
+              <th style="min-width:130px">Prix unit. {{ currency }}</th>
               <th style="min-width:110px" class="text-right">Total</th>
               <th style="width:40px"></th>
             </tr>
@@ -96,7 +96,7 @@
                   :min="0"
                   :max-fraction-digits="2"
                   mode="currency"
-                  currency="CHF"
+                  :currency="currency"
                   locale="fr-CH"
                   class="w-full"
                   size="small"
@@ -193,7 +193,7 @@ import Select from 'primevue/select'
 import type { TClient } from '../composables/useClients'
 import { STATUS_LABELS, type TInvoiceForm, type TInvoiceLineForm, type TInvoiceStatus } from '../composables/useInvoices'
 
-const props = defineProps<{ clients: TClient[]; defaultRate?: number; readonly?: boolean }>()
+const props = defineProps<{ clients: TClient[]; defaultRate?: number; readonly?: boolean; currency?: string }>()
 
 const form = defineModel<TInvoiceForm>('form', { required: true })
 const lines = defineModel<TInvoiceLineForm[]>('lines', { required: true })
@@ -222,7 +222,7 @@ const totalTVA = computed(() => {
 const totalTTC = computed(() => totalHT.value + totalTVA.value)
 
 const formatCHF = (amount: number) =>
-  new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(amount)
+  new Intl.NumberFormat('fr-CH', { style: 'currency', currency: props.currency || 'CHF' }).format(amount)
 
 const addLine = () => {
   lines.value.push({ description: '', quantity: 1, unit_price: props.defaultRate ?? 0 })

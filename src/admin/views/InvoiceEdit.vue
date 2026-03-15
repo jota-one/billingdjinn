@@ -33,6 +33,7 @@
         v-model:lines="lines"
         :clients="clients"
         :readonly="isLocked"
+        :currency="effectiveCurrency"
       />
 
       <div class="flex justify-end gap-3 mt-6">
@@ -75,10 +76,12 @@ import useInvoices, {
   type TInvoiceStatus,
 } from '../composables/useInvoices'
 import useClients from '../composables/useClients'
+import useSettings from '../composables/useSettings'
 import { downloadInvoicePdf } from '../composables/useInvoicePdf'
 
 const { loadInvoice, loadInvoiceLines, updateInvoice } = useInvoices()
 const { clients, loadClients } = useClients()
+const { settings, loadSettings } = useSettings()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
 const route = useRoute()
@@ -93,6 +96,12 @@ const invoiceStatus = ref<TInvoiceStatus | null>(null)
 const hasSnapshot = ref(false)
 
 const isLocked = computed(() => invoiceStatus.value !== null && invoiceStatus.value !== 'draft')
+
+const effectiveCurrency = computed(() => {
+  if (invoiceRef.value?.company_snapshot?.currency) return invoiceRef.value.company_snapshot.currency
+  const client = clients.value.find(c => c.id === form.value.client)
+  return client?.currency || settings.value?.currency || 'CHF'
+})
 
 const form = ref<TInvoiceForm>({
   client: '',
@@ -154,6 +163,7 @@ onMounted(async () => {
       loadInvoice(invoiceId),
       loadInvoiceLines(invoiceId),
       loadClients(),
+      loadSettings(),
     ])
     invoiceStatus.value = invoice.status
     hasSnapshot.value = !!invoice.client_snapshot

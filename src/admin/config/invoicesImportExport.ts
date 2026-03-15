@@ -64,6 +64,12 @@ export const INVOICES_FIELDS_CONFIG: FieldConfig[] = [
     exportable: true,
     importable: false, // informational only on import
   },
+  {
+    key: 'currency',
+    label: 'Devise',
+    exportable: true,
+    importable: false, // derived from client.currency at import time
+  },
   // ── invoice line ────────────────────────────────────────────────────────────
   {
     key: 'description',

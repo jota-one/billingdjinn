@@ -132,6 +132,7 @@ export default function useInvoicesImportExport() {
         const liveClient = inv.expand?.client
         const clientEmail = snapshot?.email || liveClient?.email || ''
         const clientName = snapshot?.name || liveClient?.name || ''
+        const currency = inv.company_snapshot?.currency || ''
 
         const invoiceRowPrefix = [
           escapeCSV(inv.invoice_number ?? ''),
@@ -143,6 +144,7 @@ export default function useInvoicesImportExport() {
           escapeCSV(inv.notes ?? ''),
           escapeCSV(clientEmail),
           escapeCSV(clientName),
+          escapeCSV(currency),
         ]
 
         if (lines.length === 0) {

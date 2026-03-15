@@ -11,6 +11,7 @@ export interface TClient {
   contact_person?: string
   hourly_rate?: number
   payment_terms?: number
+  currency?: string
   notes?: string
   date_acquisition?: string
   created: string
@@ -25,6 +26,7 @@ export interface TClientForm {
   contact_person?: string
   hourly_rate?: number | null
   payment_terms?: number | null
+  currency?: string
   notes?: string
   date_acquisition?: string
 }
@@ -79,6 +81,7 @@ function buildFormData(payload: TClientForm): FormData {
   if (payload.payment_terms !== null && payload.payment_terms !== undefined) {
     fd.append('payment_terms', String(payload.payment_terms))
   }
+  if (payload.currency) fd.append('currency', payload.currency)
   if (payload.notes !== undefined) fd.append('notes', payload.notes)
   if (payload.date_acquisition) fd.append('date_acquisition', payload.date_acquisition)
   return fd

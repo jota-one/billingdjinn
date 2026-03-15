@@ -57,18 +57,17 @@
           </div>
         </div>
 
-        <!-- Taux horaire / Délai de paiement -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Taux horaire / Délai de paiement / Devise -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold">Taux horaire (CHF)</span>
-              <span class="label-text-alt">Override entreprise</span>
+              <span class="label-text font-semibold">Taux horaire</span>
             </label>
             <InputNumber
               v-model="form.hourly_rate"
               :min="0"
               mode="currency"
-              currency="CHF"
+              :currency="form.currency || 'CHF'"
               :max-fraction-digits="2"
               suffix=" /h"
               locale="fr-CH"
@@ -79,7 +78,6 @@
           <div class="form-control">
             <label class="label">
               <span class="label-text font-semibold">Délai de paiement</span>
-              <span class="label-text-alt">Override entreprise</span>
             </label>
             <InputNumber
               v-model="form.payment_terms"
@@ -89,6 +87,18 @@
               placeholder="—"
               class="w-full"
             />
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Devise</span>
+            </label>
+            <select v-model="form.currency" class="select select-bordered w-full">
+              <option value="">— défaut entreprise —</option>
+              <option value="CHF">CHF</option>
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+              <option value="GBP">GBP</option>
+            </select>
           </div>
         </div>
 
@@ -149,6 +159,7 @@ const form = ref({
   email: '',
   hourly_rate: null as number | null,
   payment_terms: null as number | null,
+  currency: '',
   date_acquisition: '',
   notes: '',
 })
@@ -176,6 +187,7 @@ onMounted(async () => {
       email: client.email || '',
       hourly_rate: client.hourly_rate ?? null,
       payment_terms: client.payment_terms ?? null,
+      currency: client.currency || '',
       date_acquisition: client.date_acquisition ? client.date_acquisition.substring(0, 10) : '',
       notes: client.notes || '',
     }

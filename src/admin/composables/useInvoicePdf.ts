@@ -16,11 +16,11 @@ const formatDate = (iso?: string) => {
   return d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-const formatCHF = (n: number) =>
-  new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' })
+const formatCurrency = (n: number, currency: string) =>
+  new Intl.NumberFormat('fr-CH', { style: 'currency', currency })
     .format(n)
     .replace(/\u202F/g, "'")  // narrow no-break space (thousands sep) → apostrophe
-    .replace(/\u00A0/g, ' ')  // no-break space (before CHF) → regular space
+    .replace(/\u00A0/g, ' ')  // no-break space (before symbol) → regular space
 
 const lineTotal = (l: { quantity: number; unit_price: number }) => l.quantity * l.unit_price
 
@@ -86,6 +86,7 @@ async function resolveData(invoice: TInvoice): Promise<{
       bank_account: settingsRaw.bank_account || '',
       tva_number: settingsRaw.tva_number || '',
       logo_base64,
+      currency: clientRaw.currency || settingsRaw.currency || 'CHF',
     },
   }
 }
@@ -98,6 +99,8 @@ function buildDocDef(
   client: TClientSnapshot,
   company: TCompanySnapshot,
 ): TDocumentDefinitions {
+  const currency = company.currency || 'CHF'
+  const fmt = (n: number) => formatCurrency(n, currency)
   const totalHT = lines.reduce((s, l) => s + lineTotal(l), 0)
   const totalTVA = invoice.tva_enabled && invoice.tva_rate ? totalHT * (invoice.tva_rate / 100) : 0
   const totalTTC = totalHT + totalTVA
@@ -164,8 +167,8 @@ function buildDocDef(
     ...lines.map(l => [
       { text: l.description, style: 'body' },
       { text: String(l.quantity), style: 'body', alignment: 'right' as const },
-      { text: formatCHF(l.unit_price), style: 'body', alignment: 'right' as const },
-      { text: formatCHF(lineTotal(l)), style: 'body', alignment: 'right' as const },
+      { text: fmt(l.unit_price), style: 'body', alignment: 'right' as const },
+      { text: fmt(lineTotal(l)), style: 'body', alignment: 'right' as const },
     ]),
   ]
 
@@ -183,18 +186,18 @@ function buildDocDef(
   const totalsRows: TableCell[][] = [
     [
       { text: 'Total HT', alignment: 'right', style: 'body' },
-      { text: formatCHF(totalHT), alignment: 'right', style: 'body' },
+      { text: fmt(totalHT), alignment: 'right', style: 'body' },
     ],
   ]
   if (invoice.tva_enabled && invoice.tva_rate) {
     totalsRows.push([
       { text: `TVA ${invoice.tva_rate}\u00a0%`, alignment: 'right', style: 'body' },
-      { text: formatCHF(totalTVA), alignment: 'right', style: 'body' },
+      { text: fmt(totalTVA), alignment: 'right', style: 'body' },
     ])
   }
   totalsRows.push([
     { text: 'Total TTC', alignment: 'right', bold: true },
-    { text: formatCHF(totalTTC), alignment: 'right', bold: true },
+    { text: fmt(totalTTC), alignment: 'right', bold: true },
   ])
 
   const totalsTable: Content = {
