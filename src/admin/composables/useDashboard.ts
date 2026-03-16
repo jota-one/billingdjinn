@@ -5,7 +5,20 @@ import type { TInvoiceTotal } from './useInvoiceTotals'
 
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
-const MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+const MONTHS_FR = [
+  'janvier',
+  'février',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'août',
+  'septembre',
+  'octobre',
+  'novembre',
+  'décembre',
+]
 
 export default function useDashboard() {
   const pb = new PocketBase(config.apiBaseUrl)
@@ -110,12 +123,18 @@ export default function useDashboard() {
 
   const ytdChartData = computed(() => {
     const years = Array.from({ length: 5 }, (_, i) => String(currentYear - 4 + i))
-    const data = years.map(y =>
-      Math.round(
-        invoices.value
-          .filter(i => i.status === 'paid' && i.date?.startsWith(y) && i.date.substring(5, 7) <= prevMonthStr)
-          .reduce((s, i) => s + i.total_ht, 0) * 100,
-      ) / 100,
+    const data = years.map(
+      y =>
+        Math.round(
+          invoices.value
+            .filter(
+              i =>
+                i.status !== 'draft' &&
+                i.date?.startsWith(y) &&
+                i.date.substring(5, 7) <= prevMonthStr,
+            )
+            .reduce((s, i) => s + i.total_ht, 0) * 100,
+        ) / 100,
     )
     return {
       labels: years,
