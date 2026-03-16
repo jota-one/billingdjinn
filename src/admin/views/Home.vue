@@ -41,9 +41,15 @@
           <h3 class="font-semibold mb-4">CA mensuel {{ currentYear }}</h3>
           <Chart type="bar" :data="monthlyChartData" :options="barOptions" />
         </div>
-        <div class="card bg-base-200 p-5">
-          <h3 class="font-semibold mb-4">Évolution annuelle</h3>
-          <Chart type="line" :data="annualChartData" :options="lineOptions" />
+        <div class="flex flex-col gap-6">
+          <div class="card bg-base-200 p-5">
+            <h3 class="font-semibold mb-4">Évolution annuelle (total)</h3>
+            <Chart type="line" :data="annualChartData" :options="lineOptions" />
+          </div>
+          <div class="card bg-base-200 p-5">
+            <h3 class="font-semibold mb-4">À fin {{ prevMonthName }}</h3>
+            <Chart type="line" :data="ytdChartData" :options="lineOptions" />
+          </div>
         </div>
       </div>
 
@@ -70,6 +76,8 @@ const {
   pendingAmount,
   monthlyChartData,
   annualChartData,
+  ytdChartData,
+  prevMonthName,
   topClientsChartData,
 } = useDashboard()
 

@@ -5,6 +5,8 @@ import type { TInvoiceTotal } from './useInvoiceTotals'
 
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
+const MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+
 export default function useDashboard() {
   const pb = new PocketBase(config.apiBaseUrl)
   const invoices = ref<TInvoiceTotal[]>([])
@@ -18,6 +20,9 @@ export default function useDashboard() {
   // ── KPI ─────────────────────────────────────────────────────────────────────
 
   const currentYear = new Date().getFullYear()
+  const prevMonthIndex = new Date().getMonth() === 0 ? 11 : new Date().getMonth() - 1
+  const prevMonthStr = String(prevMonthIndex + 1).padStart(2, '0')
+  const prevMonthName = MONTHS_FR[prevMonthIndex]
 
   const caAllTime = computed(() =>
     invoices.value.filter(i => i.status === 'paid').reduce((s, i) => s + i.total_ht, 0),
@@ -101,6 +106,33 @@ export default function useDashboard() {
     }
   })
 
+  // ── Même périmètre, années précédentes (à fin mois précédent) ───────────────
+
+  const ytdChartData = computed(() => {
+    const years = Array.from({ length: 5 }, (_, i) => String(currentYear - 4 + i))
+    const data = years.map(y =>
+      Math.round(
+        invoices.value
+          .filter(i => i.status === 'paid' && i.date?.startsWith(y) && i.date.substring(5, 7) <= prevMonthStr)
+          .reduce((s, i) => s + i.total_ht, 0) * 100,
+      ) / 100,
+    )
+    return {
+      labels: years,
+      datasets: [
+        {
+          label: `CA HT payé à fin ${prevMonthName}`,
+          data,
+          borderColor: 'rgba(34, 197, 94, 0.9)',
+          backgroundColor: 'rgba(34, 197, 94, 0.15)',
+          pointBackgroundColor: 'rgba(34, 197, 94, 1)',
+          fill: true,
+          tension: 0.3,
+        },
+      ],
+    }
+  })
+
   // ── CA par client (top 8) ────────────────────────────────────────────────────
 
   const topClientsChartData = computed(() => {
@@ -146,6 +178,8 @@ export default function useDashboard() {
     pendingAmount,
     monthlyChartData,
     annualChartData,
+    ytdChartData,
+    prevMonthName,
     topClientsChartData,
   }
 }
