@@ -39,10 +39,14 @@
           </template>
         </Column>
         <Column header="Total HT" style="width: 110px;" class="text-right">
-          <template #body>—</template>
+          <template #body="{ data }">
+            <span class="font-mono text-sm">{{ formatAmount(data.total_ht) }}</span>
+          </template>
         </Column>
         <Column header="Total TTC" style="width: 110px;" class="text-right">
-          <template #body>—</template>
+          <template #body="{ data }">
+            <span class="font-mono text-sm">{{ formatAmount(data.total_ttc) }}</span>
+          </template>
         </Column>
         <Column field="status" header="Statut" style="width: 110px;">
           <template #body="{ data }">
@@ -86,7 +90,7 @@
       :is-importing="isImporting"
       :export-fn="exportToCSV"
       :import-fn="importFromCSV"
-      @saved="loadInvoices"
+      @saved="loadInvoiceTotals"
     />
   </div>
 </template>
@@ -100,26 +104,30 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ImportExportModal from '../components/ImportExportModal.vue'
-import useInvoices, { STATUS_BADGE, STATUS_LABELS, type TInvoice, type TInvoiceStatus } from '../composables/useInvoices'
+import useInvoices, { STATUS_BADGE, STATUS_LABELS, type TInvoiceStatus } from '../composables/useInvoices'
+import useInvoiceTotals, { type TInvoiceTotal } from '../composables/useInvoiceTotals'
 import useInvoicesImportExport, { INVOICE_IMPORT_COLUMNS } from '../composables/useInvoicesImportExport'
 
-const { invoices, loadInvoices, deleteInvoice } = useInvoices()
+const { deleteInvoice } = useInvoices()
+const { invoices, loadInvoiceTotals } = useInvoiceTotals()
 const { isExporting, isImporting, exportToCSV, importFromCSV } = useInvoicesImportExport()
 
 const showDeleteModal = ref(false)
 const showImportExportModal = ref(false)
-const invoiceToDelete = ref<TInvoice | null>(null)
+const invoiceToDelete = ref<TInvoiceTotal | null>(null)
 const deleteMessage = ref('')
 const invoiceColumns = [...INVOICE_IMPORT_COLUMNS]
 
 const formatDate = (date?: string) => (date ? dayjs(date).format('DD.MM.YYYY') : '—')
+const formatAmount = (n: number) =>
+  new Intl.NumberFormat('fr-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
 
-const isOverdue = (invoice: TInvoice) => {
+const isOverdue = (invoice: TInvoiceTotal) => {
   if (!invoice.due_date || invoice.status === 'paid') return false
   return dayjs(invoice.due_date).isBefore(dayjs(), 'day')
 }
 
-const confirmDelete = (invoice: TInvoice) => {
+const confirmDelete = (invoice: TInvoiceTotal) => {
   invoiceToDelete.value = invoice
   deleteMessage.value = `Voulez-vous vraiment supprimer la facture ${invoice.invoice_number} ? Cette action est irréversible.`
   showDeleteModal.value = true
@@ -128,10 +136,10 @@ const confirmDelete = (invoice: TInvoice) => {
 const deleteConfirmed = async () => {
   if (!invoiceToDelete.value) return
   await deleteInvoice(invoiceToDelete.value.id)
-  await loadInvoices()
+  await loadInvoiceTotals()
   showDeleteModal.value = false
   invoiceToDelete.value = null
 }
 
-onMounted(loadInvoices)
+onMounted(loadInvoiceTotals)
 </script>
