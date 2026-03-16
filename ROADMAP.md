@@ -8,8 +8,6 @@ Format recommandé pour le suivi: `- [AAAA-MM-JJ] Titre — note courte`.
 
 Liste des petites améliorations et refactorings potentiels.
 
-- Colonnes HT/TTC dans la liste des factures — actuellement `—`, à calculer via une view PocketBase (agrégation sur `invoice_lines`)
-
 
 ## Nouvelles fonctionnalités
 
@@ -19,11 +17,10 @@ Objet `labels` dans `company_settings` (JSON) permettant de surcharger les texte
 ### Personnalisation du layout de facture
 Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
 
-### Dashboard / accueil
-Une page d'accueil avec un aperçu de la situation financière: factures en attente, CA du mois en cours, CA de l'année, montants ouverts. À implémenter en dernier — nécessite que clients, factures et statuts soient en place pour avoir de la donnée à remonter.
-
 
 ## Historique (fait)
+
+- [2026-03-16] Dashboard — KPI cards (CA mois, CA année, CA total, montants en attente) + courbe mensuelle (barres empilées payé/en attente) + évolution annuelle (ligne) + top clients. View PocketBase `invoice_totals` (agrégation `invoice_lines`). Colonnes HT/TTC dans la liste des factures.
 
 - [2026-03-15] Devise multi-monnaie — champ `currency` sur `company_settings` et `clients` (override). Cascade vers les snapshots et le PDF. CHF par défaut, options CHF/EUR/USD/GBP.
 - [2026-03-15] Import / Export CSV — export et import CSV pour clients et factures. Moteur générique (`useImportExport`) + composables spécifiques. Format dénormalisé pour les factures (une ligne par ligne de facture, groupées par `invoice_number` à l'import).
