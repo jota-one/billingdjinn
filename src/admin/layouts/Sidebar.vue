@@ -11,9 +11,27 @@
           </RouterLink>
         </li>
         <li>
+          <RouterLink to="/clients" class="flex items-center gap-3" active-class="menu-active">
+            <span class="i-fa-solid-users text-xl"></span>
+            Clients
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/invoices" class="flex items-center gap-3" active-class="menu-active">
+            <span class="i-fa-solid-file-invoice-dollar text-xl"></span>
+            Factures
+          </RouterLink>
+        </li>
+        <li>
           <RouterLink to="/users" class="flex items-center gap-3" active-class="menu-active">
             <span class="i-fa-solid-users text-xl"></span>
             Utilisateurs
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/settings" class="flex items-center gap-3" active-class="menu-active">
+            <span class="i-fa-solid-building text-xl"></span>
+            Mon entreprise
           </RouterLink>
         </li>
         <li>
@@ -24,7 +42,7 @@
         </li>
       </ul>
     </aside>
-    <div class="drawer-content p-4 overflow-y-auto">
+    <div class="drawer-content p-4 overflow-y-auto h-[calc(100vh-5rem)]">
       <label for="my-drawer" class="drawer-button cursor-pointer lg:hidden">
         <span class="i-fa-solid-bars text-xl"></span>
       </label>
