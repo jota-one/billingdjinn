@@ -224,17 +224,49 @@ export default function useInvoicesImportExport() {
           }
 
           // Check unique constraints (driven by config)
-          let isDuplicate = false
+          let existingInvoice: any = null
           for (const f of getUniqueFields()) {
             const val = col(firstRow, f.key)
             if (!val) continue
             try {
-              await pb.collection('invoices').getFirstListItem(`${f.key}="${val}"`)
-              isDuplicate = true // already exists → skip
+              existingInvoice = await pb.collection('invoices').getFirstListItem(`${f.key}="${val}"`)
             } catch { /* not found → ok to create */ }
           }
-          if (isDuplicate) {
-            result.unchanged++
+          if (existingInvoice) {
+            // Invoice exists — add lines missing from DB (matched by description+quantity+unit_price)
+            const csvLines = invoiceRows.filter(r => col(r, 'description'))
+            const existingLines = await pb
+              .collection('invoice_lines')
+              .getFullList({ filter: `invoice="${existingInvoice.id}"`, sort: 'sort_order' })
+
+            const lineKey = (desc: string, qty: number, price: number) =>
+              `${desc}|${qty}|${price}`
+            const existingKeys = new Set(
+              existingLines.map((l: any) => lineKey(l.description, l.quantity, l.unit_price)),
+            )
+
+            const missingLines = csvLines.filter(row => {
+              const desc = col(row, 'description')
+              const qty = parseDecimal(col(row, 'quantity') || '1')
+              const price = parseDecimal(col(row, 'unit_price') || '0')
+              return !existingKeys.has(lineKey(desc, qty, price))
+            })
+
+            if (missingLines.length === 0) {
+              result.unchanged++
+            } else {
+              let sortOrder = existingLines.length + 1
+              for (const row of missingLines) {
+                await pb.collection('invoice_lines').create({
+                  invoice: existingInvoice.id,
+                  description: col(row, 'description'),
+                  quantity: parseDecimal(col(row, 'quantity') || '1'),
+                  unit_price: parseDecimal(col(row, 'unit_price') || '0'),
+                  sort_order: sortOrder++,
+                })
+              }
+              result.updated++
+            }
             result.success = result.created + result.updated + result.unchanged
             continue
           }
