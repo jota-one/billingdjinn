@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import config from '../../config'
 import PocketBase from 'pocketbase'
+import type { TInvoiceLabels } from '../types/invoice-labels'
 
 export interface TClient {
   id: string
@@ -14,6 +15,7 @@ export interface TClient {
   currency?: string
   notes?: string
   date_acquisition?: string
+  labels?: TInvoiceLabels
   created: string
   updated: string
 }
@@ -29,17 +31,32 @@ export interface TClientForm {
   currency?: string
   notes?: string
   date_acquisition?: string
+  labels?: TInvoiceLabels
+}
+
+export interface TClientStats {
+  id: string
+  name: string
+  ca_annuel: number
+  ca_cumule: number
+  last_invoice_date?: string
 }
 
 export default function useClients() {
   const pb = new PocketBase(config.apiBaseUrl)
 
   const clients = ref<TClient[]>([])
+  const clientStats = ref<Map<string, TClientStats>>(new Map())
 
   const loadClients = async () => {
     clients.value = await pb.collection<TClient>('clients').getFullList({
       sort: 'name',
     })
+  }
+
+  const loadClientStats = async () => {
+    const list = await pb.collection<TClientStats>('client_stats').getFullList()
+    clientStats.value = new Map(list.map(s => [s.id, s]))
   }
 
   const loadClient = async (id: string): Promise<TClient> => {
@@ -60,7 +77,9 @@ export default function useClients() {
 
   return {
     clients,
+    clientStats,
     loadClients,
+    loadClientStats,
     loadClient,
     createClient,
     updateClient,
@@ -84,5 +103,6 @@ function buildFormData(payload: TClientForm): FormData {
   if (payload.currency) fd.append('currency', payload.currency)
   if (payload.notes !== undefined) fd.append('notes', payload.notes)
   if (payload.date_acquisition) fd.append('date_acquisition', payload.date_acquisition)
+  if (payload.labels !== undefined) fd.append('labels', JSON.stringify(payload.labels))
   return fd
 }

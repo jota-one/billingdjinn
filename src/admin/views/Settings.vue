@@ -167,6 +167,14 @@
           </div>
         </div>
 
+        <!-- Labels de facture -->
+        <div class="form-control">
+          <div class="divider mt-2 mb-0"></div>
+          <label class="label mt-2"><span class="label-text font-semibold">Labels de facture</span></label>
+          <p class="text-xs text-base-content/50 mb-4">Personnalisez les textes du PDF. Laissez vide pour utiliser les valeurs par défaut.</p>
+          <InvoiceLabelsEditor v-model="form.labels" />
+        </div>
+
         <!-- Actions -->
         <div class="flex justify-end mt-2">
           <Button
@@ -192,8 +200,10 @@ import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
 import PbErrorToast from '../components/PbErrorToast.vue'
+import InvoiceLabelsEditor from '../components/InvoiceLabelsEditor.vue'
 import usePbErrorToast from '../composables/usePbErrorToast'
 import useSettings from '../composables/useSettings'
+import type { TInvoiceLabels } from '../types/invoice-labels'
 
 const { settings, loadSettings, updateSettings, getLogoUrl } = useSettings()
 const { showPbError } = usePbErrorToast()
@@ -214,6 +224,7 @@ const form = ref({
   tva_enabled: false,
   tva_number: '',
   tva_rate: null as number | null,
+  labels: {} as TInvoiceLabels,
 })
 
 const logoUrl = computed(() => {
@@ -260,6 +271,7 @@ onMounted(async () => {
       tva_enabled: settings.value.tva_enabled ?? false,
       tva_number: settings.value.tva_number || '',
       tva_rate: settings.value.tva_rate ?? null,
+      labels: settings.value.labels ?? {},
     }
   }
 })

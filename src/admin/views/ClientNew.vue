@@ -113,6 +113,18 @@
           <Textarea v-model="form.notes" placeholder="Remarques, contexte..." :rows="3" class="w-full" />
         </div>
 
+        <!-- Labels de facture (override) -->
+        <div class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg">
+          <input type="checkbox" />
+          <div class="collapse-title text-sm font-semibold">
+            Labels de facture <span class="text-base-content/40 font-normal">(override client)</span>
+          </div>
+          <div class="collapse-content pt-0">
+            <p class="text-xs text-base-content/50 mb-4">Laissez vide pour hériter des labels de l'entreprise.</p>
+            <InvoiceLabelsEditor v-model="form.labels" :placeholders="companyLabels" />
+          </div>
+        </div>
+
         <!-- Actions -->
         <div class="flex justify-end gap-2 mt-2">
           <RouterLink to="/clients">
@@ -128,17 +140,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
 import PbErrorToast from '../components/PbErrorToast.vue'
+import InvoiceLabelsEditor from '../components/InvoiceLabelsEditor.vue'
 import usePbErrorToast from '../composables/usePbErrorToast'
 import useClients from '../composables/useClients'
+import useSettings from '../composables/useSettings'
+import { resolveLabels } from '../utils/invoice-labels'
+import type { TInvoiceLabels } from '../types/invoice-labels'
 
 const { createClient } = useClients()
+const { settings, loadSettings } = useSettings()
 const { showPbError } = usePbErrorToast()
 const router = useRouter()
 
@@ -155,7 +172,10 @@ const form = ref({
   currency: '',
   date_acquisition: '',
   notes: '',
+  labels: {} as TInvoiceLabels,
 })
+
+const companyLabels = computed(() => resolveLabels(settings.value?.labels))
 
 const save = async () => {
   saving.value = true
@@ -168,4 +188,6 @@ const save = async () => {
     saving.value = false
   }
 }
+
+onMounted(loadSettings)
 </script>

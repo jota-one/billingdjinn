@@ -11,6 +11,7 @@ export interface TInvoiceTotal {
   client: string
   tva_enabled?: boolean
   tva_rate?: number
+  converted_amount?: number | null
   total_ht: number
   total_tva: number
   total_ttc: number

@@ -36,6 +36,27 @@
         :currency="effectiveCurrency"
       />
 
+      <!-- Conversion de devise -->
+      <div v-if="showConversionField" class="card bg-base-200 p-6 max-w-2xl mt-4">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-semibold">Montant HT en {{ settings?.currency || 'CHF' }}</span>
+            <span class="label-text-alt text-base-content/40">Facture en {{ effectiveCurrency }}</span>
+          </label>
+          <InputNumber
+            v-model="form.converted_amount"
+            :min="0"
+            mode="currency"
+            :currency="settings?.currency || 'CHF'"
+            :max-fraction-digits="2"
+            locale="fr-CH"
+            placeholder="—"
+            class="w-full"
+          />
+          <p class="text-xs text-base-content/50 mt-1">Équivalent HT dans la devise principale. À renseigner après encaissement.</p>
+        </div>
+      </div>
+
       <div class="flex justify-end gap-3 mt-6">
         <Button
           type="button"
@@ -63,6 +84,7 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
+import InputNumber from 'primevue/inputnumber'
 import PbErrorToast from '../components/PbErrorToast.vue'
 import InvoiceForm from '../components/InvoiceForm.vue'
 import usePbErrorToast from '../composables/usePbErrorToast'
@@ -103,6 +125,10 @@ const effectiveCurrency = computed(() => {
   return client?.currency || settings.value?.currency || 'CHF'
 })
 
+const showConversionField = computed(() =>
+  effectiveCurrency.value !== (settings.value?.currency || 'CHF'),
+)
+
 const form = ref<TInvoiceForm>({
   client: '',
   invoice_number: '',
@@ -112,6 +138,7 @@ const form = ref<TInvoiceForm>({
   tva_enabled: false,
   tva_rate: null,
   notes: '',
+  converted_amount: null,
 })
 
 const lines = ref<TInvoiceLineForm[]>([])
@@ -177,6 +204,7 @@ onMounted(async () => {
       tva_enabled: invoice.tva_enabled ?? false,
       tva_rate: invoice.tva_rate ?? null,
       notes: invoice.notes || '',
+      converted_amount: invoice.converted_amount || null,
     }
     lines.value = existingLines.map(l => ({
       description: l.description,

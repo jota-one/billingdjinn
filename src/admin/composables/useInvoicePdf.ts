@@ -4,6 +4,8 @@ import type { TDocumentDefinitions, Content, TableCell } from 'pdfmake/interface
 import type { TInvoice, TInvoiceLine, TClientSnapshot, TCompanySnapshot } from './useInvoices'
 import PocketBase from 'pocketbase'
 import config from '../../config'
+import { resolveLabels, label } from '../utils/invoice-labels'
+import type { TInvoiceLabels } from '../types/invoice-labels'
 
 // Init Roboto fonts
 ;(pdfMake as any).vfs = (pdfFonts as any).pdfMake?.vfs ?? (pdfFonts as any).vfs ?? pdfFonts
@@ -19,8 +21,8 @@ const formatDate = (iso?: string) => {
 const formatCurrency = (n: number, currency: string) =>
   new Intl.NumberFormat('fr-CH', { style: 'currency', currency })
     .format(n)
-    .replace(/\u202F/g, "'")  // narrow no-break space (thousands sep) → apostrophe
-    .replace(/\u00A0/g, ' ')  // no-break space (before symbol) → regular space
+    .replace(/\u202F/g, "'") // narrow no-break space (thousands sep) → apostrophe
+    .replace(/\u00A0/g, ' ') // no-break space (before symbol) → regular space
 
 const lineTotal = (l: { quantity: number; unit_price: number }) => l.quantity * l.unit_price
 
@@ -41,19 +43,21 @@ const logoContent = (logo: string | null | undefined): Content => {
 async function resolveData(invoice: TInvoice): Promise<{
   client: TClientSnapshot
   company: TCompanySnapshot
+  labels: Required<TInvoiceLabels>
 }> {
-  // If snapshot exists, use it directly
-  if (invoice.client_snapshot && invoice.company_snapshot) {
-    return { client: invoice.client_snapshot, company: invoice.company_snapshot }
-  }
-
-  // Draft fallback: load live data
   const pb = new PocketBase(config.apiBaseUrl)
   const [clientRaw, settingsRaw] = await Promise.all([
     pb.collection('clients').getOne<Record<string, any>>(invoice.client),
     pb.collection('company_settings').getFirstListItem<Record<string, any>>(''),
   ])
 
+  const labels = resolveLabels(settingsRaw.labels, clientRaw.labels)
+
+  if (invoice.client_snapshot && invoice.company_snapshot) {
+    return { client: invoice.client_snapshot, company: invoice.company_snapshot, labels }
+  }
+
+  // Draft fallback: build snapshots from live data
   let logo_base64: string | null = null
   if (settingsRaw.logo) {
     try {
@@ -88,6 +92,7 @@ async function resolveData(invoice: TInvoice): Promise<{
       logo_base64,
       currency: clientRaw.currency || settingsRaw.currency || 'CHF',
     },
+    labels,
   }
 }
 
@@ -98,6 +103,7 @@ function buildDocDef(
   lines: TInvoiceLine[],
   client: TClientSnapshot,
   company: TCompanySnapshot,
+  labels: Required<TInvoiceLabels>,
 ): TDocumentDefinitions {
   const currency = company.currency || 'CHF'
   const fmt = (n: number) => formatCurrency(n, currency)
@@ -131,7 +137,7 @@ function buildDocDef(
 
   const clientBlock: Content = {
     stack: [
-      { text: "À l'attention de", style: 'label' },
+      { text: labels.section_attention, style: 'label' },
       { text: clientLines.join('\n'), style: 'body' },
     ],
     margin: [0, 0, 0, 20],
@@ -159,10 +165,10 @@ function buildDocDef(
   // ── lines table ──
   const tableBody: TableCell[][] = [
     [
-      { text: 'Description', style: 'tableHeader' },
-      { text: 'Qté', style: 'tableHeader', alignment: 'right' },
-      { text: 'Prix unit.', style: 'tableHeader', alignment: 'right' },
-      { text: 'Total', style: 'tableHeader', alignment: 'right' },
+      { text: labels.col_description, style: 'tableHeader' },
+      { text: labels.col_qty, style: 'tableHeader', alignment: 'right' },
+      { text: labels.col_unit_price, style: 'tableHeader', alignment: 'right' },
+      { text: labels.col_total, style: 'tableHeader', alignment: 'right' },
     ],
     ...lines.map(l => [
       { text: l.description, style: 'body' },
@@ -185,18 +191,22 @@ function buildDocDef(
   // ── totals ──
   const totalsRows: TableCell[][] = [
     [
-      { text: 'Total HT', alignment: 'right', style: 'body' },
+      { text: labels.total_ht, alignment: 'right', style: 'body' },
       { text: fmt(totalHT), alignment: 'right', style: 'body' },
     ],
   ]
   if (invoice.tva_enabled && invoice.tva_rate) {
     totalsRows.push([
-      { text: `TVA ${invoice.tva_rate}\u00a0%`, alignment: 'right', style: 'body' },
+      {
+        text: label(labels.total_tva, { rate: String(invoice.tva_rate) }),
+        alignment: 'right',
+        style: 'body',
+      },
       { text: fmt(totalTVA), alignment: 'right', style: 'body' },
     ])
   }
   totalsRows.push([
-    { text: 'Total TTC', alignment: 'right', bold: true },
+    { text: labels.total_ttc, alignment: 'right', bold: true },
     { text: fmt(totalTTC), alignment: 'right', bold: true },
   ])
 
@@ -213,7 +223,10 @@ function buildDocDef(
   }
   if (invoice.due_date) {
     paymentStack.push({
-      text: `Paiement à effectuer au plus tard le ${formatDate(invoice.due_date)}.`,
+      text: label(labels.payment_mention, {
+        date: formatDate(invoice.due_date),
+        n: String((invoice as any).payment_terms ?? ''),
+      }),
       style: 'small',
     })
   }
@@ -222,7 +235,7 @@ function buildDocDef(
   const notesBlock: Content = invoice.notes
     ? [
         {
-          text: '\nNotes',
+          text: '\n' + labels.section_notes,
           style: 'label',
           margin: [0, 12, 0, 4] as [number, number, number, number],
         },
@@ -269,8 +282,8 @@ function buildDocDef(
 // ─── public API ─────────────────────────────────────────────────────────────
 
 export async function downloadInvoicePdf(invoice: TInvoice, lines: TInvoiceLine[]) {
-  const { client, company } = await resolveData(invoice)
-  const docDef = buildDocDef(invoice, lines, client, company)
+  const { client, company, labels } = await resolveData(invoice)
+  const docDef = buildDocDef(invoice, lines, client, company, labels)
   const filename = `facture-${invoice.invoice_number || invoice.id}.pdf`
   pdfMake.createPdf(docDef).download(filename)
 }

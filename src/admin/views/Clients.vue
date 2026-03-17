@@ -17,7 +17,7 @@
           <Button label="Nouveau client" icon="i-fa-solid-plus" size="small" />
         </RouterLink>
       </div>
-      <DataTable :value="clients" sort-field="name" :sort-order="1" table-style="min-width: 50rem">
+      <DataTable :value="clientsWithStats" sort-field="name" :sort-order="1" table-style="min-width: 50rem">
         <Column field="name" header="Nom" sortable>
           <template #body="{ data }">
             <RouterLink :to="`/clients/${data.id}`" class="link link-hover font-medium">
@@ -37,14 +37,14 @@
         <Column field="date_acquisition" header="Client depuis" sortable>
           <template #body="{ data }">{{ formatDate(data.date_acquisition) }}</template>
         </Column>
-        <Column header="CA annuel" style="width: 110px;">
-          <template #body>—</template>
+        <Column field="ca_annuel" header="CA annuel" sortable style="width: 110px;">
+          <template #body="{ data }">{{ data.ca_annuel ? fmt(data.ca_annuel) : '—' }}</template>
         </Column>
-        <Column header="CA cumulé" style="width: 110px;">
-          <template #body>—</template>
+        <Column field="ca_cumule" header="CA cumulé" sortable style="width: 110px;">
+          <template #body="{ data }">{{ data.ca_cumule ? fmt(data.ca_cumule) : '—' }}</template>
         </Column>
-        <Column header="Dernière facture" style="width: 140px;">
-          <template #body>—</template>
+        <Column field="last_invoice_date" header="Dernière facture" sortable style="width: 140px;">
+          <template #body="{ data }">{{ formatDate(data.last_invoice_date) }}</template>
         </Column>
         <Column header="Actions" style="width: 90px;">
           <template #body="{ data }">
@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import dayjs from 'dayjs'
 import DataTable from 'primevue/datatable'
@@ -100,7 +100,7 @@ import useClientsImportExport from '../composables/useClientsImportExport'
 import { getExportableFields } from '../config/clientsImportExport'
 import type { TClient } from '../composables/useClients'
 
-const { clients, loadClients, deleteClient } = useClients()
+const { clients, clientStats, loadClients, loadClientStats, deleteClient } = useClients()
 const { isExporting, isImporting, exportToCSV, importFromCSV } = useClientsImportExport()
 
 const showDeleteModal = ref(false)
@@ -108,6 +108,27 @@ const showImportExportModal = ref(false)
 const clientToDelete = ref<TClient | null>(null)
 const deleteMessage = ref('')
 const clientColumns = getExportableFields().map(f => f.key)
+
+const clientsWithStats = computed(() =>
+  clients.value.map(c => {
+    const stats = clientStats.value.get(c.id)
+    return {
+      ...c,
+      ca_annuel: stats?.ca_annuel ?? 0,
+      ca_cumule: stats?.ca_cumule ?? 0,
+      last_invoice_date: stats?.last_invoice_date,
+    }
+  }),
+)
+
+const fmt = (n: number): string => {
+  const sign = n < 0 ? '-' : ''
+  const [intPart, decPart] = Math.abs(n).toFixed(2).split('.')
+  const formattedInt = Number(intPart) >= 10000
+    ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
+    : intPart
+  return `${sign}${formattedInt}.${decPart}`
+}
 
 const formatDate = (date?: string) => {
   if (!date) return '—'
@@ -128,5 +149,5 @@ const deleteConfirmed = async () => {
   clientToDelete.value = null
 }
 
-onMounted(loadClients)
+onMounted(() => Promise.all([loadClients(), loadClientStats()]))
 </script>

@@ -57,6 +57,7 @@ const form = ref<TInvoiceForm>({
   tva_enabled: false,
   tva_rate: null,
   notes: '',
+  converted_amount: null,
 })
 
 const lines = ref<TInvoiceLineForm[]>([

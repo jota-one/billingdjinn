@@ -16,22 +16,22 @@
         <div class="card bg-base-200 p-4">
           <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">CA mois en cours</p>
           <p class="text-2xl font-bold font-mono">{{ fmt(caCurrentMonth) }}</p>
-          <p class="text-xs text-base-content/40 mt-1">HT · payé</p>
+          <p class="text-xs text-base-content/40 mt-1">{{ currency }} · HT · payé</p>
         </div>
         <div class="card bg-base-200 p-4">
           <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">CA {{ currentYear }}</p>
           <p class="text-2xl font-bold font-mono">{{ fmt(caCurrentYear) }}</p>
-          <p class="text-xs text-base-content/40 mt-1">HT · payé</p>
+          <p class="text-xs text-base-content/40 mt-1">{{ currency }} · HT · payé</p>
         </div>
         <div class="card bg-base-200 p-4">
           <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">CA total</p>
           <p class="text-2xl font-bold font-mono">{{ fmt(caAllTime) }}</p>
-          <p class="text-xs text-base-content/40 mt-1">HT · toutes années · payé</p>
+          <p class="text-xs text-base-content/40 mt-1">{{ currency }} · HT · toutes années · payé</p>
         </div>
         <div class="card bg-base-200 p-4 border border-warning/30">
           <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">En attente</p>
           <p class="text-2xl font-bold font-mono text-warning">{{ fmt(pendingAmount) }}</p>
-          <p class="text-xs text-base-content/40 mt-1">TTC · {{ pendingInvoices.length }} facture{{ pendingInvoices.length !== 1 ? 's' : '' }}</p>
+          <p class="text-xs text-base-content/40 mt-1">{{ currency }} · TTC · {{ pendingInvoices.length }} facture{{ pendingInvoices.length !== 1 ? 's' : '' }}</p>
         </div>
       </div>
 
@@ -66,6 +66,7 @@
 import { computed, onMounted, ref } from 'vue'
 import Chart from 'primevue/chart'
 import useDashboard from '../composables/useDashboard'
+import useSettings from '../composables/useSettings'
 
 const {
   load,
@@ -81,16 +82,24 @@ const {
   topClientsChartData,
 } = useDashboard()
 
+const { settings, loadSettings } = useSettings()
+const currency = computed(() => settings.value?.currency ?? 'CHF')
+
 const loading = ref(true)
 const currentYear = new Date().getFullYear()
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('fr-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
+const fmt = (n: number): string => {
+  const sign = n < 0 ? '-' : ''
+  const [intPart, decPart] = Math.abs(n).toFixed(2).split('.')
+  const formattedInt = Number(intPart) >= 10000
+    ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
+    : intPart
+  return `${sign}${formattedInt}.${decPart}`
+}
 
 const gridColor = 'rgba(128,128,128,0.1)'
 const fmtTick = (v: any) => new Intl.NumberFormat('fr-CH', { notation: 'compact' }).format(v)
-const fmtTooltip = (ctx: any) =>
-  ` ${new Intl.NumberFormat('fr-CH', { minimumFractionDigits: 2 }).format(ctx.parsed.y ?? ctx.parsed)}`
+const fmtTooltip = (ctx: any) => ` ${fmt(ctx.parsed.y ?? ctx.parsed)}`
 
 const barOptions = computed(() => ({
   responsive: true,
@@ -133,7 +142,7 @@ const clientsBarOptions = {
 }
 
 onMounted(async () => {
-  await load()
+  await Promise.all([load(), loadSettings()])
   loading.value = false
 })
 </script>
