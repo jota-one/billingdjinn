@@ -118,6 +118,18 @@
           <Textarea v-model="form.notes" placeholder="Remarques, contexte..." :rows="3" class="w-full" />
         </div>
 
+        <!-- Labels de facture (override) -->
+        <div class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg">
+          <input type="checkbox" />
+          <div class="collapse-title text-sm font-semibold">
+            Labels de facture <span class="text-base-content/40 font-normal">(override client)</span>
+          </div>
+          <div class="collapse-content pt-0">
+            <p class="text-xs text-base-content/50 mb-4">Laissez vide pour hériter des labels de l'entreprise.</p>
+            <InvoiceLabelsEditor v-model="form.labels" :placeholders="companyLabels" />
+          </div>
+        </div>
+
         <!-- Actions -->
         <div class="flex justify-end mt-2">
           <Button type="submit" label="Enregistrer" icon="i-fa-solid-save" size="small" :loading="saving" />
@@ -130,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import InputText from 'primevue/inputtext'
@@ -138,10 +150,15 @@ import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
 import PbErrorToast from '../components/PbErrorToast.vue'
+import InvoiceLabelsEditor from '../components/InvoiceLabelsEditor.vue'
 import usePbErrorToast from '../composables/usePbErrorToast'
 import useClients from '../composables/useClients'
+import useSettings from '../composables/useSettings'
+import { resolveLabels } from '../utils/invoice-labels'
+import type { TInvoiceLabels } from '../types/invoice-labels'
 
 const { loadClient, updateClient } = useClients()
+const { settings, loadSettings } = useSettings()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
 const route = useRoute()
@@ -162,7 +179,10 @@ const form = ref({
   currency: '',
   date_acquisition: '',
   notes: '',
+  labels: {} as TInvoiceLabels,
 })
+
+const companyLabels = computed(() => resolveLabels(settings.value?.labels))
 
 const save = async () => {
   saving.value = true
@@ -178,7 +198,7 @@ const save = async () => {
 
 onMounted(async () => {
   try {
-    const client = await loadClient(clientId)
+    const [client] = await Promise.all([loadClient(clientId), loadSettings()])
     form.value = {
       name: client.name || '',
       contact_person: client.contact_person || '',
@@ -190,6 +210,7 @@ onMounted(async () => {
       currency: client.currency || '',
       date_acquisition: client.date_acquisition ? client.date_acquisition.substring(0, 10) : '',
       notes: client.notes || '',
+      labels: client.labels ?? {},
     }
   } finally {
     loading.value = false

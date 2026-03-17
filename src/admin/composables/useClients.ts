@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import config from '../../config'
 import PocketBase from 'pocketbase'
+import type { TInvoiceLabels } from '../types/invoice-labels'
 
 export interface TClient {
   id: string
@@ -14,6 +15,7 @@ export interface TClient {
   currency?: string
   notes?: string
   date_acquisition?: string
+  labels?: TInvoiceLabels
   created: string
   updated: string
 }
@@ -29,6 +31,7 @@ export interface TClientForm {
   currency?: string
   notes?: string
   date_acquisition?: string
+  labels?: TInvoiceLabels
 }
 
 export interface TClientStats {
@@ -100,5 +103,6 @@ function buildFormData(payload: TClientForm): FormData {
   if (payload.currency) fd.append('currency', payload.currency)
   if (payload.notes !== undefined) fd.append('notes', payload.notes)
   if (payload.date_acquisition) fd.append('date_acquisition', payload.date_acquisition)
+  if (payload.labels !== undefined) fd.append('labels', JSON.stringify(payload.labels))
   return fd
 }

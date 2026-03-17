@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import config from '../../config'
 import PocketBase from 'pocketbase'
+import type { TInvoiceLabels } from '../types/invoice-labels'
 
 export interface TSettings {
   id: string
@@ -16,6 +17,7 @@ export interface TSettings {
   hourly_rate?: number
   payment_terms?: number
   currency?: string
+  labels?: TInvoiceLabels
   created: string
   updated: string
 }
@@ -33,6 +35,7 @@ export interface TSettingsForm {
   hourly_rate?: number | null
   payment_terms?: number | null
   currency?: string
+  labels?: TInvoiceLabels
 }
 
 export default function useSettings() {
@@ -84,6 +87,9 @@ export default function useSettings() {
     }
     if (payload.currency) {
       formData.append('currency', payload.currency)
+    }
+    if (payload.labels !== undefined) {
+      formData.append('labels', JSON.stringify(payload.labels))
     }
 
     settings.value = await pb
