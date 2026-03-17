@@ -38,13 +38,15 @@ export default function useDashboard() {
   const prevMonthName = MONTHS_FR[prevMonthIndex]
 
   const caAllTime = computed(() =>
-    invoices.value.filter(i => i.status === 'paid').reduce((s, i) => s + i.total_ht, 0),
+    invoices.value
+      .filter(i => i.status === 'paid')
+      .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0),
   )
 
   const caCurrentYear = computed(() =>
     invoices.value
       .filter(i => i.status === 'paid' && i.date?.startsWith(String(currentYear)))
-      .reduce((s, i) => s + i.total_ht, 0),
+      .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0),
   )
 
   const pendingInvoices = computed(() => invoices.value.filter(i => i.status === 'sent'))
@@ -55,7 +57,7 @@ export default function useDashboard() {
     const ym = new Date().toISOString().substring(0, 7) // YYYY-MM
     return invoices.value
       .filter(i => i.status === 'paid' && i.date?.startsWith(ym))
-      .reduce((s, i) => s + i.total_ht, 0)
+      .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0)
   })
 
   // ── Graphique mensuel (année en cours, barres empilées paid + sent) ──────────
@@ -67,8 +69,8 @@ export default function useDashboard() {
       .filter(i => i.status !== 'draft' && i.date?.startsWith(String(currentYear)))
       .forEach(i => {
         const m = new Date(i.date).getMonth()
-        if (i.status === 'paid') paid[m] += i.total_ht
-        else sent[m] += i.total_ht
+        if (i.status === 'paid') paid[m] += i.converted_amount || i.total_ht
+        else sent[m] += i.converted_amount || i.total_ht
       })
     return {
       labels: MONTHS,
@@ -100,7 +102,7 @@ export default function useDashboard() {
         Math.round(
           invoices.value
             .filter(i => i.status === 'paid' && i.date?.startsWith(y))
-            .reduce((s, i) => s + i.total_ht, 0) * 100,
+            .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0) * 100,
         ) / 100,
     )
     return {
@@ -133,7 +135,7 @@ export default function useDashboard() {
                 i.date?.startsWith(y) &&
                 i.date.substring(5, 7) <= prevMonthStr,
             )
-            .reduce((s, i) => s + i.total_ht, 0) * 100,
+            .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0) * 100,
         ) / 100,
     )
     return {
@@ -161,7 +163,7 @@ export default function useDashboard() {
       .forEach(i => {
         const name = i.expand?.client?.name ?? 'Inconnu'
         const existing = map.get(name) ?? { name, ca: 0 }
-        existing.ca += i.total_ht
+        existing.ca += i.converted_amount || i.total_ht
         map.set(name, existing)
       })
     const sorted = [...map.values()].sort((a, b) => b.ca - a.ca).slice(0, 8)

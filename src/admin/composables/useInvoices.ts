@@ -36,6 +36,7 @@ export interface TInvoice {
   notes?: string
   client_snapshot?: TClientSnapshot
   company_snapshot?: TCompanySnapshot
+  converted_amount?: number | null
   expand?: { client?: TClient }
   created: string
   updated: string
@@ -66,6 +67,7 @@ export interface TInvoiceForm {
   tva_enabled: boolean
   tva_rate: number | null
   notes: string
+  converted_amount: number | null
 }
 
 export const STATUS_LABELS: Record<TInvoiceStatus, string> = {
@@ -184,6 +186,7 @@ function buildInvoiceData(payload: TInvoiceForm): Record<string, unknown> {
     tva_enabled: payload.tva_enabled,
     tva_rate: payload.tva_enabled ? (payload.tva_rate ?? null) : null,
     notes: payload.notes || '',
+    converted_amount: payload.converted_amount ?? null,
   }
 }
 
