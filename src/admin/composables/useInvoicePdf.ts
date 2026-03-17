@@ -21,8 +21,8 @@ const formatDate = (iso?: string) => {
 const formatCurrency = (n: number, currency: string) =>
   new Intl.NumberFormat('fr-CH', { style: 'currency', currency })
     .format(n)
-    .replace(/\u202F/g, "'")  // narrow no-break space (thousands sep) → apostrophe
-    .replace(/\u00A0/g, ' ')  // no-break space (before symbol) → regular space
+    .replace(/\u202F/g, "'") // narrow no-break space (thousands sep) → apostrophe
+    .replace(/\u00A0/g, ' ') // no-break space (before symbol) → regular space
 
 const lineTotal = (l: { quantity: number; unit_price: number }) => l.quantity * l.unit_price
 
