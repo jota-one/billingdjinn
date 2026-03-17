@@ -8,8 +8,6 @@ Format recommandé pour le suivi: `- [AAAA-MM-JJ] Titre — note courte`.
 
 Liste des petites améliorations et refactorings potentiels.
 
-- Ajouter un petit système de conversion de devises si une facture a été faite dans une autre devise que la devise principale de l'entreprise, histoire de pouvoir remonter des chiffres corrects. Là je suppose que pour la facture en euros que nous avons faite, le montant a bêtement été additionné comme s'il s'agissait de CHF
-
 
 ## Nouvelles fonctionnalités
 
@@ -19,6 +17,7 @@ Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organis
 
 ## Historique (fait)
 
+- [2026-03-17] Conversion de devises — champ `converted_amount` sur `invoices`, éditable même sur facture verrouillée. Dashboard et vues DB utilisent `COALESCE(converted_amount, total_ht)` pour des chiffres cohérents en devise principale.
 - [2026-03-17] Personnalisation des labels de facture — champ `labels` JSON sur `company_settings` et `clients`. Merge 3 couches (défaut → entreprise → client). Éditeur `InvoiceLabelsEditor` réutilisable. Intégration dans le PDF via `resolveLabels` + interpolation `label()`.
 - [2026-03-17] Vue DB `client_stats` — agrégation CA annuel / CA cumulé / dernière facture par client, basée sur `invoice_totals`. Affichage avec tri dans la liste des clients.
 - [2026-03-17] Dashboard — formatage CHF (apostrophe à partir de 10'000, point décimal, pas de séparateur sous 10'000) + devise dans les labels des KPI cards.
