@@ -176,7 +176,7 @@ const downloadPdf = async () => {
       tva_rate: form.value.tva_rate ?? undefined,
     }
     const linesForPdf = lines.value.map(l => ({ ...l, invoice: invoiceId })) as TInvoiceLine[]
-    await downloadInvoicePdf(invoiceForPdf, linesForPdf)
+    await downloadInvoicePdf(invoiceForPdf, linesForPdf, 'graphic')
   } catch (e) {
     showPbError(e)
   } finally {
