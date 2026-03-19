@@ -1,6 +1,6 @@
 import pdfMake from 'pdfmake/build/pdfmake'
 import * as pdfFonts from 'pdfmake/build/vfs_fonts'
-import type { TInvoice, TInvoiceLine, TClientSnapshot, TCompanySnapshot } from './useInvoices'
+import type { TInvoiceBase, TInvoiceLine, TClientSnapshot, TCompanySnapshot } from './useInvoices'
 import PocketBase from 'pocketbase'
 import config from '../../config'
 import { resolveLabels } from '../utils/invoice-labels'
@@ -13,7 +13,7 @@ import type { TemplateName } from '../invoice-templates'
 
 // ─── data resolution ────────────────────────────────────────────────────────
 
-async function resolveData(invoice: TInvoice): Promise<{
+async function resolveData(invoice: TInvoiceBase): Promise<{
   client: TClientSnapshot
   company: TCompanySnapshot
   labels: Required<TInvoiceLabels>
@@ -72,7 +72,7 @@ async function resolveData(invoice: TInvoice): Promise<{
 // ─── public API ─────────────────────────────────────────────────────────────
 
 export async function downloadInvoicePdf(
-  invoice: TInvoice,
+  invoice: TInvoiceBase,
   lines: TInvoiceLine[],
   template: TemplateName = 'default',
 ) {

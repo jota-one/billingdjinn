@@ -24,22 +24,26 @@ export interface TCompanySnapshot {
   currency: string
 }
 
-export interface TInvoice {
+export interface TInvoiceBase {
   id: string
   client: string
   invoice_number: string
   date: string
   due_date?: string
   status: TInvoiceStatus
-  tva_enabled: boolean
+  tva_enabled?: boolean
   tva_rate?: number
   notes?: string
+  converted_amount?: number | null
   client_snapshot?: TClientSnapshot
   company_snapshot?: TCompanySnapshot
-  converted_amount?: number | null
-  expand?: { client?: TClient }
+}
+
+export interface TInvoice extends TInvoiceBase {
+  tva_enabled: boolean
   created: string
   updated: string
+  expand?: { client?: TClient }
 }
 
 export interface TInvoiceLine {

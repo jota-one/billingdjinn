@@ -1,17 +1,9 @@
 import { ref } from 'vue'
 import PocketBase from 'pocketbase'
 import config from '../../config'
+import type { TInvoiceBase } from './useInvoices'
 
-export interface TInvoiceTotal {
-  id: string
-  invoice_number: string
-  date: string
-  due_date?: string
-  status: 'draft' | 'sent' | 'paid'
-  client: string
-  tva_enabled?: boolean
-  tva_rate?: number
-  converted_amount?: number | null
+export interface TInvoiceTotal extends TInvoiceBase {
   total_ht: number
   total_tva: number
   total_ttc: number

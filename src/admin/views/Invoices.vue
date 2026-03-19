@@ -55,7 +55,7 @@
             </span>
           </template>
         </Column>
-        <Column header="Actions" style="width: 90px;">
+        <Column header="Actions" style="width: 115px;">
           <template #body="{ data }">
             <div class="flex gap-2">
               <RouterLink :to="`/invoices/${data.id}`">
@@ -63,6 +63,14 @@
                   <span class="i-fa-solid-pen"></span>
                 </button>
               </RouterLink>
+              <button
+                class="btn btn-xs btn-ghost"
+                title="Télécharger PDF"
+                :disabled="downloadingId === data.id"
+                @click="downloadPdf(data)"
+              >
+                <span :class="downloadingId === data.id ? 'i-fa-solid-spinner animate-spin' : 'i-fa6-solid-file-arrow-down'"></span>
+              </button>
               <button class="btn btn-xs btn-ghost" title="Supprimer" @click="confirmDelete(data)">
                 <span class="i-fa-solid-trash"></span>
               </button>
@@ -107,8 +115,9 @@ import ImportExportModal from '../components/ImportExportModal.vue'
 import useInvoices, { STATUS_BADGE, STATUS_LABELS, type TInvoiceStatus } from '../composables/useInvoices'
 import useInvoiceTotals, { type TInvoiceTotal } from '../composables/useInvoiceTotals'
 import useInvoicesImportExport, { INVOICE_IMPORT_COLUMNS } from '../composables/useInvoicesImportExport'
+import { downloadInvoicePdf } from '../composables/useInvoicePdf'
 
-const { deleteInvoice } = useInvoices()
+const { deleteInvoice, loadInvoiceLines } = useInvoices()
 const { invoices, loadInvoiceTotals } = useInvoiceTotals()
 const { isExporting, isImporting, exportToCSV, importFromCSV } = useInvoicesImportExport()
 
@@ -117,6 +126,17 @@ const showImportExportModal = ref(false)
 const invoiceToDelete = ref<TInvoiceTotal | null>(null)
 const deleteMessage = ref('')
 const invoiceColumns = [...INVOICE_IMPORT_COLUMNS]
+const downloadingId = ref<string | null>(null)
+
+const downloadPdf = async (invoice: TInvoiceTotal) => {
+  downloadingId.value = invoice.id
+  try {
+    const lines = await loadInvoiceLines(invoice.id)
+    await downloadInvoicePdf(invoice, lines, 'graphic')
+  } finally {
+    downloadingId.value = null
+  }
+}
 
 const formatDate = (date?: string) => (date ? dayjs(date).format('DD.MM.YYYY') : '—')
 const formatAmount = (n: number) =>
