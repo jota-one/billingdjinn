@@ -14,8 +14,11 @@ Liste des petites améliorations et refactorings potentiels.
 ### Personnalisation du layout de facture
 Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
 
-
 ## Historique (fait)
+
+- [2026-03-23] Module Grand Livre — suivi des flux de trésorerie avec solde courant, catégories paramétrables, badge "À vérifier" pour les écritures passées non réconciliées. Import/Export CSV (dates DD.MM.YYYY, montants signés avec séparateur de milliers). Matching intelligent lors du passage d'une facture en "payée" : recherche des écritures planifiées par score date+montant, modal de sélection ou création automatique d'une écriture "Revenu".
+
+- [2026-03-18] Templates PDF — extraction dans un dossier dédié `invoice-templates/` avec import dynamique au runtime (`TemplateName`). Nouveau template `graphic` : grand titre en couleur d'accent, forme décorative (carré + triangle rectangle) en arrière-plan, séparateur, client et métadonnées côte à côte, table avec header coloré et lignes zébrées, totaux fusionnés dans la même table pour alignement parfait.
 
 - [2026-03-17] Conversion de devises — champ `converted_amount` sur `invoices`, éditable même sur facture verrouillée. Dashboard et vues DB utilisent `COALESCE(converted_amount, total_ht)` pour des chiffres cohérents en devise principale.
 - [2026-03-17] Personnalisation des labels de facture — champ `labels` JSON sur `company_settings` et `clients`. Merge 3 couches (défaut → entreprise → client). Éditeur `InvoiceLabelsEditor` réutilisable. Intégration dans le PDF via `resolveLabels` + interpolation `label()`.

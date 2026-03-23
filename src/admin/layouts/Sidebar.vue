@@ -23,6 +23,12 @@
           </RouterLink>
         </li>
         <li>
+          <RouterLink to="/ledger" class="flex items-center gap-3" active-class="menu-active">
+            <span class="i-fa-solid-book text-xl"></span>
+            Grand Livre
+          </RouterLink>
+        </li>
+        <li>
           <RouterLink to="/users" class="flex items-center gap-3" active-class="menu-active">
             <span class="i-fa-solid-users text-xl"></span>
             Utilisateurs

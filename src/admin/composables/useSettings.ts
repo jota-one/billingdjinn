@@ -18,6 +18,7 @@ export interface TSettings {
   payment_terms?: number
   currency?: string
   labels?: TInvoiceLabels
+  ledger_categories?: string[]
   created: string
   updated: string
 }
@@ -36,6 +37,7 @@ export interface TSettingsForm {
   payment_terms?: number | null
   currency?: string
   labels?: TInvoiceLabels
+  ledger_categories?: string[]
 }
 
 export default function useSettings() {
@@ -90,6 +92,9 @@ export default function useSettings() {
     }
     if (payload.labels !== undefined) {
       formData.append('labels', JSON.stringify(payload.labels))
+    }
+    if (payload.ledger_categories !== undefined) {
+      formData.append('ledger_categories', JSON.stringify(payload.ledger_categories))
     }
 
     settings.value = await pb

@@ -24,4 +24,4 @@ export type ImportResult = {
 
 /** Parse a decimal number accepting both period and comma as decimal separator */
 export const parseDecimal = (v: string): number =>
-  parseFloat(v.replace(',', '.'))
+  parseFloat(v.replace(/[\s\u00a0]/g, '').replace(',', '.'))

@@ -77,6 +77,14 @@
     </template>
   </div>
   <PbErrorToast />
+  <LedgerMatchModal
+    v-model="showLedgerMatchModal"
+    :candidates="ledgerCandidates"
+    :invoice-amount="pendingLedgerAmount"
+    @link="onLedgerLink"
+    @create-new="onLedgerCreateNew"
+    @skip="ledgerCandidates = []"
+  />
 </template>
 
 <script setup lang="ts">
@@ -87,6 +95,7 @@ import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import PbErrorToast from '../components/PbErrorToast.vue'
 import InvoiceForm from '../components/InvoiceForm.vue'
+import LedgerMatchModal from '../components/LedgerMatchModal.vue'
 import usePbErrorToast from '../composables/usePbErrorToast'
 import useInvoices, {
   STATUS_BADGE,
@@ -99,11 +108,14 @@ import useInvoices, {
 } from '../composables/useInvoices'
 import useClients from '../composables/useClients'
 import useSettings from '../composables/useSettings'
+import useLedger from '../composables/useLedger'
 import { downloadInvoicePdf } from '../composables/useInvoicePdf'
+import type { TLedgerCandidateEntry } from '../composables/useLedger'
 
 const { loadInvoice, loadInvoiceLines, updateInvoice } = useInvoices()
 const { clients, loadClients } = useClients()
 const { settings, loadSettings } = useSettings()
+const { findLedgerCandidates, linkEntryToInvoice, createFromInvoice } = useLedger()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
 const route = useRoute()
@@ -117,6 +129,11 @@ const invoiceRef = ref<TInvoice | null>(null)
 const invoiceStatus = ref<TInvoiceStatus | null>(null)
 const hasSnapshot = ref(false)
 
+const showLedgerMatchModal = ref(false)
+const ledgerCandidates = ref<TLedgerCandidateEntry[]>([])
+const pendingLedgerAmount = ref(0)
+const pendingLedgerInvoiceId = ref('')
+
 const isLocked = computed(() => invoiceStatus.value !== null && invoiceStatus.value !== 'draft')
 
 const effectiveCurrency = computed(() => {
@@ -128,6 +145,13 @@ const effectiveCurrency = computed(() => {
 const showConversionField = computed(() =>
   effectiveCurrency.value !== (settings.value?.currency || 'CHF'),
 )
+
+const effectiveAmount = computed(() => {
+  if (form.value.converted_amount) return form.value.converted_amount
+  const totalHt = lines.value.reduce((s, l) => s + (l.quantity ?? 0) * (l.unit_price ?? 0), 0)
+  if (!form.value.tva_enabled || !form.value.tva_rate) return totalHt
+  return totalHt * (1 + form.value.tva_rate / 100)
+})
 
 const form = ref<TInvoiceForm>({
   client: '',
@@ -146,6 +170,7 @@ const lines = ref<TInvoiceLineForm[]>([])
 const save = async () => {
   saving.value = true
   try {
+    const wasJustPaid = invoiceStatus.value !== 'paid' && form.value.status === 'paid'
     const wasJustLocked = invoiceStatus.value === 'draft' && form.value.status !== 'draft'
     await updateInvoice(
       invoiceId,
@@ -159,11 +184,41 @@ const save = async () => {
     // Reload to get snapshot data populated by the server
     if (wasJustLocked) invoiceRef.value = await loadInvoice(invoiceId)
     toast.add({ severity: 'success', summary: 'Enregistré', detail: 'La facture a été mise à jour.', life: 3000 })
+
+    if (wasJustPaid) {
+      const amount = effectiveAmount.value
+      pendingLedgerAmount.value = amount
+      pendingLedgerInvoiceId.value = invoiceId
+      const candidates = await findLedgerCandidates(form.value.due_date, amount)
+      if (candidates.length > 0) {
+        ledgerCandidates.value = candidates
+        showLedgerMatchModal.value = true
+      } else {
+        const clientName = clients.value.find(c => c.id === form.value.client)?.name ?? ''
+        await createFromInvoice(invoiceId, form.value.invoice_number, clientName, amount)
+      }
+    }
   } catch (e) {
     showPbError(e)
   } finally {
     saving.value = false
   }
+}
+
+const onLedgerLink = async (entryId: string) => {
+  await linkEntryToInvoice(entryId, pendingLedgerInvoiceId.value, pendingLedgerAmount.value)
+  ledgerCandidates.value = []
+}
+
+const onLedgerCreateNew = async () => {
+  const clientName = clients.value.find(c => c.id === form.value.client)?.name ?? ''
+  await createFromInvoice(
+    pendingLedgerInvoiceId.value,
+    form.value.invoice_number,
+    clientName,
+    pendingLedgerAmount.value,
+  )
+  ledgerCandidates.value = []
 }
 
 const downloadPdf = async () => {

@@ -1,6 +1,6 @@
 import type { TDocumentDefinitions, Content, TableCell } from 'pdfmake/interfaces'
 import type {
-  TInvoice,
+  TInvoiceBase,
   TInvoiceLine,
   TClientSnapshot,
   TCompanySnapshot,
@@ -39,7 +39,7 @@ const logoContent = (logo: string | null | undefined): Content => {
 // ─── template ────────────────────────────────────────────────────────────────
 
 export default function buildDocDef(
-  invoice: TInvoice,
+  invoice: TInvoiceBase,
   lines: TInvoiceLine[],
   client: TClientSnapshot,
   company: TCompanySnapshot,
