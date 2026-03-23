@@ -14,6 +14,17 @@ Liste des petites améliorations et refactorings potentiels.
 ### Personnalisation du layout de facture
 Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
 
+### Module "Grand Livre"
+L'idée ici n'est pas (encore) de gérer la comptabilité de l'entreprise, mais au moins de fournir la possibilité de suivre les flux de trésorerie et les catégoriser, également pour pouvoir tirer des statistiques des différents postes de dépenses de l'entreprise. On crée donc un Grand Livre dans lequel l'utilisateur peut saisir toutes les écritures du compte courant de l'entreprise et les catégoriser.
+
+L'idée est aussi d'utiliser ce Grand Livre pour permettre la planification des dépenses et des revenus (on sait qu'on va devoir payer telle assurance tel mois, que des frais bancaires arrivent chaque trimestre, que des salaires sont versés chaque mois, etc.)
+
+Bien entendu, lors de l'encaissement d'une facture (statut sent -> paid), on va ajouter (ou modifier si elle existe déjà en mode planifiée) la ligne correspondante dans le Grand Livre automatiquement.
+
+Une ligne de Grand Livre doit contenir les colonnes suivantes: date, libellé, catégorie (parmi un choix prédéfini dans les company_settings), montant.
+
+Le Grand Livre doit être exportable et importable en CSV.
+
 
 ## Historique (fait)
 

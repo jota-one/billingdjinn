@@ -175,6 +175,37 @@
           <InvoiceLabelsEditor v-model="form.labels" />
         </div>
 
+        <!-- Catégories Grand Livre -->
+        <div class="form-control">
+          <div class="divider mt-2 mb-0"></div>
+          <label class="label mt-2"><span class="label-text font-semibold">Catégories du Grand Livre</span></label>
+          <p class="text-xs text-base-content/50 mb-4">Définissez les catégories disponibles lors de la saisie des écritures.</p>
+          <div class="flex flex-col gap-2">
+            <div v-for="(cat, i) in form.ledger_categories" :key="i" class="flex gap-2 items-center">
+              <InputText v-model="form.ledger_categories[i]" class="flex-1" />
+              <button type="button" class="btn btn-xs btn-ghost text-error" @click="removeCategory(i)">
+                <span class="i-fa-solid-trash"></span>
+              </button>
+            </div>
+            <div class="flex gap-2 mt-1">
+              <InputText
+                v-model="newCategory"
+                placeholder="Nouvelle catégorie..."
+                class="flex-1"
+                @keydown.enter.prevent="addCategory"
+              />
+              <Button
+                type="button"
+                label="Ajouter"
+                icon="i-fa-solid-plus"
+                size="small"
+                severity="secondary"
+                @click="addCategory"
+              />
+            </div>
+          </div>
+        </div>
+
         <!-- Actions -->
         <div class="flex justify-end mt-2">
           <Button
@@ -211,6 +242,7 @@ const toast = useToast()
 
 const saving = ref(false)
 const logoFile = ref<File | null>(null)
+const newCategory = ref('')
 
 const form = ref({
   company_name: '',
@@ -225,7 +257,20 @@ const form = ref({
   tva_number: '',
   tva_rate: null as number | null,
   labels: {} as TInvoiceLabels,
+  ledger_categories: [] as string[],
 })
+
+const addCategory = () => {
+  const cat = newCategory.value.trim()
+  if (cat && !form.value.ledger_categories.includes(cat)) {
+    form.value.ledger_categories.push(cat)
+  }
+  newCategory.value = ''
+}
+
+const removeCategory = (index: number) => {
+  form.value.ledger_categories.splice(index, 1)
+}
 
 const logoUrl = computed(() => {
   if (logoFile.value) return URL.createObjectURL(logoFile.value)
@@ -272,6 +317,7 @@ onMounted(async () => {
       tva_number: settings.value.tva_number || '',
       tva_rate: settings.value.tva_rate ?? null,
       labels: settings.value.labels ?? {},
+      ledger_categories: settings.value.ledger_categories ?? [],
     }
   }
 })
