@@ -11,6 +11,7 @@ export interface TLedgerEntry {
   amount: number
   is_checked: boolean
   invoice?: string
+  fiscal_year?: number
   created: string
   updated: string
 }
@@ -22,6 +23,7 @@ export interface TLedgerEntryForm {
   amount: number | null
   is_checked: boolean
   invoice?: string
+  fiscal_year?: number | null
 }
 
 export interface TLedgerCandidateEntry extends TLedgerEntry {
@@ -101,13 +103,17 @@ export default function useLedger() {
     entryId: string,
     invoiceId: string,
     amount: number,
+    invoiceDate: string,
   ): Promise<void> => {
     const today = dayjs().format('YYYY-MM-DD')
+    const invoiceYear = dayjs(invoiceDate).year()
+    const todayYear = dayjs().year()
     await pb.collection('ledger').update(entryId, {
       amount,
       is_checked: true,
       date: today,
       invoice: invoiceId,
+      fiscal_year: invoiceYear !== todayYear ? invoiceYear : null,
     })
   }
 
@@ -119,10 +125,13 @@ export default function useLedger() {
     invoiceNumber: string,
     clientName: string,
     amount: number,
+    invoiceDate: string,
   ): Promise<void> => {
     const description = clientName
       ? `Facture ${invoiceNumber} — ${clientName}`
       : `Facture ${invoiceNumber}`
+    const invoiceYear = dayjs(invoiceDate).year()
+    const todayYear = dayjs().year()
     await pb.collection('ledger').create({
       date: dayjs().format('YYYY-MM-DD'),
       description,
@@ -130,6 +139,7 @@ export default function useLedger() {
       amount,
       is_checked: true,
       invoice: invoiceId,
+      fiscal_year: invoiceYear !== todayYear ? invoiceYear : null,
     })
   }
 
@@ -155,6 +165,6 @@ function buildData(payload: TLedgerEntryForm): Record<string, unknown> {
     amount: payload.amount ?? 0,
     is_checked: payload.is_checked,
     invoice: payload.invoice || null,
+    fiscal_year: payload.fiscal_year || null,
   }
 }
-

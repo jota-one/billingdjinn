@@ -11,6 +11,11 @@ Liste des petites améliorations et refactorings potentiels.
 
 ## Nouvelles fonctionnalités
 
+### Gestion des transitoires
+Cette tâche fait partie d'une vision plus large qui consiste à pouvoir générer un bilan comptable simple pour une petite entreprise, basé sur les écritures du Grand Livre.
+Pour rendre cela possible, il faut qu'on sache à quelle année correspond chaque entrée du Grand Livre. Pour la plupart, la date d'écriture fait foi, mais dans certain cas une écriture peut être faite une année et porter sur une autre année. Dans ce cas, il nous faut pouvoir le mentionner au niveau de l'écriture.
+On va aussi vouloir voir la liste des transitoires pour chaque année. Les entrants et les sortants.
+
 ### Personnalisation du layout de facture
 Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
 
