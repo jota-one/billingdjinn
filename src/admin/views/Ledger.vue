@@ -22,6 +22,7 @@
         :value="entriesWithBalance"
         v-model:sortField="sortField"
         v-model:sortOrder="sortOrder"
+        :row-class="rowClass"
         table-style="min-width: 48rem"
       >
         <Column field="date" header="Date" sortable style="width: 110px;">
@@ -179,6 +180,13 @@ const formatDate = (date?: string) => {
 const isPast = (date?: string) => !!date && dayjs(date).isBefore(dayjs(), 'day')
 const isFuture = (date?: string) => !!date && dayjs(date).isAfter(dayjs(), 'day')
 
+const rowClass = (data: TLedgerEntry) => {
+  if (data.fiscal_year && data.fiscal_year !== parseInt(data.date.substring(0, 4))) {
+    return 'row-transitoire'
+  }
+  return ''
+}
+
 const checkEntry = async (id: string) => {
   await markChecked(id)
   await loadEntries()
@@ -200,3 +208,9 @@ const deleteConfirmed = async () => {
 
 onMounted(() => loadEntries())
 </script>
+
+<style scoped>
+:deep(tr.row-transitoire > td) {
+  background-color: color-mix(in oklch, var(--color-warning) 12%, transparent);
+}
+</style>

@@ -195,7 +195,7 @@ const save = async () => {
         showLedgerMatchModal.value = true
       } else {
         const clientName = clients.value.find(c => c.id === form.value.client)?.name ?? ''
-        await createFromInvoice(invoiceId, form.value.invoice_number, clientName, amount)
+        await createFromInvoice(invoiceId, form.value.invoice_number, clientName, amount, form.value.date)
       }
     }
   } catch (e) {
@@ -206,7 +206,7 @@ const save = async () => {
 }
 
 const onLedgerLink = async (entryId: string) => {
-  await linkEntryToInvoice(entryId, pendingLedgerInvoiceId.value, pendingLedgerAmount.value)
+  await linkEntryToInvoice(entryId, pendingLedgerInvoiceId.value, pendingLedgerAmount.value, form.value.date)
   ledgerCandidates.value = []
 }
 
@@ -217,6 +217,7 @@ const onLedgerCreateNew = async () => {
     form.value.invoice_number,
     clientName,
     pendingLedgerAmount.value,
+    form.value.date,
   )
   ledgerCandidates.value = []
 }

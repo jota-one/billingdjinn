@@ -8,6 +8,8 @@ Format recommandé pour le suivi: `- [AAAA-MM-JJ] Titre — note courte`.
 
 Liste des petites améliorations et refactorings potentiels.
 
+- Garder en local storage le tri du Grand Livre (utiliser @vueuse/core useStorage) pour l'implémentation.
+
 
 ## Nouvelles fonctionnalités
 
@@ -15,6 +17,8 @@ Liste des petites améliorations et refactorings potentiels.
 Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
 
 ## Historique (fait)
+
+- [2026-03-28] Transitoires (accruals) — champ `fiscal_year` sur les écritures du Grand Livre pour distinguer l'année de l'encaissement de l'année fiscale de rattachement. Attribution automatique à l'encaissement d'une facture (basé sur la date d'émission). Badge "Transitoire" dans le formulaire, mise en évidence visuelle dans le Grand Livre, page dédiée `/transitoires` avec classement entrants/sortants par exercice.
 
 - [2026-03-23] Module Grand Livre — suivi des flux de trésorerie avec solde courant, catégories paramétrables, badge "À vérifier" pour les écritures passées non réconciliées. Import/Export CSV (dates DD.MM.YYYY, montants signés avec séparateur de milliers). Matching intelligent lors du passage d'une facture en "payée" : recherche des écritures planifiées par score date+montant, modal de sélection ou création automatique d'une écriture "Revenu".
 
