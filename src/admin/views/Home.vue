@@ -3,6 +3,12 @@
     <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
       <span class="i-fa6-solid-house"></span>
       Tableau de bord
+      <Select
+        v-model="selectedYear"
+        :options="availableYears"
+        size="small"
+        class="ml-3 w-28 font-normal text-base"
+      />
     </h2>
 
     <div v-if="loading" class="flex items-center gap-2 text-base-content/50">
@@ -14,12 +20,12 @@
       <!-- KPI cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="card bg-base-200 p-4">
-          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">CA mois en cours</p>
+          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">{{ currentMonthLabel }}</p>
           <p class="text-2xl font-bold font-mono">{{ fmt(caCurrentMonth) }}</p>
           <p class="text-xs text-base-content/40 mt-1">{{ currency }} · HT · payé</p>
         </div>
         <div class="card bg-base-200 p-4">
-          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">CA {{ currentYear }}</p>
+          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">CA {{ selectedYear }}</p>
           <p class="text-2xl font-bold font-mono">{{ fmt(caCurrentYear) }}</p>
           <p class="text-xs text-base-content/40 mt-1">{{ currency }} · HT · payé</p>
         </div>
@@ -38,7 +44,7 @@
       <!-- CA mensuel + évolution annuelle -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div class="card bg-base-200 p-5 lg:col-span-2">
-          <h3 class="font-semibold mb-4">CA mensuel {{ currentYear }}</h3>
+          <h3 class="font-semibold mb-4">CA mensuel {{ selectedYear }}</h3>
           <Chart type="bar" :data="monthlyChartData" :options="barOptions" />
         </div>
         <div class="flex flex-col gap-6">
@@ -55,8 +61,15 @@
 
       <!-- Top clients -->
       <div class="card bg-base-200 p-5">
-        <h3 class="font-semibold mb-4">Top clients (CA HT payé)</h3>
-        <Chart type="bar" :data="topClientsChartData" :options="clientsBarOptions" style="max-height: 260px;" />
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold">Top clients (CA HT payé)</h3>
+          <div class="flex items-center gap-2 text-sm text-base-content/60">
+            <span :class="!topClientsAllTime ? 'text-base-content font-medium' : ''">{{ selectedYear }}</span>
+            <input type="checkbox" v-model="topClientsAllTime" class="toggle toggle-sm" />
+            <span :class="topClientsAllTime ? 'text-base-content font-medium' : ''">all time</span>
+          </div>
+        </div>
+        <Chart type="bar" :data="topClientsAllTime ? topClientsAllTimeChartData : topClientsChartData" :options="clientsBarOptions" style="max-height: 260px;" />
       </div>
     </template>
   </div>
@@ -64,12 +77,19 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useStorage } from '@vueuse/core'
 import Chart from 'primevue/chart'
+import Select from 'primevue/select'
 import useDashboard from '../composables/useDashboard'
 import useSettings from '../composables/useSettings'
 
+const realYear = new Date().getFullYear()
+const selectedYear = useStorage('dashboard-year', realYear)
+const topClientsAllTime = useStorage('dashboard-top-clients-alltime', false)
+
 const {
   load,
+  availableYears,
   caAllTime,
   caCurrentYear,
   caCurrentMonth,
@@ -80,13 +100,17 @@ const {
   ytdChartData,
   prevMonthName,
   topClientsChartData,
-} = useDashboard()
+  topClientsAllTimeChartData,
+} = useDashboard(selectedYear)
 
 const { settings, loadSettings } = useSettings()
 const currency = computed(() => settings.value?.currency ?? 'CHF')
 
 const loading = ref(true)
-const currentYear = new Date().getFullYear()
+
+const currentMonthLabel = computed(() =>
+  selectedYear.value === realYear ? 'CA mois en cours' : `CA décembre ${selectedYear.value}`,
+)
 
 const fmt = (n: number): string => {
   const sign = n < 0 ? '-' : ''
