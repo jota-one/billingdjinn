@@ -113,6 +113,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useStorage } from '@vueuse/core'
 import { RouterLink } from 'vue-router'
 import dayjs from 'dayjs'
 import DataTable from 'primevue/datatable'
@@ -133,8 +134,8 @@ const showImportExportModal = ref(false)
 const entryToDelete = ref<TLedgerEntry | null>(null)
 const deleteMessage = ref('')
 const ledgerColumns = getExportableFields().map(f => f.key)
-const sortField = ref('date')
-const sortOrder = ref(1)
+const sortField = useStorage('ledger-sort-field', 'date')
+const sortOrder = useStorage('ledger-sort-order', 1)
 
 const entriesWithBalance = computed(() => {
   const chronological = [...entries.value].sort((a, b) => {
