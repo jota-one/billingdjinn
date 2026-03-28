@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import PocketBase from 'pocketbase'
 import config from '../../config'
 import type { TInvoiceTotal } from './useInvoiceTotals'
@@ -20,7 +20,11 @@ const MONTHS_FR = [
   'décembre',
 ]
 
-export default function useDashboard() {
+const realNow = new Date()
+const realYear = realNow.getFullYear()
+const realMonthIndex = realNow.getMonth() // 0-indexed
+
+export default function useDashboard(selectedYear: Ref<number>) {
   const pb = new PocketBase(config.apiBaseUrl)
   const invoices = ref<TInvoiceTotal[]>([])
 
@@ -30,22 +34,48 @@ export default function useDashboard() {
       .getFullList<TInvoiceTotal>({ expand: 'client', sort: '-date' })
   }
 
-  // ── KPI ─────────────────────────────────────────────────────────────────────
+  const availableYears = computed(() => {
+    const years = new Set<number>([realYear])
+    invoices.value.forEach(i => {
+      if (i.date) years.add(parseInt(i.date.substring(0, 4)))
+    })
+    return [...years].sort((a, b) => b - a)
+  })
 
-  const currentYear = new Date().getFullYear()
-  const prevMonthIndex = new Date().getMonth() === 0 ? 11 : new Date().getMonth() - 1
-  const prevMonthStr = String(prevMonthIndex + 1).padStart(2, '0')
-  const prevMonthName = MONTHS_FR[prevMonthIndex]
+  // For a past year: cutoff = December. For current year: cutoff = current month.
+  const refMonthIndex = computed(() => (selectedYear.value === realYear ? realMonthIndex : 11))
+
+  const refMonthStr = computed(
+    () => `${selectedYear.value}-${String(refMonthIndex.value + 1).padStart(2, '0')}`,
+  )
+
+  // prevMonth for YTD chart
+  const prevMonthIndex = computed(() => {
+    if (selectedYear.value < realYear) return 11
+    return realMonthIndex === 0 ? 11 : realMonthIndex - 1
+  })
+
+  const prevMonthStr = computed(() => String(prevMonthIndex.value + 1).padStart(2, '0'))
+  const prevMonthName = computed(() => MONTHS_FR[prevMonthIndex.value])
+
+  // Cutoff date for caAllTime
+  const cutoffDate = computed(() =>
+    selectedYear.value === realYear
+      ? realNow.toISOString().substring(0, 10)
+      : `${selectedYear.value}-12-31`,
+  )
+
+  // ── KPI ─────────────────────────────────────────────────────────────────────
 
   const caAllTime = computed(() =>
     invoices.value
-      .filter(i => i.status === 'paid')
+      .filter(i => i.status === 'paid' && !!i.date && i.date <= cutoffDate.value)
       .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0),
   )
 
   const caCurrentYear = computed(() =>
     invoices.value
-      .filter(i => i.status === 'paid' && i.date?.startsWith(String(currentYear)))
+      .filter(i => i.status === 'paid' && i.date?.startsWith(String(selectedYear.value)))
       .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0),
   )
 
@@ -53,20 +83,19 @@ export default function useDashboard() {
 
   const pendingAmount = computed(() => pendingInvoices.value.reduce((s, i) => s + i.total_ttc, 0))
 
-  const caCurrentMonth = computed(() => {
-    const ym = new Date().toISOString().substring(0, 7) // YYYY-MM
-    return invoices.value
-      .filter(i => i.status === 'paid' && i.date?.startsWith(ym))
-      .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0)
-  })
+  const caCurrentMonth = computed(() =>
+    invoices.value
+      .filter(i => i.status === 'paid' && i.date?.startsWith(refMonthStr.value))
+      .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0),
+  )
 
-  // ── Graphique mensuel (année en cours, barres empilées paid + sent) ──────────
+  // ── Graphique mensuel ────────────────────────────────────────────────────────
 
   const monthlyChartData = computed(() => {
     const paid = Array(12).fill(0)
     const sent = Array(12).fill(0)
     invoices.value
-      .filter(i => i.status !== 'draft' && i.date?.startsWith(String(currentYear)))
+      .filter(i => i.status !== 'draft' && i.date?.startsWith(String(selectedYear.value)))
       .forEach(i => {
         const m = new Date(i.date).getMonth()
         if (i.status === 'paid') paid[m] += i.converted_amount || i.total_ht
@@ -93,10 +122,10 @@ export default function useDashboard() {
     }
   })
 
-  // ── Graphique annuel (5 dernières années, ligne) ─────────────────────────────
+  // ── Graphique annuel (5 ans se terminant à selectedYear) ─────────────────────
 
   const annualChartData = computed(() => {
-    const years = Array.from({ length: 5 }, (_, i) => String(currentYear - 4 + i))
+    const years = Array.from({ length: 5 }, (_, i) => String(selectedYear.value - 4 + i))
     const data = years.map(
       y =>
         Math.round(
@@ -121,10 +150,10 @@ export default function useDashboard() {
     }
   })
 
-  // ── Même périmètre, années précédentes (à fin mois précédent) ───────────────
+  // ── YTD (même périmètre, coupé à prevMonthStr) ───────────────────────────────
 
   const ytdChartData = computed(() => {
-    const years = Array.from({ length: 5 }, (_, i) => String(currentYear - 4 + i))
+    const years = Array.from({ length: 5 }, (_, i) => String(selectedYear.value - 4 + i))
     const data = years.map(
       y =>
         Math.round(
@@ -133,7 +162,7 @@ export default function useDashboard() {
               i =>
                 i.status !== 'draft' &&
                 i.date?.startsWith(y) &&
-                i.date.substring(5, 7) <= prevMonthStr,
+                i.date.substring(5, 7) <= prevMonthStr.value,
             )
             .reduce((s, i) => s + (i.converted_amount || i.total_ht), 0) * 100,
         ) / 100,
@@ -142,7 +171,7 @@ export default function useDashboard() {
       labels: years,
       datasets: [
         {
-          label: `CA HT payé à fin ${prevMonthName}`,
+          label: `CA HT payé à fin ${prevMonthName.value}`,
           data,
           borderColor: 'rgba(34, 197, 94, 0.9)',
           backgroundColor: 'rgba(34, 197, 94, 0.15)',
@@ -154,44 +183,48 @@ export default function useDashboard() {
     }
   })
 
-  // ── CA par client (top 8) ────────────────────────────────────────────────────
+  // ── Top clients ───────────────────────────────────────────────────────────────
 
-  const topClientsChartData = computed(() => {
+  const CLIENT_COLORS = [
+    'rgba(99, 102, 241, 0.75)',
+    'rgba(34, 197, 94, 0.75)',
+    'rgba(251, 146, 60, 0.75)',
+    'rgba(236, 72, 153, 0.75)',
+    'rgba(14, 165, 233, 0.75)',
+    'rgba(168, 85, 247, 0.75)',
+    'rgba(234, 179, 8, 0.75)',
+    'rgba(239, 68, 68, 0.75)',
+  ]
+
+  const buildTopClientsChart = (list: TInvoiceTotal[]) => {
     const map = new Map<string, { name: string; ca: number }>()
-    invoices.value
-      .filter(i => i.status === 'paid')
-      .forEach(i => {
-        const name = i.expand?.client?.name ?? 'Inconnu'
-        const existing = map.get(name) ?? { name, ca: 0 }
-        existing.ca += i.converted_amount || i.total_ht
-        map.set(name, existing)
-      })
+    list.forEach(i => {
+      const name = i.expand?.client?.name ?? 'Inconnu'
+      const existing = map.get(name) ?? { name, ca: 0 }
+      existing.ca += i.converted_amount || i.total_ht
+      map.set(name, existing)
+    })
     const sorted = [...map.values()].sort((a, b) => b.ca - a.ca).slice(0, 8)
     return {
       labels: sorted.map(c => c.name),
-      datasets: [
-        {
-          label: 'CA HT payé',
-          data: sorted.map(c => Math.round(c.ca * 100) / 100),
-          backgroundColor: [
-            'rgba(99, 102, 241, 0.75)',
-            'rgba(34, 197, 94, 0.75)',
-            'rgba(251, 146, 60, 0.75)',
-            'rgba(236, 72, 153, 0.75)',
-            'rgba(14, 165, 233, 0.75)',
-            'rgba(168, 85, 247, 0.75)',
-            'rgba(234, 179, 8, 0.75)',
-            'rgba(239, 68, 68, 0.75)',
-          ],
-          borderRadius: 4,
-        },
-      ],
+      datasets: [{ label: 'CA HT payé', data: sorted.map(c => Math.round(c.ca * 100) / 100), backgroundColor: CLIENT_COLORS, borderRadius: 4 }],
     }
+  }
+
+  const topClientsChartData = computed(() => {
+    const list = invoices.value.filter(i => i.status === 'paid' && i.date?.startsWith(String(selectedYear.value)))
+    return buildTopClientsChart(list)
+  })
+
+  const topClientsAllTimeChartData = computed(() => {
+    const list = invoices.value.filter(i => i.status === 'paid')
+    return buildTopClientsChart(list)
   })
 
   return {
     load,
     invoices,
+    availableYears,
     caAllTime,
     caCurrentYear,
     caCurrentMonth,
@@ -202,5 +235,6 @@ export default function useDashboard() {
     ytdChartData,
     prevMonthName,
     topClientsChartData,
+    topClientsAllTimeChartData,
   }
 }
