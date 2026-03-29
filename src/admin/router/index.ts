@@ -11,7 +11,9 @@ import InvoiceEdit from '../views/InvoiceEdit.vue'
 import Ledger from '../views/Ledger.vue'
 import LedgerEntryNew from '../views/LedgerEntryNew.vue'
 import LedgerEntryEdit from '../views/LedgerEntryEdit.vue'
+import LedgerBulkCreate from '../views/LedgerBulkCreate.vue'
 import Transitoires from '../views/Transitoires.vue'
+import Stats from '../views/Stats.vue'
 import useAuth from '../composables/useAuth'
 
 const routes = [
@@ -26,8 +28,10 @@ const routes = [
   { path: '/invoices/:id', component: InvoiceEdit },
   { path: '/ledger', component: Ledger },
   { path: '/ledger/new', component: LedgerEntryNew },
+  { path: '/ledger/bulk', component: LedgerBulkCreate },
   { path: '/ledger/:id', component: LedgerEntryEdit },
   { path: '/transitoires', component: Transitoires },
+  { path: '/stats', component: Stats },
 ]
 
 const baseUrl = (import.meta as any).env?.BASE_URL || '/'
