@@ -29,9 +29,21 @@
           </RouterLink>
         </li>
         <li>
+          <RouterLink to="/ledger/bulk" class="flex items-center gap-3" active-class="menu-active">
+            <span class="i-fa-solid-calendar-plus text-xl"></span>
+            Saisie en série
+          </RouterLink>
+        </li>
+        <li>
           <RouterLink to="/transitoires" class="flex items-center gap-3" active-class="menu-active">
             <span class="i-fa6-solid-arrows-left-right text-xl"></span>
             Transitoires
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/stats" class="flex items-center gap-3" active-class="menu-active">
+            <span class="i-fa-solid-chart-pie text-xl"></span>
+            Statistiques
           </RouterLink>
         </li>
         <li>
