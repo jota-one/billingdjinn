@@ -5,17 +5,28 @@
       Grand Livre
     </h2>
     <div class="card">
-      <div class="flex justify-end gap-2 mb-2">
-        <Button
-          label="Import / Export"
-          icon="i-fa-solid-file-arrow-up"
-          size="small"
-          severity="secondary"
-          @click="showImportExportModal = true"
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <LedgerFilters
+          v-model:selected-years="filterYears"
+          v-model:selected-categories="filterCategories"
+          :available-years="availableYears"
+          :available-categories="availableCategories"
         />
-        <RouterLink to="/ledger/new">
-          <Button label="Nouvelle écriture" icon="i-fa-solid-plus" size="small" />
-        </RouterLink>
+        <div class="flex gap-2 shrink-0">
+          <Button
+            label="Import / Export"
+            icon="i-fa-solid-file-arrow-up"
+            size="small"
+            severity="secondary"
+            @click="showImportExportModal = true"
+          />
+          <RouterLink to="/ledger/bulk">
+            <Button label="Saisie en série" icon="i-fa-solid-calendar-plus" size="small" severity="secondary" />
+          </RouterLink>
+          <RouterLink to="/ledger/new">
+            <Button label="Nouvelle écriture" icon="i-fa-solid-plus" size="small" />
+          </RouterLink>
+        </div>
       </div>
 
       <DataTable
@@ -81,7 +92,12 @@
           </template>
         </Column>
         <template #footer>
-          <span>{{ entries.length }} écriture{{ entries.length !== 1 ? 's' : '' }}</span>
+          <span>
+            {{ entriesWithBalance.length }} écriture{{ entriesWithBalance.length !== 1 ? 's' : '' }}
+            <span v-if="entriesWithBalance.length !== entries.length" class="text-base-content/40">
+              (sur {{ entries.length }})
+            </span>
+          </span>
           <span class="ml-4 font-mono font-semibold whitespace-nowrap" :class="finalBalance >= 0 ? 'text-success' : 'text-error'">
             Solde final : {{ fmtAmount(finalBalance) }}
           </span>
@@ -121,6 +137,7 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ImportExportModal from '../components/ImportExportModal.vue'
+import LedgerFilters from '../components/LedgerFilters.vue'
 import useLedger from '../composables/useLedger'
 import useLedgerImportExport from '../composables/useLedgerImportExport'
 import { getExportableFields } from '../config/ledgerImportExport'
@@ -136,6 +153,20 @@ const deleteMessage = ref('')
 const ledgerColumns = getExportableFields().map(f => f.key)
 const sortField = useStorage('ledger-sort-field', 'date')
 const sortOrder = useStorage('ledger-sort-order', 1)
+const filterYears = useStorage<number[]>('ledger-filter-years', [])
+const filterCategories = useStorage<string[]>('ledger-filter-categories', [])
+
+const availableYears = computed(() => {
+  const years = new Set<number>()
+  entries.value.forEach(e => years.add(e.fiscal_year || parseInt(e.date.substring(0, 4))))
+  return [...years].sort((a, b) => b - a)
+})
+
+const availableCategories = computed(() => {
+  const cats = new Set<string>()
+  entries.value.forEach(e => { if (e.category) cats.add(e.category) })
+  return [...cats].sort()
+})
 
 const entriesWithBalance = computed(() => {
   const chronological = [...entries.value].sort((a, b) => {
@@ -144,12 +175,16 @@ const entriesWithBalance = computed(() => {
     return (a.created ?? '') < (b.created ?? '') ? -1 : 1
   })
   let balance = 0
-  const withBalance = chronological.map(e => {
+  let filtered = chronological.map(e => {
     balance += e.amount
     return { ...e, balance }
   })
+  if (filterYears.value.length > 0)
+    filtered = filtered.filter(e => filterYears.value.includes(e.fiscal_year || parseInt(e.date.substring(0, 4))))
+  if (filterCategories.value.length > 0)
+    filtered = filtered.filter(e => filterCategories.value.includes(e.category))
   const dir = sortOrder.value ?? 1
-  return withBalance.sort((a, b) => {
+  return filtered.sort((a, b) => {
     const av = (a as any)[sortField.value] ?? ''
     const bv = (b as any)[sortField.value] ?? ''
     const primary = av < bv ? -1 : av > bv ? 1 : 0
