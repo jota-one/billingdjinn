@@ -16,6 +16,14 @@ Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organis
 
 ## Historique (fait)
 
+- [2026-03-29] Saisie en série — wizard 4 étapes pour créer des écritures récurrentes planifiées. Récurrences : journalier, hebdomadaire (choix du jour), mensuel, trimestriel (choix du jour / dernier jour / dernier jour ouvrable), annuel (idem). Date de fin ou nombre d'occurrences. Suffixe automatique sur le libellé (mois pour mensuel, Q1-Q4 pour trimestriel). Aperçu avant validation.
+
+- [2026-03-29] Page Statistiques Grand Livre — KPIs (revenus, charges, résultat, charges sociales AVS+LPP+LAA, ratio charges/revenus). Donut charges par catégorie. Graphique de tendance multi-séries par catégorie sur les 5 dernières années. Sélecteur d'année. Catégorie "Erreur" exclue de tous les calculs.
+
+- [2026-03-29] Filtres Grand Livre — multiselect année et catégorie (persistés en localStorage). Compteur "N sur total" dans le footer. Bouton "Saisie en série" dans la barre d'actions.
+
+- [2026-03-29] Normalisation des catégories — script `scripts/normalize-ledger-categories.js` via API PocketBase (dry-run par défaut, `--commit` pour appliquer). Fusionne les doublons (casse, pluriels), renomme les catégories ad hoc (`Service` → `Fiduciaire`, `unique` → `Constitution`, etc.), met à jour `ledger_categories` dans `company_settings`.
+
 - [2026-03-28] Dashboard par année — dropdown pour sélectionner l'année (courante par défaut, persistée en localStorage). KPIs et graphiques recalculés comme si on était à la fin de l'année choisie. Toggle "année / all time" sur le chart Top clients.
 - [2026-03-28] Tri du Grand Livre persisté — sortField et sortOrder sauvegardés en localStorage via @vueuse/core useStorage.
 - [2026-03-28] Transitoires (accruals) — champ `fiscal_year` sur les écritures du Grand Livre pour distinguer l'année de l'encaissement de l'année fiscale de rattachement. Attribution automatique à l'encaissement d'une facture (basé sur la date d'émission). Badge "Transitoire" dans le formulaire, mise en évidence visuelle dans le Grand Livre, page dédiée `/transitoires` avec classement entrants/sortants par exercice.
