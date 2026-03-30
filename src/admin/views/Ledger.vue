@@ -4,7 +4,7 @@
       <span class="i-fa-solid-book text-xl"></span>
       Grand Livre
     </h2>
-    <div class="card">
+    <div class="card" ref="tableWrapper">
       <div class="flex items-center justify-between gap-2 mb-3">
         <LedgerFilters
           v-model:selected-years="filterYears"
@@ -128,9 +128,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -145,6 +145,9 @@ import type { TLedgerEntry } from '../composables/useLedger'
 
 const { entries, loadEntries, deleteEntry, markChecked } = useLedger()
 const { isExporting, isImporting, exportToCSV, importFromCSV } = useLedgerImportExport()
+const route = useRoute()
+
+const tableWrapper = ref<HTMLElement | null>(null)
 
 const showDeleteModal = ref(false)
 const showImportExportModal = ref(false)
@@ -242,7 +245,34 @@ const deleteConfirmed = async () => {
   entryToDelete.value = null
 }
 
-onMounted(() => loadEntries())
+const scrollToTarget = () => {
+  const focusId = route.query.focus as string | undefined
+  const list = entriesWithBalance.value
+  if (!list.length) return
+
+  let idx: number
+  if (focusId) {
+    idx = list.findIndex(e => e.id === focusId)
+  } else {
+    const todayMs = new Date().setHours(0, 0, 0, 0)
+    let closest = 0
+    let closestDiff = Infinity
+    list.forEach((e, i) => {
+      const diff = Math.abs(new Date(e.date.substring(0, 10)).getTime() - todayMs)
+      if (diff < closestDiff) { closestDiff = diff; closest = i }
+    })
+    idx = closest
+  }
+
+  if (idx === -1) return
+  const rows = tableWrapper.value?.querySelectorAll('tbody tr')
+  rows?.[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+onMounted(async () => {
+  await loadEntries()
+  setTimeout(scrollToTarget, 100)
+})
 </script>
 
 <style scoped>

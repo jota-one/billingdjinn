@@ -49,9 +49,9 @@ const form = ref({
 const save = async () => {
   saving.value = true
   try {
-    await createEntry({ ...form.value })
+    const created = await createEntry({ ...form.value })
     toast.add({ severity: 'success', summary: 'Enregistré', detail: 'L\'écriture a été créée.', life: 3000 })
-    router.push('/ledger')
+    router.push({ path: '/ledger', query: { focus: created.id } })
   } catch (e) {
     showPbError(e)
   } finally {

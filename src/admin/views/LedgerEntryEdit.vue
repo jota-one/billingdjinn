@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import PbErrorToast from '../components/PbErrorToast.vue'
 import LedgerEntryForm from '../components/LedgerEntryForm.vue'
@@ -41,6 +41,7 @@ const { loadEntry, updateEntry } = useLedger()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
 const route = useRoute()
+const router = useRouter()
 
 const entryId = route.params.id as string
 
@@ -62,6 +63,7 @@ const save = async () => {
   try {
     await updateEntry(entryId, { ...form.value, invoice: entry.value?.invoice })
     toast.add({ severity: 'success', summary: 'Enregistré', detail: 'L\'écriture a été mise à jour.', life: 3000 })
+    router.push({ path: '/ledger', query: { focus: entryId } })
   } catch (e) {
     showPbError(e)
   } finally {
