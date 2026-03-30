@@ -2,7 +2,7 @@
 import heroImg from '../assets/hero.jpg'
 ---
 <section
-  class="relative w-full min-h-[90vh] flex flex-col items-center justify-center text-center px-6 lg:px-16 py-16 md:py-32"
+  class="relative w-full min-h-[90vh] flex flex-col items-start justify-center px-6 lg:px-16 py-16 md:py-32"
 >
   <!-- Background Image -->
   <div
@@ -10,28 +10,21 @@ import heroImg from '../assets/hero.jpg'
     style={`background-image: url(${heroImg.src})`}
   >
   </div>
-  <div class="absolute inset-0 bg-black opacity-50"></div>
+  <div class="absolute inset-0 bg-black opacity-20"></div>
 
   <!-- Content -->
-  <div class="relative z-10 text-white w-full pt-50 max-w-3xl mx-auto">
-    <h1 class="text-4xl md:text-6xl font-bold leading-tight">
-      Gérez vos factures simplement
+  <div class="relative z-10 text-white w-full pt-50 max-w-lg">
+    <h1 class="text-4xl md:text-6xl font-bold leading-tight drop-shadow-lg">
+      Vos finances.<br /> A un seul endroit.
     </h1>
-    <p class="mt-6 text-lg md:text-xl text-white/80">
-      ...pas comme ces débiles.
+    <p class="mt-5 text-lg md:text-xl text-white/85 drop-shadow">
+      Facturation, grand livre et statistiques — tout ce qu'il faut pour piloter votre entreprise.
     </p>
+    <a
+      href="/admin/"
+      class="mt-8 inline-block bg-white text-gray-900 font-semibold px-7 py-3 rounded-lg shadow-lg hover:bg-white/90 transition"
+    >
+      Accéder au tableau de bord →
+    </a>
   </div>
 </section>
-
-<script>
-  // Masquer le CTA si l'utilisateur n'est pas authentifié
-  const userJwt = sessionStorage.getItem('userJwt')
-  const isAuthenticated = userJwt && userJwt.length > 0
-
-  if (!isAuthenticated) {
-    const ctaElement = document.getElementById('heroCta')
-    if (ctaElement) {
-      ctaElement.style.display = 'none'
-    }
-  }
-</script>
