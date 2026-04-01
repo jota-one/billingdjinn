@@ -31,14 +31,14 @@ const logoContent = (logo: string | null | undefined): Content => {
     return { svg: svgString, width: 90, margin: [0, 0, 0, 4] }
   }
   if (/^data:image\/(jpeg|jpg|png)/i.test(logo)) {
-    return { image: logo, width: 90, margin: [0, 0, 0, 4] }
+    return { image: logo, width: 60, margin: [0, 0, 0, 4] }
   }
   return { text: '' }
 }
 
 // ─── design tokens ───────────────────────────────────────────────────────────
 
-const ACCENT = '#0C0052'
+const ACCENT = '#000000'
 const ACCENT_LIGHT = '#EEF1F7'
 const MUTED = '#6b7280'
 const INK = '#111827'
@@ -63,15 +63,10 @@ export default function buildDocDef(
     columns: [
       {
         stack: [
-          { text: 'FACTURE', style: 'invoiceTitle' },
+          { text: labels.invoice_title, style: 'invoiceTitle' },
           invoice.invoice_number
             ? { text: `N°\u00a0${invoice.invoice_number}`, style: 'invoiceNumber' }
-            : { text: 'BROUILLON', style: 'invoiceNumber' },
-        ],
-      },
-      {
-        stack: [
-          logoContent(company.logo_base64),
+            : { text: labels.draft, style: 'invoiceNumber' },
           { text: company.name, style: 'companyName' },
           { text: company.address || '', style: 'small' },
           { text: ' ', style: 'small' },
@@ -97,7 +92,7 @@ export default function buildDocDef(
   const metaRows: Content[] = [
     {
       text: [
-        { text: 'Date  ', style: 'metaLabel' },
+        { text: labels.date + '  ', style: 'metaLabel' },
         { text: formatDate(invoice.date), style: 'metaValue' },
       ],
       margin: [0, 0, 0, 3],
@@ -106,7 +101,7 @@ export default function buildDocDef(
   if (invoice.due_date) {
     metaRows.push({
       text: [
-        { text: 'Échéance  ', style: 'metaLabel' },
+        { text: labels.due_date + '  ', style: 'metaLabel' },
         { text: formatDate(invoice.due_date), style: 'metaValue' },
       ],
       margin: [0, 0, 0, 3],
@@ -227,7 +222,7 @@ export default function buildDocDef(
   // ── payment info ──
   const paymentStack: Content[] = []
   if (company.bank_account) {
-    paymentStack.push({ text: `IBAN\u00a0: ${company.bank_account}`, style: 'body' })
+    paymentStack.push({ text: `${labels.iban}\u00a0: ${company.bank_account}`, style: 'body' })
   }
   if (invoice.due_date) {
     paymentStack.push({
@@ -258,33 +253,10 @@ export default function buildDocDef(
 
   return {
     pageSize: 'A4',
-    pageMargins: [56, 50, 50, 70],
+    pageMargins: [56, 110, 50, 70],
     background: (): Content => ({
-      canvas: [
-        // carré
-        {
-          type: 'polyline',
-          closePath: true,
-          color: ACCENT_LIGHT,
-          points: [
-            { x: 44, y: 0 },
-            { x: 194, y: 0 },
-            { x: 194, y: 150 },
-            { x: 44, y: 150 },
-          ],
-        },
-        // triangle rectangle (moitié gauche du carré suivant, diagonal haut-droite → bas-gauche)
-        {
-          type: 'polyline',
-          closePath: true,
-          color: ACCENT_LIGHT,
-          points: [
-            { x: 44, y: 150 },
-            { x: 194, y: 150 },
-            { x: 44, y: 300 },
-          ],
-        },
-      ],
+      svg: `<svg fill="none" height="80" viewBox="0 0 82 120" xmlns="http://www.w3.org/2000/svg"><path d="m81.3128 0v38.6871l-81.3128 81.3129v-120z" fill="#000"/><path clip-rule="evenodd" d="m31.8578 41.2802c-1.8 0-3.1778-.5171-4.1333-1.5512-.9556-1.0342-1.4334-2.4955-1.4334-4.3839v-12.4099c0-1.8885.4778-3.3498 1.4334-4.384.9555-1.0341 2.3333-1.5512 4.1333-1.5512s3.1778.5171 4.1333 1.5512c.9556 1.0342 1.4333 2.4955 1.4333 4.384v12.4099c0 1.8884-.4777 3.3497-1.4333 4.3839-.9555 1.0341-2.3333 1.5512-4.1333 1.5512zm0-3.3722c1.2667 0 1.9-.7757 1.9-2.3269v-12.882c0-1.5512-.6333-2.3268-1.9-2.3268s-1.9.7756-1.9 2.3268v12.882c0 1.5512.6333 2.3269 1.9 2.3269zm-14.1578 3.1699c-.6667 0-1.7 0-1.7 0v-3.3723h1.2c.7333 0 1.2778-.1798 1.6333-.5395.3556-.3822.5334-.9555.5334-1.7199v-9.2068l3.6666-3.7095v12.8152c0 1.9334-.4444 3.3722-1.3333 4.3164-.8667.9443-2.2 1.4164-4 1.4164zm5.3333-21.9758v-1.7649h-3.6666v5.4744zm19.1537 1.6074h-3.8333v-3.3723h11.3333v3.3723h-3.8333v20.2335h-3.6667zm10.1437-3.3723h4.9667l3.8 23.6058h-3.6667l-.6667-4.6874v.0674h-4.1666l-.6667 4.62h-3.4zm4 15.7822-1.6333-11.668h-.0667l-1.6 11.668z" fill="#fff" fill-rule="evenodd"/></svg>`,
+      absolutePosition: { x: 42, y: 0 },
     }),
     content: [header, separator, clientMeta, linesTable, ...paymentStack, notesBlock],
     footer: (_currentPage: number, _pageCount: number): Content => ({
@@ -294,8 +266,8 @@ export default function buildDocDef(
       margin: [56, 0, 50, 0],
     }),
     styles: {
-      invoiceTitle: { fontSize: 30, bold: true, color: ACCENT },
-      invoiceNumber: { fontSize: 13, color: ACCENT, margin: [0, 2, 0, 0] },
+      invoiceTitle: { fontSize: 20, bold: true, color: ACCENT },
+      invoiceNumber: { fontSize: 10, color: ACCENT, margin: [0, 2, 0, 0] },
       companyName: { fontSize: 11, bold: true, color: INK },
       tableHeader: { bold: true, fillColor: ACCENT, color: '#ffffff', fontSize: 10 },
       metaLabel: { fontSize: 9, bold: true, color: MUTED },
