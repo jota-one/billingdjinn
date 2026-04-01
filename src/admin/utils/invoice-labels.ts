@@ -1,6 +1,11 @@
 import type { TInvoiceLabels } from '../types/invoice-labels'
 
 export const DEFAULT_LABELS: Required<TInvoiceLabels> = {
+  invoice_title: 'Facture',
+  draft: 'BROUILLON',
+  date: 'Date',
+  due_date: 'Échéance',
+  iban: 'IBAN',
   col_description: 'Description',
   col_qty: 'Qté',
   col_unit_price: 'Prix unit.',

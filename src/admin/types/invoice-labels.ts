@@ -1,4 +1,9 @@
 export interface TInvoiceLabels {
+  invoice_title?: string
+  draft?: string
+  date?: string
+  due_date?: string
+  iban?: string
   col_description?: string
   col_qty?: string
   col_unit_price?: string
