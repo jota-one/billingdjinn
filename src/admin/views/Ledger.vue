@@ -1,11 +1,11 @@
 <template>
-  <div class="p-8">
-    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+  <div class="h-full flex flex-col p-8 gap-4">
+    <h2 class="text-2xl font-bold shrink-0 flex items-center gap-2">
       <span class="i-fa-solid-book text-xl"></span>
       Grand Livre
     </h2>
-    <div class="card" ref="tableWrapper">
-      <div class="flex items-center justify-between gap-2 mb-3">
+    <div class="card flex-1 flex flex-col min-h-0" ref="tableWrapper">
+      <div class="shrink-0 flex items-center justify-between gap-2 pb-3">
         <LedgerFilters
           v-model:selected-years="filterYears"
           v-model:selected-categories="filterCategories"
@@ -15,11 +15,14 @@
         <div class="flex gap-2 shrink-0">
           <Button
             label="Import / Export"
-            icon="i-fa-solid-file-arrow-up"
+            icon="i-fa6-solid-file-arrow-up"
             size="small"
             severity="secondary"
             @click="showImportExportModal = true"
           />
+          <RouterLink to="/ledger/reconcile">
+            <Button label="Réconciliation" icon="i-fa6-solid-scale-balanced" size="small" severity="secondary" />
+          </RouterLink>
           <RouterLink to="/ledger/bulk">
             <Button label="Saisie en série" icon="i-fa-solid-calendar-plus" size="small" severity="secondary" />
           </RouterLink>
@@ -34,10 +37,20 @@
         v-model:sortField="sortField"
         v-model:sortOrder="sortOrder"
         :row-class="rowClass"
+        scrollable
+        scrollHeight="flex"
         table-style="min-width: 48rem"
       >
+        <Column style="width: 1.5rem; padding: 0;">
+          <template #body="{ data }">
+            <span v-if="data.isPastBoundary" class="ledger-sep-above">{{ sortOrder === 1 ? 'passé' : 'futur' }}</span>
+            <span v-if="data.isFirstFuture" class="ledger-sep-below">{{ sortOrder === 1 ? 'futur' : 'passé' }}</span>
+          </template>
+        </Column>
         <Column field="date" header="Date" sortable style="width: 110px;">
-          <template #body="{ data }">{{ formatDate(data.date) }}</template>
+          <template #body="{ data }">
+            {{ formatDate(data.date) }}
+          </template>
         </Column>
         <Column field="category" header="Catégorie" style="width: 140px;">
           <template #body="{ data }">{{ data.category || '—' }}</template>
@@ -55,7 +68,7 @@
             >Prévu</span>
           </template>
         </Column>
-        <Column field="amount" header="Montant" sortable style="width: 130px; text-align: right;">
+        <Column field="amount" header="Montant" style="width: 130px; text-align: right;">
           <template #body="{ data }">
             <span :class="data.amount >= 0 ? 'text-success' : 'text-error'" class="font-mono font-medium whitespace-nowrap">
               {{ fmtAmount(data.amount) }}
@@ -128,7 +141,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { RouterLink, useRoute } from 'vue-router'
 import dayjs from 'dayjs'
@@ -142,6 +155,8 @@ import useLedger from '../composables/useLedger'
 import useLedgerImportExport from '../composables/useLedgerImportExport'
 import { getExportableFields } from '../config/ledgerImportExport'
 import type { TLedgerEntry } from '../composables/useLedger'
+
+type LedgerEntryWithBoundary = TLedgerEntry & { isPastBoundary?: boolean; isFirstFuture?: boolean }
 
 const { entries, loadEntries, deleteEntry, markChecked } = useLedger()
 const { isExporting, isImporting, exportToCSV, importFromCSV } = useLedgerImportExport()
@@ -171,7 +186,7 @@ const availableCategories = computed(() => {
   return [...cats].sort()
 })
 
-const entriesWithBalance = computed(() => {
+const entriesWithBalance = computed<LedgerEntryWithBoundary[]>(() => {
   const chronological = [...entries.value].sort((a, b) => {
     const d = a.date < b.date ? -1 : a.date > b.date ? 1 : 0
     if (d !== 0) return d
@@ -180,14 +195,14 @@ const entriesWithBalance = computed(() => {
   let balance = 0
   let filtered = chronological.map(e => {
     balance += e.amount
-    return { ...e, balance }
+    return { ...e, balance } as LedgerEntryWithBoundary & { balance: number }
   })
   if (filterYears.value.length > 0)
     filtered = filtered.filter(e => filterYears.value.includes(e.fiscal_year || parseInt(e.date.substring(0, 4))))
   if (filterCategories.value.length > 0)
     filtered = filtered.filter(e => filterCategories.value.includes(e.category))
   const dir = sortOrder.value ?? 1
-  return filtered.sort((a, b) => {
+  filtered = filtered.sort((a, b) => {
     const av = (a as any)[sortField.value] ?? ''
     const bv = (b as any)[sortField.value] ?? ''
     const primary = av < bv ? -1 : av > bv ? 1 : 0
@@ -195,6 +210,24 @@ const entriesWithBalance = computed(() => {
     const sec = (a.created ?? '') < (b.created ?? '') ? -1 : (a.created ?? '') > (b.created ?? '') ? 1 : 0
     return sec * dir
   })
+  // Ajout du flag de séparation passé/futur — uniquement quand on trie par date
+  if (sortField.value === 'date') {
+    let boundaryIdx = -1
+    for (let i = 1; i < filtered.length; i++) {
+      if (isFuture(filtered[i - 1].date) !== isFuture(filtered[i].date)) {
+        boundaryIdx = dir === 1 ? i - 1 : i
+        break
+      }
+    }
+    if (boundaryIdx !== -1) {
+      filtered[boundaryIdx] = { ...filtered[boundaryIdx], isPastBoundary: true }
+      const neighborIdx = boundaryIdx + 1
+      if (neighborIdx >= 0 && neighborIdx < filtered.length) {
+        filtered[neighborIdx] = { ...filtered[neighborIdx], isFirstFuture: true }
+      }
+    }
+  }
+  return filtered as LedgerEntryWithBoundary[]
 })
 
 const finalBalance = computed(() => {
@@ -219,11 +252,10 @@ const formatDate = (date?: string) => {
 const isPast = (date?: string) => !!date && dayjs(date).isBefore(dayjs(), 'day')
 const isFuture = (date?: string) => !!date && dayjs(date).isAfter(dayjs(), 'day')
 
-const rowClass = (data: TLedgerEntry) => {
-  if (data.fiscal_year && data.fiscal_year !== parseInt(data.date.substring(0, 4))) {
-    return 'row-transitoire'
-  }
-  return ''
+const rowClass = (data: LedgerEntryWithBoundary) => {
+  const transitoire = data.fiscal_year && data.fiscal_year !== parseInt(data.date.substring(0, 4)) ? 'row-transitoire' : ''
+  const separator = data.isPastBoundary ? 'ledger-row-separator' : ''
+  return [transitoire, separator].filter(Boolean).join(' ')
 }
 
 const checkEntry = async (id: string) => {
@@ -266,7 +298,15 @@ const scrollToTarget = () => {
 
   if (idx === -1) return
   const rows = tableWrapper.value?.querySelectorAll('tbody tr')
-  rows?.[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const row = rows?.[idx] as HTMLElement | undefined
+  if (!row) return
+
+  const scrollContainer = tableWrapper.value?.querySelector('.p-datatable-table-container') as HTMLElement | null
+  if (!scrollContainer) return
+
+  const offset = row.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top
+    - scrollContainer.clientHeight / 2 + row.clientHeight / 2
+  scrollContainer.scrollTop += offset
 }
 
 onMounted(async () => {
@@ -276,7 +316,49 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-:deep(tr.row-transitoire > td) {
+:deep(.p-datatable-thead > tr > th) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:deep(tr.row-transitoire > td:not(:first-child)) {
   background-color: color-mix(in oklch, var(--color-warning) 12%, transparent);
 }
+
+/* Première colonne : transparente, sans bordure — slot pour le séparateur */
+:deep(.p-datatable-header-cell:first-child),
+:deep(.p-datatable-tbody > tr > td:first-child) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0;
+  position: relative;
+}
+
+/* Ligne de séparation : trait épais en bas */
+:deep(.ledger-row-separator > td) {
+  border-bottom: 4px solid var(--color-primary, #2563eb);
+}
+/* Restaurer le border-bottom sur la 1ère cellule (écrasé par border: none) */
+:deep(.p-datatable-tbody > tr.ledger-row-separator > td:first-child) {
+  border-bottom: 4px solid var(--color-primary, #2563eb) !important;
+}
+
+:deep(.ledger-sep-above),
+:deep(.ledger-sep-below) {
+  position: absolute;
+  left: 50%;
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--color-base-content, #64748b);
+  letter-spacing: 0.1em;
+  writing-mode: vertical-rl;
+  user-select: none;
+  opacity: 0.7;
+  transform: translateX(-50%) rotate(180deg);
+  pointer-events: none;
+}
+
+:deep(.ledger-sep-above) { bottom: 6px; }
+:deep(.ledger-sep-below) { top: 6px; }
 </style>

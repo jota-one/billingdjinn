@@ -2,12 +2,12 @@ import { computed, ref, type Ref } from 'vue'
 import PocketBase from 'pocketbase'
 import config from '../../config'
 
-interface TLedgerStatEntry {
+interface TLedgerStatRow {
   id: string
-  date: string
   category: string
-  amount: number
-  fiscal_year?: number
+  year: number
+  total_credit: number
+  total_debit: number
 }
 
 const SOCIAL_CATEGORIES = ['AVS', 'LPP', 'LAA']
@@ -31,39 +31,33 @@ const PALETTE = [
 ]
 
 export default function useLedgerStats(selectedYear: Ref<number>) {
-  const entries = ref<TLedgerStatEntry[]>([])
+  const stats = ref<TLedgerStatRow[]>([])
   const pb = new PocketBase(config.apiBaseUrl)
 
   const load = async () => {
-    entries.value = await pb.collection('ledger').getFullList<TLedgerStatEntry>({
-      fields: 'id,date,category,amount,fiscal_year',
-    })
+    stats.value = await pb.collection('ledger_stats').getFullList<TLedgerStatRow>()
   }
-
-  const fiscalYearOf = (e: TLedgerStatEntry) => e.fiscal_year || parseInt(e.date.substring(0, 4))
 
   const availableYears = computed(() => {
     const years = new Set<number>([new Date().getFullYear()])
-    entries.value.forEach(e => years.add(fiscalYearOf(e)))
+    stats.value.forEach(r => years.add(r.year))
     return [...years].sort((a, b) => b - a)
   })
 
-  const yearEntries = computed(() =>
-    entries.value.filter(e => fiscalYearOf(e) === selectedYear.value && e.category !== 'Erreur'),
+  const yearStats = computed(() =>
+    stats.value.filter(r => r.year === selectedYear.value && r.category !== 'Erreur'),
   )
 
-  const totalRevenu = computed(() =>
-    yearEntries.value.filter(e => e.amount > 0 && e.category === 'Revenu').reduce((s, e) => s + e.amount, 0),
+  const totalRevenu = computed(
+    () => yearStats.value.find(r => r.category === 'Revenu')?.total_credit ?? 0,
   )
 
-  const totalCharges = computed(() =>
-    yearEntries.value.filter(e => e.amount < 0).reduce((s, e) => s + Math.abs(e.amount), 0),
-  )
+  const totalCharges = computed(() => yearStats.value.reduce((s, r) => s + r.total_debit, 0))
 
   const chargesSociales = computed(() =>
-    yearEntries.value
-      .filter(e => e.amount < 0 && SOCIAL_CATEGORIES.includes(e.category))
-      .reduce((s, e) => s + Math.abs(e.amount), 0),
+    yearStats.value
+      .filter(r => SOCIAL_CATEGORIES.includes(r.category))
+      .reduce((s, r) => s + r.total_debit, 0),
   )
 
   const ratioCharges = computed(() => {
@@ -74,16 +68,14 @@ export default function useLedgerStats(selectedYear: Ref<number>) {
   // ── Donut — charges par catégorie (année sélectionnée) ─────────────────────
 
   const chargesByCategoryChartData = computed(() => {
-    const map = new Map<string, number>()
-    yearEntries.value
-      .filter(e => e.amount < 0 && e.category)
-      .forEach(e => map.set(e.category, (map.get(e.category) ?? 0) + Math.abs(e.amount)))
-    const sorted = [...map.entries()].sort((a, b) => b[1] - a[1])
+    const sorted = yearStats.value
+      .filter(r => r.total_debit > 0)
+      .sort((a, b) => b.total_debit - a.total_debit)
     return {
-      labels: sorted.map(([cat]) => cat),
+      labels: sorted.map(r => r.category),
       datasets: [
         {
-          data: sorted.map(([, v]) => Math.round(v * 100) / 100),
+          data: sorted.map(r => Math.round(r.total_debit * 100) / 100),
           backgroundColor: PALETTE.slice(0, sorted.length),
           borderWidth: 2,
           hoverOffset: 6,
@@ -101,24 +93,20 @@ export default function useLedgerStats(selectedYear: Ref<number>) {
 
   const categoryTrendsChartData = computed(() => {
     const years = trendYears.value
-    const trendEntries = entries.value.filter(
-      e => e.amount < 0 && e.category && e.category !== 'Erreur' && years.includes(fiscalYearOf(e)),
+    const trendStats = stats.value.filter(
+      r => r.total_debit > 0 && r.category && r.category !== 'Erreur' && years.includes(r.year),
     )
-    const cats = [...new Set(trendEntries.map(e => e.category))].sort()
+    const cats = [...new Set(trendStats.map(r => r.category))].sort()
     return {
       labels: years.map(String),
       datasets: cats.map((cat, i) => {
         const color = PALETTE[i % PALETTE.length]
         return {
           label: cat,
-          data: years.map(
-            y =>
-              Math.round(
-                trendEntries
-                  .filter(e => e.category === cat && fiscalYearOf(e) === y)
-                  .reduce((s, e) => s + Math.abs(e.amount), 0) * 100,
-              ) / 100,
-          ),
+          data: years.map(y => {
+            const row = trendStats.find(r => r.category === cat && r.year === y)
+            return Math.round((row?.total_debit ?? 0) * 100) / 100
+          }),
           borderColor: color,
           backgroundColor: color.replace('0.85', '0.12'),
           fill: false,
