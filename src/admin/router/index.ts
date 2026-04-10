@@ -12,6 +12,7 @@ import Ledger from '../views/Ledger.vue'
 import LedgerEntryNew from '../views/LedgerEntryNew.vue'
 import LedgerEntryEdit from '../views/LedgerEntryEdit.vue'
 import LedgerBulkCreate from '../views/LedgerBulkCreate.vue'
+import LedgerReconciliation from '../views/LedgerReconciliation.vue'
 import Transitoires from '../views/Transitoires.vue'
 import Stats from '../views/Stats.vue'
 import useAuth from '../composables/useAuth'
@@ -29,6 +30,7 @@ const routes = [
   { path: '/ledger', component: Ledger },
   { path: '/ledger/new', component: LedgerEntryNew },
   { path: '/ledger/bulk', component: LedgerBulkCreate },
+  { path: '/ledger/reconcile', component: LedgerReconciliation },
   { path: '/ledger/:id', component: LedgerEntryEdit },
   { path: '/transitoires', component: Transitoires },
   { path: '/stats', component: Stats },
