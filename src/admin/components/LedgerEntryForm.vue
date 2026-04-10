@@ -125,7 +125,7 @@ const form = defineModel<TLedgerEntryForm>('form', { required: true })
 const { settings, loadSettings } = useSettings()
 onMounted(() => loadSettings())
 
-const categories = computed(() => settings.value?.ledger_categories ?? [])
+const categories = computed(() => (settings.value?.ledger_categories ?? []).map(c => c.name))
 
 const inferredYear = computed(() => {
   if (form.value.date) return parseInt(form.value.date.substring(0, 4))

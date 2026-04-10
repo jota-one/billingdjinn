@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import config from '../../config'
 import PocketBase from 'pocketbase'
 import dayjs from 'dayjs'
+import { scoreCandidate } from '../helpers/ledger'
 
 export interface TLedgerEntry {
   id: string
@@ -30,18 +31,6 @@ export interface TLedgerCandidateEntry extends TLedgerEntry {
   score: number
 }
 
-function scoreCandidate(entry: TLedgerEntry, dueDate: string, invoiceAmount: number): number {
-  // Date proximity: ±30 days window, score = 1 at exact date, 0 at ±30d
-  const daysDiff = Math.abs(dayjs(entry.date).diff(dayjs(dueDate), 'day'))
-  const dateScore = Math.max(0, 1 - daysDiff / 30)
-
-  // Amount proximity: 1 at exact match, 0 at ±150% difference
-  const amountDiff = Math.abs(entry.amount - invoiceAmount)
-  const amountScore = invoiceAmount > 0 ? Math.max(0, 1 - amountDiff / (invoiceAmount * 1.5)) : 0
-
-  return dateScore * 0.6 + amountScore * 0.4
-}
-
 export default function useLedger() {
   const pb = new PocketBase(config.apiBaseUrl)
 
@@ -55,6 +44,11 @@ export default function useLedger() {
 
   const loadEntry = async (id: string): Promise<TLedgerEntry> => {
     return pb.collection<TLedgerEntry>('ledger').getOne(id)
+  }
+
+  const loadUsedCategories = async (): Promise<Set<string>> => {
+    const records = await pb.collection('ledger_stats').getFullList({ fields: 'category' })
+    return new Set(records.map(r => r['category'] as string).filter(Boolean))
   }
 
   const createEntry = async (payload: TLedgerEntryForm): Promise<TLedgerEntry> => {
@@ -90,7 +84,7 @@ export default function useLedger() {
       requestKey: null,
     })
     return results
-      .map(e => ({ ...e, score: scoreCandidate(e, dueDate, invoiceAmount) }))
+      .map(e => ({ ...e, score: scoreCandidate(e, dueDate, invoiceAmount, 60) }))
       .filter(e => e.score > 0.1)
       .sort((a, b) => b.score - a.score)
       .slice(0, 5)
@@ -147,6 +141,7 @@ export default function useLedger() {
     entries,
     loadEntries,
     loadEntry,
+    loadUsedCategories,
     createEntry,
     updateEntry,
     deleteEntry,

@@ -259,7 +259,7 @@ const endCondition = reactive({
   count: 12,
 })
 
-const categories = computed(() => settings.value?.ledger_categories ?? [])
+const categories = computed(() => (settings.value?.ledger_categories ?? []).map(c => c.name))
 
 const step1Valid = computed(() =>
   !!entry.startDate && !!entry.description.trim() && entry.amount !== null

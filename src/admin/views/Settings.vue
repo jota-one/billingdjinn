@@ -179,13 +179,62 @@
         <div class="form-control">
           <div class="divider mt-2 mb-0"></div>
           <label class="label mt-2"><span class="label-text font-semibold">Catégories du Grand Livre</span></label>
-          <p class="text-xs text-base-content/50 mb-4">Définissez les catégories disponibles lors de la saisie des écritures.</p>
-          <div class="flex flex-col gap-2">
-            <div v-for="(cat, i) in form.ledger_categories" :key="i" class="flex gap-2 items-center">
-              <InputText v-model="form.ledger_categories[i]" class="flex-1" />
-              <button type="button" class="btn btn-xs btn-ghost text-error" @click="removeCategory(i)">
-                <span class="i-fa-solid-trash"></span>
-              </button>
+          <p class="text-xs text-base-content/50 mb-4">
+            Définissez les catégories et leurs patterns de détection automatique.<br>
+            Un pattern peut être une chaîne de texte (recherche insensible à la casse) ou une regex au format <code class="font-mono">/pattern/flags</code>.
+          </p>
+          <div class="flex flex-col gap-3">
+            <div
+              v-for="(cat, i) in form.ledger_categories"
+              :key="i"
+              class="border border-base-300 rounded-lg p-3 flex flex-col gap-2"
+            >
+              <div class="flex gap-2 items-center">
+                <InputText v-model="cat.name" placeholder="Nom de la catégorie" class="flex-1" />
+                <button
+                  type="button"
+                  class="btn btn-xs btn-ghost"
+                  :class="usedCategoryNames.has(cat.name) ? 'text-base-content/30 cursor-not-allowed' : 'text-error'"
+                  v-tooltip.top="{ value: 'Catégorie utilisée dans le ledger', disabled: !usedCategoryNames.has(cat.name) }"
+                  @click="removeCategory(i)"
+                >
+                  <span class="i-fa6-solid-trash"></span>
+                </button>
+              </div>
+              <div class="pl-1 flex flex-col gap-1">
+                <p v-if="cat.patterns.length > 0 || newPatternInputs[i] !== undefined" class="text-xs font-medium text-base-content/50">
+                  Patterns de détection automatique
+                </p>
+                <div v-for="(p, j) in cat.patterns" :key="j" class="flex gap-2 items-center">
+                  <InputText
+                    v-model="cat.patterns[j]"
+                    class="flex-1"
+                    style="font-family: monospace; font-size: 0.8rem;"
+                    placeholder="/regex/ ou texte à chercher"
+                  />
+                  <button type="button" class="btn btn-xs btn-ghost text-error" @click="removePattern(i, j)">
+                    <span class="i-fa6-solid-xmark"></span>
+                  </button>
+                </div>
+                <div v-if="newPatternInputs[i] !== undefined" class="flex gap-2 mt-1">
+                  <InputText
+                    v-model="newPatternInputs[i]"
+                    placeholder="Pattern..."
+                    class="flex-1"
+                    style="font-family: monospace; font-size: 0.8rem;"
+                    @keydown.enter.prevent="addPattern(i)"
+                  />
+                  <button type="button" class="btn btn-xs btn-ghost" :class="newPatternInputs[i]?.trim() ? 'text-success' : 'text-base-content/30 cursor-not-allowed'" @click="addPattern(i)"><span class="i-fa-solid-check"></span></button>
+                </div>
+                <button
+                  v-else
+                  type="button"
+                  class="text-xs text-base-content/40 text-left hover:text-base-content/70 transition-colors mt-1"
+                  @click="newPatternInputs[i] = ''"
+                >
+                  + Ajouter des patterns de détection
+                </button>
+              </div>
             </div>
             <div class="flex gap-2 mt-1">
               <InputText
@@ -197,7 +246,7 @@
               <Button
                 type="button"
                 label="Ajouter"
-                icon="i-fa-solid-plus"
+                icon="i-fa-solid-save"
                 size="small"
                 severity="secondary"
                 @click="addCategory"
@@ -224,7 +273,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
@@ -234,15 +283,19 @@ import PbErrorToast from '../components/PbErrorToast.vue'
 import InvoiceLabelsEditor from '../components/InvoiceLabelsEditor.vue'
 import usePbErrorToast from '../composables/usePbErrorToast'
 import useSettings from '../composables/useSettings'
+import useLedger from '../composables/useLedger'
 import type { TInvoiceLabels } from '../types/invoice-labels'
+import type { TLedgerCategory } from '../types/ledger-category'
 
 const { settings, loadSettings, updateSettings, getLogoUrl } = useSettings()
+const { loadUsedCategories } = useLedger()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
 
 const saving = ref(false)
 const logoFile = ref<File | null>(null)
 const newCategory = ref('')
+const newPatternInputs = reactive<Record<number, string>>({})
 
 const form = ref({
   company_name: '',
@@ -257,19 +310,44 @@ const form = ref({
   tva_number: '',
   tva_rate: null as number | null,
   labels: {} as TInvoiceLabels,
-  ledger_categories: [] as string[],
+  ledger_categories: [] as TLedgerCategory[],
 })
 
+const usedCategoryNames = ref<Set<string>>(new Set())
+
 const addCategory = () => {
-  const cat = newCategory.value.trim()
-  if (cat && !form.value.ledger_categories.includes(cat)) {
-    form.value.ledger_categories.push(cat)
+  const name = newCategory.value.trim()
+  if (name && !form.value.ledger_categories.some(c => c.name === name)) {
+    form.value.ledger_categories.push({ name, patterns: [] })
   }
   newCategory.value = ''
 }
 
 const removeCategory = (index: number) => {
+  const name = form.value.ledger_categories[index].name
+  if (usedCategoryNames.value.has(name)) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Catégorie utilisée',
+      detail: `"${name}" est utilisée dans le ledger et ne peut pas être supprimée.`,
+      life: 4000,
+    })
+    return
+  }
   form.value.ledger_categories.splice(index, 1)
+  delete newPatternInputs[index]
+}
+
+const addPattern = (catIdx: number) => {
+  const pattern = (newPatternInputs[catIdx] ?? '').trim()
+  if (pattern) {
+    form.value.ledger_categories[catIdx].patterns.push(pattern)
+  }
+  delete newPatternInputs[catIdx]
+}
+
+const removePattern = (catIdx: number, patIdx: number) => {
+  form.value.ledger_categories[catIdx].patterns.splice(patIdx, 1)
 }
 
 const logoUrl = computed(() => {
@@ -302,7 +380,10 @@ const save = async () => {
 }
 
 onMounted(async () => {
-  await loadSettings()
+  await Promise.all([
+    loadSettings(),
+    loadUsedCategories().then(s => { usedCategoryNames.value = s }),
+  ])
   if (settings.value) {
     form.value = {
       company_name: settings.value.company_name || '',
