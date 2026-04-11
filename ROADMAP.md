@@ -16,6 +16,18 @@ Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organis
 
 ## Historique (fait)
 
+- [2026-04-10] Rapprochement bancaire camt.053 — Import de relevés bancaires XML (ISO 20022), algorithme de matching date+montant avec les écritures du ledger, confirmation en lot. Entrées non matchées créables directement depuis l'import. Adaptateur unique camt.053 (CSV supprimés).
+
+- [2026-04-10] Catégories du ledger avec patterns de détection — Les catégories définissent désormais des patterns (texte ou regex) pour l'attribution automatique lors de l'import. Matching par spécificité (le pattern le plus précis gagne, support multi-mots dans n'importe quel ordre). Suppression bloquée si la catégorie est utilisée dans le ledger.
+
+- [2026-04-10] Vue SQL `ledger_stats` — Vue PocketBase agrégeant crédit/débit par catégorie et exercice fiscal. Stats et vérifications de catégories utilisées passent de N écritures à quelques dizaines de lignes agrégées.
+
+- [2026-04-10] Grand Livre scrollable + séparateur passé/futur — DataTable en `scrollHeight="flex"`, séparateur visuel entre écritures passées et futures (tri par date), correction du `scrollIntoView` qui scrollait la page entière au lieu du tableau.
+
+- [2026-04-01] Amélioration template facture — Template de facture affiné et extraction de labels supplémentaires paramétrables depuis le layout.
+
+- [2026-03-30] Autoscroll Grand Livre — Au chargement, le tableau scrolle automatiquement vers l'entrée la plus proche de la date du jour (ou vers l'entrée focalisée si navigation depuis une autre page).
+
 - [2026-03-29] Saisie en série — wizard 4 étapes pour créer des écritures récurrentes planifiées. Récurrences : journalier, hebdomadaire (choix du jour), mensuel, trimestriel (choix du jour / dernier jour / dernier jour ouvrable), annuel (idem). Date de fin ou nombre d'occurrences. Suffixe automatique sur le libellé (mois pour mensuel, Q1-Q4 pour trimestriel). Aperçu avant validation.
 
 - [2026-03-29] Page Statistiques Grand Livre — KPIs (revenus, charges, résultat, charges sociales AVS+LPP+LAA, ratio charges/revenus). Donut charges par catégorie. Graphique de tendance multi-séries par catégorie sur les 5 dernières années. Sélecteur d'année. Catégorie "Erreur" exclue de tous les calculs.
