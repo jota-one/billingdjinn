@@ -19,7 +19,8 @@
       <LedgerEntryForm
         v-model:form="form"
         :saving="saving"
-        :invoice-linked="!!entry?.invoice"
+        :invoice-id="entry?.invoice"
+        :invoice-number="entry?.expand?.invoice?.invoice_number"
         @submit="save"
       />
     </div>

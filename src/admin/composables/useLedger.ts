@@ -15,6 +15,9 @@ export interface TLedgerEntry {
   fiscal_year?: number
   created: string
   updated: string
+  expand?: {
+    invoice?: { id: string; invoice_number: string }
+  }
 }
 
 export interface TLedgerEntryForm {
@@ -43,7 +46,7 @@ export default function useLedger() {
   }
 
   const loadEntry = async (id: string): Promise<TLedgerEntry> => {
-    return pb.collection<TLedgerEntry>('ledger').getOne(id)
+    return pb.collection<TLedgerEntry>('ledger').getOne(id, { expand: 'invoice' })
   }
 
   const loadUsedCategories = async (): Promise<Set<string>> => {

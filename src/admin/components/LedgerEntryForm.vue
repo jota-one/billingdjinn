@@ -1,8 +1,9 @@
 <template>
   <div>
-    <div v-if="invoiceLinked" class="alert alert-info mb-5 text-sm">
+    <div v-if="invoiceId" class="alert alert-info mb-5 text-sm">
       <span class="i-fa-solid-link"></span>
-      Cette écriture a été créée automatiquement lors de l'encaissement d'une facture.
+      Cette écriture est liée à l'encaissement de la facture
+      <RouterLink :to="`/invoices/${invoiceId}`" class="font-semibold underline">{{ invoiceNumber || invoiceId }}</RouterLink>.
     </div>
 
     <form @submit.prevent="$emit('submit')" class="flex flex-col gap-5">
@@ -117,7 +118,7 @@ import Button from 'primevue/button'
 import useSettings from '../composables/useSettings'
 import type { TLedgerEntryForm } from '../composables/useLedger'
 
-defineProps<{ saving: boolean; invoiceLinked?: boolean }>()
+defineProps<{ saving: boolean; invoiceId?: string; invoiceNumber?: string }>()
 defineEmits<{ submit: [] }>()
 
 const form = defineModel<TLedgerEntryForm>('form', { required: true })
