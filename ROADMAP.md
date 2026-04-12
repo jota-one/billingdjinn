@@ -16,6 +16,8 @@ Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organis
 
 ## Historique (fait)
 
+- [2026-04-12] Rapprochement bancaire → matching automatique des factures — Lors de la confirmation d'une réconciliation, les écritures de catégorie « Facture » déclenchent une recherche automatique dans les factures envoyées (scoring date+montant via `invoice_totals`). Si un candidat dépasse le seuil de confiance (0.5), la facture est marquée payée et liée à l'écriture du ledger.
+
 - [2026-04-10] Rapprochement bancaire camt.053 — Import de relevés bancaires XML (ISO 20022), algorithme de matching date+montant avec les écritures du ledger, confirmation en lot. Entrées non matchées créables directement depuis l'import. Adaptateur unique camt.053 (CSV supprimés).
 
 - [2026-04-10] Catégories du ledger avec patterns de détection — Les catégories définissent désormais des patterns (texte ou regex) pour l'attribution automatique lors de l'import. Matching par spécificité (le pattern le plus précis gagne, support multi-mots dans n'importe quel ordre). Suppression bloquée si la catégorie est utilisée dans le ledger.

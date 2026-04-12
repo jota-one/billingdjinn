@@ -152,6 +152,10 @@
           <span>Ignorées</span>
           <span class="font-mono">{{ result.ignored }}</span>
         </div>
+        <div v-if="result.invoiceMatched > 0" class="flex justify-between text-sm text-success">
+          <span>Factures marquées payées</span>
+          <span class="font-mono font-semibold">{{ result.invoiceMatched }}</span>
+        </div>
       </div>
       <RouterLink to="/ledger">
         <Button label="Retour au Grand Livre" icon="i-fa-solid-book" class="w-full" />
@@ -187,7 +191,7 @@ const openFilePicker = () => (fileUploadRef.value as any)?.choose()
 const step = ref(1)
 const loading = ref(false)
 const parseError = ref('')
-const result = ref({ linked: 0, created: 0, ignored: 0 })
+const result = ref({ linked: 0, created: 0, ignored: 0, invoiceMatched: 0 })
 
 const categories = computed(() => (settings.value?.ledger_categories ?? []).map(c => c.name))
 
@@ -227,7 +231,7 @@ const confirm = async () => {
     toast.add({
       severity: 'success',
       summary: 'Rapprochement effectué',
-      detail: `${res.linked} liée(s), ${res.created} créée(s), ${res.ignored} ignorée(s).`,
+      detail: `${res.linked} liée(s), ${res.created} créée(s), ${res.ignored} ignorée(s)${res.invoiceMatched ? `, ${res.invoiceMatched} facture(s) payée(s)` : ''}.`,
       life: 4000,
     })
   } catch (e) {
