@@ -61,7 +61,7 @@ export default function useBankReconciliation() {
           created++
         }
 
-        if (entryId && row.editedCategory === 'Facture') {
+        if (entryId && row.editedAmount > 0) {
           const matched = await matchInvoice(entryId, row.editedAmount, row.editedDate)
           if (matched) invoiceMatched++
         }
@@ -84,7 +84,7 @@ export default function useBankReconciliation() {
         const refDate = (inv as any).due_date || (inv as any).date
         const daysDiff = Math.abs(dayjs(refDate).diff(dayjs(date), 'day'))
         const dateScore = Math.max(0, 1 - daysDiff / 60)
-        const invAmount = (inv as any).converted_amount ?? (inv as any).total_ttc
+        const invAmount = (inv as any).converted_amount || (inv as any).total_ttc
         const amountDiff = Math.abs(invAmount - amount)
         const amountScore = amount !== 0 ? Math.max(0, 1 - amountDiff / (Math.abs(amount) * 1.5)) : 0
         return { id: (inv as any).id, score: dateScore * 0.6 + amountScore * 0.4 }
