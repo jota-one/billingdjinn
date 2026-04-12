@@ -214,8 +214,8 @@ const entriesWithBalance = computed<LedgerEntryWithBoundary[]>(() => {
   if (sortField.value === 'date') {
     let boundaryIdx = -1
     for (let i = 1; i < filtered.length; i++) {
-      if (isFuture(filtered[i - 1].date) !== isFuture(filtered[i].date)) {
-        boundaryIdx = dir === 1 ? i - 1 : i
+      if (isPast(filtered[i - 1].date) !== isPast(filtered[i].date)) {
+        boundaryIdx = i - 1
         break
       }
     }
