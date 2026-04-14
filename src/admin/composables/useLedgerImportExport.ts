@@ -1,7 +1,7 @@
 import PocketBase from 'pocketbase'
 import useImportExport from './useImportExport'
 import config from '@/config'
-import { createLedgerFieldsConfig } from '../config/ledgerImportExport'
+import { createLedgerFieldsConfig } from '@/admin/config/ledgerImportExport'
 
 export default function useLedgerImportExport() {
   const pb = new PocketBase(config.apiBaseUrl)

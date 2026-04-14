@@ -114,14 +114,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import dayjs from 'dayjs'
-import useUsers from '../composables/useUsers'
-import useAuth from '../composables/useAuth'
-import type { TUser } from '../composables/useUsers'
+import useUsers from '@/admin/composables/useUsers'
+import useAuth from '@/admin/composables/useAuth'
+import type { TUser } from '@/admin/composables/useUsers'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
-import UserFormModal from '../components/UserFormModal.vue'
-import ConfirmModal from '../components/ConfirmModal.vue'
+import UserFormModal from '@/admin/components/UserFormModal.vue'
+import ConfirmModal from '@/admin/components/ConfirmModal.vue'
 
 const { users, loadUsers, deleteUser, getAvatarUrl } = useUsers()
 const { user: currentUser, impersonate } = useAuth()

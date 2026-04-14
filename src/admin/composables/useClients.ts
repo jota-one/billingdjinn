@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import config from '@/config'
 import PocketBase from 'pocketbase'
-import type { TInvoiceLabels } from '../types/invoice-labels'
+import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
 
 export interface TClient {
   id: string

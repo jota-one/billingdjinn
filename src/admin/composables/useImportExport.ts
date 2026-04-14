@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import config from '@/config'
 import PocketBase from 'pocketbase'
-import type { FieldConfig, ImportResult } from '../types/import-export'
+import type { FieldConfig, ImportResult } from '@/admin/types/import-export'
 
 type TGetFieldsConfig = () => FieldConfig[]
 type TGetFieldConfig = (key: string) => FieldConfig | undefined

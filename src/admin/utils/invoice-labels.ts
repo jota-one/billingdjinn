@@ -1,4 +1,4 @@
-import type { TInvoiceLabels } from '../types/invoice-labels'
+import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
 
 export const DEFAULT_LABELS: Required<TInvoiceLabels> = {
   invoice_title: 'Facture',

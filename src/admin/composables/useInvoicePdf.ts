@@ -3,10 +3,10 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts'
 import type { TInvoiceBase, TInvoiceLine, TClientSnapshot, TCompanySnapshot } from './useInvoices'
 import PocketBase from 'pocketbase'
 import config from '@/config'
-import { resolveLabels } from '../utils/invoice-labels'
-import type { TInvoiceLabels } from '../types/invoice-labels'
-import { templates } from '../invoice-templates'
-import type { TemplateName } from '../invoice-templates'
+import { resolveLabels } from '@/admin/utils/invoice-labels'
+import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
+import { templates } from '@/admin/invoice-templates'
+import type { TemplateName } from '@/admin/invoice-templates'
 
 // Init Roboto fonts
 ;(pdfMake as any).vfs = (pdfFonts as any).pdfMake?.vfs ?? (pdfFonts as any).vfs ?? pdfFonts

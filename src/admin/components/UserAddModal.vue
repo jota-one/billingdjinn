@@ -90,11 +90,11 @@ import Password from 'primevue/password'
 import MultiSelect from 'primevue/multiselect'
 import FileUpload from 'primevue/fileupload'
 import type { FileUploadSelectEvent } from 'primevue/fileupload'
-import useUsers from '../composables/useUsers'
-import type { TUserForm } from '../composables/useUsers'
-import useRoles from '../composables/useRoles'
+import useUsers from '@/admin/composables/useUsers'
+import type { TUserForm } from '@/admin/composables/useUsers'
+import useRoles from '@/admin/composables/useRoles'
 import PbErrorToast from './PbErrorToast.vue'
-import usePbErrorToast from '../composables/usePbErrorToast'
+import usePbErrorToast from '@/admin/composables/usePbErrorToast'
 
 type Events = {
   saved: []

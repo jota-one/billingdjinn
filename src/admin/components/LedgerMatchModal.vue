@@ -52,7 +52,7 @@
 import dayjs from 'dayjs'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
-import type { TLedgerCandidateEntry } from '../composables/useLedger'
+import type { TLedgerCandidateEntry } from '@/admin/composables/useLedger'
 
 const props = defineProps<{
   candidates: TLedgerCandidateEntry[]

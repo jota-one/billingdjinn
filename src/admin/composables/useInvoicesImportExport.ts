@@ -3,13 +3,13 @@ import PocketBase from 'pocketbase'
 import config from '@/config'
 import { buildSnapshots } from './useInvoices'
 import type { TInvoiceStatus, TInvoiceLine } from './useInvoices'
-import type { ImportResult } from '../types/import-export'
-import { parseDecimal } from '../types/import-export'
+import type { ImportResult } from '@/admin/types/import-export'
+import { parseDecimal } from '@/admin/types/import-export'
 import {
   INVOICE_CSV_COLUMNS,
   getUniqueFields,
   getImportableFields,
-} from '../config/invoicesImportExport'
+} from '@/admin/config/invoicesImportExport'
 
 export { INVOICE_CSV_COLUMNS }
 export const INVOICE_IMPORT_COLUMNS = getImportableFields().map(f => f.key)

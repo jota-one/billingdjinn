@@ -36,12 +36,12 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
-import PbErrorToast from '../components/PbErrorToast.vue'
-import InvoiceForm from '../components/InvoiceForm.vue'
-import usePbErrorToast from '../composables/usePbErrorToast'
-import useInvoices, { type TInvoiceForm, type TInvoiceLineForm } from '../composables/useInvoices'
-import useClients from '../composables/useClients'
-import useSettings from '../composables/useSettings'
+import PbErrorToast from '@/admin/components/PbErrorToast.vue'
+import InvoiceForm from '@/admin/components/InvoiceForm.vue'
+import usePbErrorToast from '@/admin/composables/usePbErrorToast'
+import useInvoices, { type TInvoiceForm, type TInvoiceLineForm } from '@/admin/composables/useInvoices'
+import useClients from '@/admin/composables/useClients'
+import useSettings from '@/admin/composables/useSettings'
 
 const { generateInvoiceNumber, createInvoice } = useInvoices()
 const { clients, loadClients } = useClients()

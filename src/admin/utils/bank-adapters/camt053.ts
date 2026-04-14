@@ -1,4 +1,4 @@
-import type { BankAdapter, TBankEntry } from '../../types/bank-entry'
+import type { BankAdapter, TBankEntry } from '@/admin/types/bank-entry'
 
 /** Returns the first direct child element with the given local name. */
 function child(el: Element, localName: string): Element | null {

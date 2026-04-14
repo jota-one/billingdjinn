@@ -1,9 +1,9 @@
 import dayjs from 'dayjs'
 import { scoreCandidate } from './ledger'
-import { detectCategory } from '../utils/matchPattern'
-import type { TLedgerEntry, TLedgerCandidateEntry } from '../composables/useLedger'
-import type { TBankEntry } from '../types/bank-entry'
-import type { TCategory } from '../types/category'
+import { detectCategory } from '@/admin/utils/matchPattern'
+import type { TLedgerEntry, TLedgerCandidateEntry } from '@/admin/composables/useLedger'
+import type { TBankEntry } from '@/admin/types/bank-entry'
+import type { TCategory } from '@/admin/types/category'
 
 export type ReconciliationAction = 'link' | 'create' | 'ignore'
 

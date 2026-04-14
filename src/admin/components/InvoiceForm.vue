@@ -232,13 +232,13 @@ import InputNumber from 'primevue/inputnumber'
 import Textarea from 'primevue/textarea'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
-import type { TClient } from '../composables/useClients'
+import type { TClient } from '@/admin/composables/useClients'
 import {
   STATUS_LABELS,
   type TInvoiceForm,
   type TInvoiceLineForm,
   type TInvoiceStatus,
-} from '../composables/useInvoices'
+} from '@/admin/composables/useInvoices'
 
 const props = defineProps<{
   clients: TClient[]

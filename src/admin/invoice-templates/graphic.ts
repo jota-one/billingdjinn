@@ -4,9 +4,9 @@ import type {
   TInvoiceLine,
   TClientSnapshot,
   TCompanySnapshot,
-} from '../composables/useInvoices'
-import { label } from '../utils/invoice-labels'
-import type { TInvoiceLabels } from '../types/invoice-labels'
+} from '@/admin/composables/useInvoices'
+import { label } from '@/admin/utils/invoice-labels'
+import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 

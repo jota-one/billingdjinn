@@ -83,8 +83,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import Chart from 'primevue/chart'
 import Select from 'primevue/select'
-import useLedgerStats from '../composables/useLedgerStats'
-import useSettings from '../composables/useSettings'
+import useLedgerStats from '@/admin/composables/useLedgerStats'
+import useSettings from '@/admin/composables/useSettings'
 
 const realYear = new Date().getFullYear()
 const selectedYear = useStorage('stats-year', realYear)

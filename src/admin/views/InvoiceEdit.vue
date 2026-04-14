@@ -100,10 +100,10 @@ import { RouterLink, useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
-import PbErrorToast from '../components/PbErrorToast.vue'
-import InvoiceForm from '../components/InvoiceForm.vue'
-import LedgerMatchModal from '../components/LedgerMatchModal.vue'
-import usePbErrorToast from '../composables/usePbErrorToast'
+import PbErrorToast from '@/admin/components/PbErrorToast.vue'
+import InvoiceForm from '@/admin/components/InvoiceForm.vue'
+import LedgerMatchModal from '@/admin/components/LedgerMatchModal.vue'
+import usePbErrorToast from '@/admin/composables/usePbErrorToast'
 import useInvoices, {
   STATUS_BADGE,
   STATUS_LABELS,
@@ -112,12 +112,12 @@ import useInvoices, {
   type TInvoiceLine,
   type TInvoiceLineForm,
   type TInvoiceStatus,
-} from '../composables/useInvoices'
-import useClients from '../composables/useClients'
-import useSettings from '../composables/useSettings'
-import useLedger from '../composables/useLedger'
-import { downloadInvoicePdf } from '../composables/useInvoicePdf'
-import type { TLedgerCandidateEntry } from '../composables/useLedger'
+} from '@/admin/composables/useInvoices'
+import useClients from '@/admin/composables/useClients'
+import useSettings from '@/admin/composables/useSettings'
+import useLedger from '@/admin/composables/useLedger'
+import { downloadInvoicePdf } from '@/admin/composables/useInvoicePdf'
+import type { TLedgerCandidateEntry } from '@/admin/composables/useLedger'
 
 const { loadInvoice, loadInvoiceLines, updateInvoice } = useInvoices()
 const { clients, loadClients } = useClients()

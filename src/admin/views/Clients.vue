@@ -100,12 +100,12 @@ import dayjs from 'dayjs'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
-import ConfirmModal from '../components/ConfirmModal.vue'
-import ImportExportModal from '../components/ImportExportModal.vue'
-import useClients from '../composables/useClients'
-import useClientsImportExport from '../composables/useClientsImportExport'
-import { getExportableFields } from '../config/clientsImportExport'
-import type { TClient } from '../composables/useClients'
+import ConfirmModal from '@/admin/components/ConfirmModal.vue'
+import ImportExportModal from '@/admin/components/ImportExportModal.vue'
+import useClients from '@/admin/composables/useClients'
+import useClientsImportExport from '@/admin/composables/useClientsImportExport'
+import { getExportableFields } from '@/admin/config/clientsImportExport'
+import type { TClient } from '@/admin/composables/useClients'
 
 const { clients, clientStats, loadClients, loadClientStats, deleteClient } = useClients()
 const { isExporting, isImporting, exportToCSV, importFromCSV } = useClientsImportExport()

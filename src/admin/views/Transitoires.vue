@@ -155,8 +155,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import dayjs from 'dayjs'
-import useLedger from '../composables/useLedger'
-import type { TLedgerEntry } from '../composables/useLedger'
+import useLedger from '@/admin/composables/useLedger'
+import type { TLedgerEntry } from '@/admin/composables/useLedger'
 
 const { entries, loadEntries } = useLedger()
 const loading = ref(true)
