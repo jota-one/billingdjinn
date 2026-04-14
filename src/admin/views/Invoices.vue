@@ -123,18 +123,18 @@ import dayjs from 'dayjs'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
-import ConfirmModal from '../components/ConfirmModal.vue'
-import ImportExportModal from '../components/ImportExportModal.vue'
+import ConfirmModal from '@/admin/components/ConfirmModal.vue'
+import ImportExportModal from '@/admin/components/ImportExportModal.vue'
 import useInvoices, {
   STATUS_BADGE,
   STATUS_LABELS,
   type TInvoiceStatus,
-} from '../composables/useInvoices'
-import useInvoiceTotals, { type TInvoiceTotal } from '../composables/useInvoiceTotals'
+} from '@/admin/composables/useInvoices'
+import useInvoiceTotals, { type TInvoiceTotal } from '@/admin/composables/useInvoiceTotals'
 import useInvoicesImportExport, {
   INVOICE_IMPORT_COLUMNS,
-} from '../composables/useInvoicesImportExport'
-import { downloadInvoicePdf } from '../composables/useInvoicePdf'
+} from '@/admin/composables/useInvoicesImportExport'
+import { downloadInvoicePdf } from '@/admin/composables/useInvoicePdf'
 
 const { deleteInvoice, loadInvoiceLines } = useInvoices()
 const { invoices, loadInvoiceTotals } = useInvoiceTotals()

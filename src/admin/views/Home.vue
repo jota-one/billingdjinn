@@ -97,8 +97,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import Chart from 'primevue/chart'
 import Select from 'primevue/select'
-import useDashboard from '../composables/useDashboard'
-import useSettings from '../composables/useSettings'
+import useDashboard from '@/admin/composables/useDashboard'
+import useSettings from '@/admin/composables/useSettings'
 
 const realYear = new Date().getFullYear()
 const selectedYear = useStorage('dashboard-year', realYear)

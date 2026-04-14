@@ -2,14 +2,16 @@ import { ref } from 'vue'
 import config from '@/config'
 import PocketBase from 'pocketbase'
 import dayjs from 'dayjs'
-import { scoreCandidate } from '../helpers/ledger'
-import type { TCategory } from '../types/category'
+import { scoreCandidate } from '@/admin/helpers/ledger'
+import type { TCategory } from '@/admin/types/category'
+import type { TProfitCenter } from '@/admin/types/profit-center'
 
 export interface TLedgerEntry {
   id: string
   date: string
   description: string
   category_id?: string
+  profit_center_id?: string
   amount: number
   is_checked: boolean
   invoice?: string
@@ -19,6 +21,7 @@ export interface TLedgerEntry {
   expand?: {
     invoice?: { id: string; invoice_number: string }
     category_id?: TCategory
+    profit_center_id?: TProfitCenter
   }
 }
 
@@ -26,6 +29,7 @@ export interface TLedgerEntryForm {
   date: string
   description: string
   category_id?: string
+  profit_center_id?: string
   amount: number | null
   is_checked: boolean
   invoice?: string
@@ -44,12 +48,12 @@ export default function useLedger() {
   const loadEntries = async () => {
     entries.value = await pb.collection<TLedgerEntry>('ledger').getFullList({
       sort: 'date,created',
-      expand: 'category_id',
+      expand: 'category_id,profit_center_id',
     })
   }
 
   const loadEntry = async (id: string): Promise<TLedgerEntry> => {
-    return pb.collection<TLedgerEntry>('ledger').getOne(id, { expand: 'invoice,category_id' })
+    return pb.collection<TLedgerEntry>('ledger').getOne(id, { expand: 'invoice,category_id,profit_center_id' })
   }
 
   const loadUsedCategoryIds = async (): Promise<Set<string>> => {
@@ -176,6 +180,7 @@ function buildData(payload: TLedgerEntryForm): Record<string, unknown> {
     date: payload.date,
     description: payload.description.trim(),
     category_id: payload.category_id || null,
+    profit_center_id: payload.profit_center_id || null,
     amount: payload.amount ?? 0,
     is_checked: payload.is_checked,
     invoice: payload.invoice || null,

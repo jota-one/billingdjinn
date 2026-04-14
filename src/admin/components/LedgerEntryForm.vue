@@ -58,6 +58,17 @@
       <!-- Année fiscale -->
       <div class="form-control max-w-xs">
         <label class="label">
+          <span class="label-text font-semibold">Centre de profit</span>
+        </label>
+        <select v-model="form.profit_center_id" class="select select-bordered w-full">
+          <option value="">— aucun —</option>
+          <option v-for="pc in profitCenters" :key="pc.id" :value="pc.id">{{ pc.name }}</option>
+        </select>
+      </div>
+
+      <!-- Année fiscale -->
+      <div class="form-control max-w-xs">
+        <label class="label">
           <span class="label-text font-semibold">
             Année fiscale
             <span v-if="isTransitoire" class="badge badge-warning badge-sm ml-2">Transitoire</span>
@@ -122,8 +133,9 @@ import { computed, onMounted } from 'vue'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
-import useCategories from '../composables/useCategories'
-import type { TLedgerEntryForm } from '../composables/useLedger'
+import useCategories from '@/admin/composables/useCategories'
+import useProfitCenters from '@/admin/composables/useProfitCenters'
+import type { TLedgerEntryForm } from '@/admin/composables/useLedger'
 
 defineProps<{ saving: boolean; invoiceId?: string; invoiceNumber?: string }>()
 defineEmits<{ submit: [] }>()
@@ -131,7 +143,8 @@ defineEmits<{ submit: [] }>()
 const form = defineModel<TLedgerEntryForm>('form', { required: true })
 
 const { categories, loadCategories } = useCategories()
-onMounted(() => loadCategories())
+const { profitCenters, loadProfitCenters } = useProfitCenters()
+onMounted(() => Promise.all([loadCategories(), loadProfitCenters()]))
 
 const inferredYear = computed(() => {
   if (form.value.date) {

@@ -186,6 +186,77 @@
       </form>
     </div>
 
+    <!-- Centres de profit -->
+    <div class="card bg-base-200 p-6 max-w-2xl mt-6">
+      <h3 class="font-semibold text-lg mb-1">Centres de profit</h3>
+      <p class="text-xs text-base-content/50 mb-4">
+        Définissez vos centres de profit pour la comptabilité analytique. Chaque centre peut
+        recevoir une couleur utilisée dans les graphiques.
+      </p>
+
+      <div class="flex flex-col gap-3">
+        <div
+          v-for="pc in profitCenters"
+          :key="pc.id"
+          class="border border-base-300 rounded-lg p-3 flex flex-col gap-2"
+        >
+          <div class="flex gap-2 items-center">
+            <input
+              v-if="profitCenterDrafts[pc.id]"
+              type="color"
+              v-model="profitCenterDrafts[pc.id].color"
+              class="w-9 h-9 rounded cursor-pointer border border-base-300 bg-base-100 p-0.5"
+            />
+            <InputText
+              v-if="profitCenterDrafts[pc.id]"
+              v-model="profitCenterDrafts[pc.id].name"
+              placeholder="Nom du centre"
+              class="flex-1"
+            />
+            <Button
+              type="button"
+              icon="i-fa-solid-save"
+              size="small"
+              severity="secondary"
+              :loading="savingProfitCenterId === pc.id"
+              v-tooltip.top="'Sauvegarder'"
+              @click="saveProfitCenter(pc.id)"
+            />
+            <button
+              type="button"
+              class="btn btn-xs btn-ghost text-error"
+              @click="removeProfitCenter(pc.id)"
+            >
+              <span class="i-fa6-solid-trash"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex gap-2 mt-1">
+          <input
+            type="color"
+            v-model="newProfitCenterColor"
+            class="w-9 h-9 rounded cursor-pointer border border-base-300 bg-base-100 p-0.5"
+          />
+          <InputText
+            v-model="newProfitCenterName"
+            placeholder="Nouveau centre de profit..."
+            class="flex-1"
+            @keydown.enter.prevent="addProfitCenter"
+          />
+          <Button
+            type="button"
+            label="Ajouter"
+            icon="i-fa-solid-plus"
+            size="small"
+            severity="secondary"
+            :loading="addingProfitCenter"
+            @click="addProfitCenter"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Catégories Grand Livre -->
     <div class="card bg-base-200 p-6 max-w-2xl mt-6">
       <h3 class="font-semibold text-lg mb-1">Catégories du Grand Livre</h3>
@@ -294,6 +365,56 @@
               + Ajouter des patterns de détection
             </button>
           </div>
+
+          <!-- Clés de répartition analytique -->
+          <div v-if="profitCenters.length && categoryDrafts[cat.id]" class="pl-1 flex flex-col gap-2 mt-1">
+            <div v-if="categoryDrafts[cat.id].allocation_keys.length > 0">
+              <p class="text-xs font-medium text-base-content/50 mb-1">Clés de répartition analytique</p>
+              <div
+                v-for="(key, ki) in categoryDrafts[cat.id].allocation_keys"
+                :key="ki"
+                class="flex gap-2 items-center mb-1"
+              >
+                <select
+                  v-model="key.profit_center_id"
+                  class="select select-bordered select-sm flex-1"
+                >
+                  <option value="">— choisir —</option>
+                  <option v-for="pc in profitCenters" :key="pc.id" :value="pc.id">
+                    {{ pc.name }}
+                  </option>
+                </select>
+                <InputNumber
+                  v-model="key.percentage"
+                  suffix=" %"
+                  :min="0"
+                  :max="100"
+                  :max-fraction-digits="1"
+                  class="w-28"
+                />
+                <button
+                  type="button"
+                  class="btn btn-xs btn-ghost text-error"
+                  @click="removeAllocationKey(cat.id, ki)"
+                >
+                  <span class="i-fa6-solid-xmark"></span>
+                </button>
+              </div>
+              <p
+                v-if="allocationKeySum(cat.id) !== 100"
+                class="text-xs text-warning mt-1"
+              >
+                Total : {{ allocationKeySum(cat.id) }}% (doit être 100%)
+              </p>
+            </div>
+            <button
+              type="button"
+              class="text-xs text-base-content/40 text-left hover:text-base-content/70 transition-colors"
+              @click="addAllocationKey(cat.id)"
+            >
+              + Ajouter une clé de répartition analytique
+            </button>
+          </div>
         </div>
 
         <div class="flex gap-2 mt-1">
@@ -326,17 +447,21 @@ import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
-import PbErrorToast from '../components/PbErrorToast.vue'
-import InvoiceLabelsEditor from '../components/InvoiceLabelsEditor.vue'
-import usePbErrorToast from '../composables/usePbErrorToast'
-import useSettings from '../composables/useSettings'
-import useCategories from '../composables/useCategories'
-import useLedger from '../composables/useLedger'
-import type { TInvoiceLabels } from '../types/invoice-labels'
+import PbErrorToast from '@/admin/components/PbErrorToast.vue'
+import InvoiceLabelsEditor from '@/admin/components/InvoiceLabelsEditor.vue'
+import usePbErrorToast from '@/admin/composables/usePbErrorToast'
+import useSettings from '@/admin/composables/useSettings'
+import useCategories from '@/admin/composables/useCategories'
+import useProfitCenters from '@/admin/composables/useProfitCenters'
+import useLedger from '@/admin/composables/useLedger'
+import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
+import type { TAllocationKey } from '@/admin/types/allocation-key'
 
 const { settings, loadSettings, updateSettings, getLogoUrl } = useSettings()
 const { categories, loadCategories, createCategory, updateCategory, deleteCategory } =
   useCategories()
+const { profitCenters, loadProfitCenters, createProfitCenter, updateProfitCenter, deleteProfitCenter } =
+  useProfitCenters()
 const { loadUsedCategoryIds } = useLedger()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
@@ -349,15 +474,39 @@ const savingCategoryId = ref<string | null>(null)
 const newPatternInputs = reactive<Record<string, string>>({})
 const usedCategoryIds = ref<Set<string>>(new Set())
 
+const newProfitCenterName = ref('')
+const newProfitCenterColor = ref('#3b82f6')
+const addingProfitCenter = ref(false)
+const savingProfitCenterId = ref<string | null>(null)
+
 /** Local drafts for editing categories before saving */
-const categoryDrafts = reactive<Record<string, { name: string; patterns: string[] }>>({})
+const categoryDrafts = reactive<Record<string, { name: string; patterns: string[]; allocation_keys: TAllocationKey[] }>>({})
+
+/** Local drafts for editing profit centers before saving */
+const profitCenterDrafts = reactive<Record<string, { name: string; color: string }>>({})
 
 watch(
   categories,
   cats => {
     for (const cat of cats) {
       if (!(cat.id in categoryDrafts)) {
-        categoryDrafts[cat.id] = { name: cat.name, patterns: [...cat.patterns] }
+        categoryDrafts[cat.id] = {
+          name: cat.name,
+          patterns: [...cat.patterns],
+          allocation_keys: cat.allocation_keys ? cat.allocation_keys.map(k => ({ ...k })) : [],
+        }
+      }
+    }
+  },
+  { immediate: true },
+)
+
+watch(
+  profitCenters,
+  pcs => {
+    for (const pc of pcs) {
+      if (!(pc.id in profitCenterDrafts)) {
+        profitCenterDrafts[pc.id] = { name: pc.name, color: pc.color }
       }
     }
   },
@@ -399,10 +548,10 @@ const addCategory = async () => {
 
 const saveCategory = async (id: string) => {
   const draft = categoryDrafts[id]
-  if (!draft) return
+  if (!draft) { return }
   savingCategoryId.value = id
   try {
-    await updateCategory(id, draft.name, draft.patterns)
+    await updateCategory(id, draft.name, draft.patterns, draft.allocation_keys)
     toast.add({ severity: 'success', summary: 'Catégorie sauvegardée', life: 2000 })
   } catch (e) {
     showPbError(e)
@@ -440,6 +589,61 @@ const addPattern = (catId: string) => {
 
 const removePattern = (catId: string, patIdx: number) => {
   categoryDrafts[catId]?.patterns.splice(patIdx, 1)
+}
+
+const allocationKeySum = (catId: string): number => {
+  const keys = categoryDrafts[catId]?.allocation_keys ?? []
+  return Math.round(keys.reduce((s, k) => s + (k.percentage ?? 0), 0) * 10) / 10
+}
+
+const addAllocationKey = (catId: string) => {
+  if (categoryDrafts[catId]) {
+    categoryDrafts[catId].allocation_keys.push({ profit_center_id: '', percentage: 0 })
+  }
+}
+
+const removeAllocationKey = (catId: string, idx: number) => {
+  categoryDrafts[catId]?.allocation_keys.splice(idx, 1)
+}
+
+// ── Profit center management ─────────────────────────────────────────────────
+
+const addProfitCenter = async () => {
+  const name = newProfitCenterName.value.trim()
+  if (!name || profitCenters.value.some(pc => pc.name === name)) { return }
+  addingProfitCenter.value = true
+  try {
+    await createProfitCenter(name, newProfitCenterColor.value)
+    newProfitCenterName.value = ''
+    newProfitCenterColor.value = '#3b82f6'
+  } catch (e) {
+    showPbError(e)
+  } finally {
+    addingProfitCenter.value = false
+  }
+}
+
+const saveProfitCenter = async (id: string) => {
+  const draft = profitCenterDrafts[id]
+  if (!draft) { return }
+  savingProfitCenterId.value = id
+  try {
+    await updateProfitCenter(id, draft.name, draft.color)
+    toast.add({ severity: 'success', summary: 'Centre sauvegardé', life: 2000 })
+  } catch (e) {
+    showPbError(e)
+  } finally {
+    savingProfitCenterId.value = null
+  }
+}
+
+const removeProfitCenter = async (id: string) => {
+  try {
+    await deleteProfitCenter(id)
+    delete profitCenterDrafts[id]
+  } catch (e) {
+    showPbError(e)
+  }
 }
 
 // ── Settings form ────────────────────────────────────────────────────────────
@@ -486,6 +690,7 @@ onMounted(async () => {
   await Promise.all([
     loadSettings(),
     loadCategories(),
+    loadProfitCenters(),
     loadUsedCategoryIds().then(ids => {
       usedCategoryIds.value = ids
     }),

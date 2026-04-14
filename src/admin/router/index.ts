@@ -1,21 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Settings from '../views/Settings.vue'
-import Users from '../views/Users.vue'
-import Clients from '../views/Clients.vue'
-import ClientNew from '../views/ClientNew.vue'
-import ClientEdit from '../views/ClientEdit.vue'
-import Invoices from '../views/Invoices.vue'
-import InvoiceNew from '../views/InvoiceNew.vue'
-import InvoiceEdit from '../views/InvoiceEdit.vue'
-import Ledger from '../views/Ledger.vue'
-import LedgerEntryNew from '../views/LedgerEntryNew.vue'
-import LedgerEntryEdit from '../views/LedgerEntryEdit.vue'
-import LedgerBulkCreate from '../views/LedgerBulkCreate.vue'
-import LedgerReconciliation from '../views/LedgerReconciliation.vue'
-import Transitoires from '../views/Transitoires.vue'
-import Stats from '../views/Stats.vue'
-import useAuth from '../composables/useAuth'
+import Home from '@/admin/views/Home.vue'
+import Settings from '@/admin/views/Settings.vue'
+import Users from '@/admin/views/Users.vue'
+import Clients from '@/admin/views/Clients.vue'
+import ClientNew from '@/admin/views/ClientNew.vue'
+import ClientEdit from '@/admin/views/ClientEdit.vue'
+import Invoices from '@/admin/views/Invoices.vue'
+import InvoiceNew from '@/admin/views/InvoiceNew.vue'
+import InvoiceEdit from '@/admin/views/InvoiceEdit.vue'
+import Ledger from '@/admin/views/Ledger.vue'
+import LedgerEntryNew from '@/admin/views/LedgerEntryNew.vue'
+import LedgerEntryEdit from '@/admin/views/LedgerEntryEdit.vue'
+import LedgerBulkCreate from '@/admin/views/LedgerBulkCreate.vue'
+import LedgerReconciliation from '@/admin/views/LedgerReconciliation.vue'
+import Transitoires from '@/admin/views/Transitoires.vue'
+import Stats from '@/admin/views/Stats.vue'
+import Analytics from '@/admin/views/Analytics.vue'
+import useAuth from '@/admin/composables/useAuth'
 
 const routes = [
   { path: '', component: Home },
@@ -34,6 +35,7 @@ const routes = [
   { path: '/ledger/:id', component: LedgerEntryEdit },
   { path: '/transitoires', component: Transitoires },
   { path: '/stats', component: Stats },
+  { path: '/analytics', component: Analytics },
 ]
 
 const baseUrl = (import.meta as any).env?.BASE_URL || '/'

@@ -134,7 +134,7 @@ import { ref } from 'vue'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
-import type { ImportResult } from '../types/import-export'
+import type { ImportResult } from '@/admin/types/import-export'
 
 const props = defineProps<{
   modelValue: boolean

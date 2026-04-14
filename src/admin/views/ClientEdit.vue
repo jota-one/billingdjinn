@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import ClientForm from '../components/ClientForm.vue'
+import ClientForm from '@/admin/components/ClientForm.vue'
 
 const route = useRoute()
 const clientId = route.params.id as string

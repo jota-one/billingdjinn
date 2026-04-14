@@ -22,21 +22,56 @@ export const config = {
     tva_number: 'CHE-123.456.789 TVA',
     payment_terms: 45,
     currency: 'CHF',
-    ledger_categories: [
-      'Revenu',
-      'Frais',
-      'Salaire',
-      'AVS',
-      'LPP',
-      'LAA',
-      'Assurance',
-      'TVA',
-      'Fiduciaire',
-      'Mastercard',
-      'Taxe',
-      'Fonds propres',
-      'Impôt',
-    ].map(name => ({ name, patterns: [] })),
+  },
+
+  categories: [
+    'Revenu',
+    'Frais',
+    'Salaire',
+    'AVS',
+    'LPP',
+    'LAA',
+    'Assurance',
+    'TVA',
+    'Fiduciaire',
+    'Mastercard',
+    'Taxe',
+    'Fonds propres',
+    'Impôt',
+  ],
+
+  profitCenters: [
+    { name: 'Travaux', color: '#f97316' },
+    { name: 'Direction', color: '#3b82f6' },
+    { name: 'Administratif', color: '#8b5cf6' },
+  ],
+
+  allocationKeys: {
+    Salaire: [
+      { name: 'Travaux', pct: 65 },
+      { name: 'Direction', pct: 20 },
+      { name: 'Administratif', pct: 15 },
+    ],
+    AVS: [
+      { name: 'Travaux', pct: 65 },
+      { name: 'Direction', pct: 20 },
+      { name: 'Administratif', pct: 15 },
+    ],
+    LPP: [
+      { name: 'Travaux', pct: 65 },
+      { name: 'Direction', pct: 20 },
+      { name: 'Administratif', pct: 15 },
+    ],
+    LAA: [
+      { name: 'Travaux', pct: 75 },
+      { name: 'Direction', pct: 15 },
+      { name: 'Administratif', pct: 10 },
+    ],
+    Revenu: [
+      { name: 'Travaux', pct: 60 },
+      { name: 'Direction', pct: 28 },
+      { name: 'Administratif', pct: 2 },
+    ],
   },
 
   clients: [
@@ -189,6 +224,7 @@ export const config = {
       amountMax: 15500,
       dayOfMonth: 25,
       every: 'month',
+      profitCenterOverride: 'Direction',
     },
     {
       description: (y, m) => `Charges AVS/AI/APG patronales ${MONTH_NAMES_FR[m]} ${y}`,

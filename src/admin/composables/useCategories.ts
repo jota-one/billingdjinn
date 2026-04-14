@@ -1,7 +1,8 @@
 import { ref } from 'vue'
 import PocketBase from 'pocketbase'
 import config from '@/config'
-import type { TCategory } from '../types/category'
+import type { TCategory } from '@/admin/types/category'
+import type { TAllocationKey } from '@/admin/types/allocation-key'
 
 export default function useCategories() {
   const pb = new PocketBase(config.apiBaseUrl)
@@ -21,10 +22,11 @@ export default function useCategories() {
     id: string,
     name: string,
     patterns: string[],
+    allocationKeys?: TAllocationKey[],
   ): Promise<TCategory> => {
     const record = await pb
       .collection<TCategory>('categories')
-      .update<TCategory>(id, { name, patterns })
+      .update<TCategory>(id, { name, patterns, allocation_keys: allocationKeys ?? [] })
     await loadCategories()
     return record
   }

@@ -139,8 +139,8 @@
 
 <script setup lang="ts">
 import InputText from 'primevue/inputtext'
-import { DEFAULT_LABELS } from '../utils/invoice-labels'
-import type { TInvoiceLabels } from '../types/invoice-labels'
+import { DEFAULT_LABELS } from '@/admin/utils/invoice-labels'
+import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
 
 const props = withDefaults(
   defineProps<{

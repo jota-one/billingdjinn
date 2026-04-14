@@ -3,7 +3,7 @@
  * Does NOT touch users or roles.
  */
 export async function clean(pb) {
-  const collections = ['ledger', 'invoice_lines', 'invoices', 'clients']
+  const collections = ['ledger', 'invoice_lines', 'invoices', 'clients', 'profit_centers', 'categories']
 
   for (const col of collections) {
     const records = await pb.collection(col).getFullList({ fields: 'id', requestKey: null })

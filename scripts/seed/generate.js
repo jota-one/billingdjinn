@@ -25,7 +25,10 @@ import {
  *   monthsBack:        number,
  *   taxes:             boolean,        // emit impôts fédéral/cantonal/communal in Jan
  *   transitoires:      boolean,        // add fiscal_year on December paid invoices (PME)
- *   company:           object,         // company_settings fields
+ *   company:           object,         // company_settings fields (no ledger_categories)
+ *   categories:        string[],       // category names to create in `categories` collection
+ *   profitCenters:     [{ name, color }],  // optional — creates profit_centers records
+ *   allocationKeys:    { categoryName: [{ name, pct }][] }, // optional — sets allocation_keys on categories
  *   clients:           array,          // client fields + optional { retainer: { description, amount } }
  *   invoicesPerMonth:  { min, max },
  *   linesPerInvoice:   { min, max },
@@ -40,6 +43,7 @@ import {
  *     every:        'month' | 'quarter' | 'half-year' | 'year',
  *     month:        number (for every:'year'),
  *     count:        { min, max } (optional, default 1),
+ *     profitCenterOverride: string (optional, center name for direct assignment),
  *   }],
  * }
  */
@@ -50,9 +54,48 @@ export async function generatePersona(pb, config) {
   const settings = await pb
     .collection('company_settings')
     .getFirstListItem('', { requestKey: null })
-  await pb.collection('company_settings').update(settings.id, config.company)
-  const fullSettings = { ...settings, ...config.company }
+  // Strip ledger_categories — categories now live in their own collection
+  const { ledger_categories: _ignored, ...companyData } = config.company
+  await pb.collection('company_settings').update(settings.id, companyData)
+  const fullSettings = { ...settings, ...companyData }
   const companySnap = buildCompanySnapshot(fullSettings)
+
+  // ── 1b. Create categories ────────────────────────────────────────────────────
+  const rawCategories = config.categories ?? config.company.ledger_categories ?? []
+  const categoryNames = rawCategories.map(c => (typeof c === 'string' ? c : c.name))
+  const categoryIdByName = new Map()
+  for (const name of categoryNames) {
+    const record = await pb
+      .collection('categories')
+      .create({ name, patterns: [] }, { requestKey: null })
+    categoryIdByName.set(name, record.id)
+  }
+  console.log(`  ${categoryNames.length} catégories créées`)
+
+  // ── 1c. Create profit centers ────────────────────────────────────────────────
+  const profitCenterIdByName = new Map()
+  if (config.profitCenters?.length) {
+    for (const pc of config.profitCenters) {
+      const record = await pb
+        .collection('profit_centers')
+        .create({ name: pc.name, color: pc.color }, { requestKey: null })
+      profitCenterIdByName.set(pc.name, record.id)
+    }
+    console.log(`  ${config.profitCenters.length} centres de profit créés`)
+  }
+
+  // ── 1d. Set allocation_keys on categories ────────────────────────────────────
+  if (config.allocationKeys && profitCenterIdByName.size > 0) {
+    for (const [catName, keys] of Object.entries(config.allocationKeys)) {
+      const catId = categoryIdByName.get(catName)
+      if (!catId) { continue }
+      const allocation_keys = keys
+        .map(k => ({ profit_center_id: profitCenterIdByName.get(k.name), percentage: k.pct }))
+        .filter(k => k.profit_center_id)
+      await pb.collection('categories').update(catId, { allocation_keys }, { requestKey: null })
+    }
+    console.log(`  Clés de répartition définies pour ${Object.keys(config.allocationKeys).length} catégories`)
+  }
 
   // ── 2. Create clients ───────────────────────────────────────────────────────
   const createdClients = []
@@ -113,7 +156,10 @@ export async function generatePersona(pb, config) {
           },
         ]
         for (const e of taxEntries) {
-          await pb.collection('ledger').create(e, { requestKey: null })
+          await pb.collection('ledger').create(
+            { ...e, category_id: categoryIdByName.get(e.category) ?? null, category: undefined },
+            { requestKey: null },
+          )
           track(expenses, year, Math.abs(e.amount))
           stats.ledger++
         }
@@ -225,7 +271,7 @@ export async function generatePersona(pb, config) {
           {
             date: paymentDate,
             description: `Paiement ${invoiceNum} — ${slot.client.name}`,
-            category: 'Revenu',
+            category_id: categoryIdByName.get('Revenu') ?? null,
             amount: totalTTC,
             is_checked: daysAgo(paymentDate) > 60,
             invoice: invoice.id,
@@ -257,9 +303,12 @@ export async function generatePersona(pb, config) {
           {
             date,
             description: desc,
-            category: charge.category,
+            category_id: categoryIdByName.get(charge.category) ?? null,
             amount,
             is_checked: daysAgo(date) > 60,
+            ...(charge.profitCenterOverride
+              ? { profit_center_id: profitCenterIdByName.get(charge.profitCenterOverride) ?? null }
+              : {}),
           },
           { requestKey: null },
         )

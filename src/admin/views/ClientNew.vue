@@ -15,5 +15,5 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import ClientForm from '../components/ClientForm.vue'
+import ClientForm from '@/admin/components/ClientForm.vue'
 </script>

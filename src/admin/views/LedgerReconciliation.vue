@@ -198,12 +198,12 @@ import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
 import FileUpload from 'primevue/fileupload'
 import InputText from 'primevue/inputtext'
-import PbErrorToast from '../components/PbErrorToast.vue'
-import useLedger from '../composables/useLedger'
-import useCategories from '../composables/useCategories'
-import useBankReconciliation from '../composables/useBankReconciliation'
-import usePbErrorToast from '../composables/usePbErrorToast'
-import camt053 from '../utils/bank-adapters/camt053'
+import PbErrorToast from '@/admin/components/PbErrorToast.vue'
+import useLedger from '@/admin/composables/useLedger'
+import useCategories from '@/admin/composables/useCategories'
+import useBankReconciliation from '@/admin/composables/useBankReconciliation'
+import usePbErrorToast from '@/admin/composables/usePbErrorToast'
+import camt053 from '@/admin/utils/bank-adapters/camt053'
 
 const { entries, loadEntries } = useLedger()
 const { categories, loadCategories } = useCategories()

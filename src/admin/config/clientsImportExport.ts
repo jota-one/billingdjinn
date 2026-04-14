@@ -1,5 +1,5 @@
-import type { FieldConfig } from '../types/import-export'
-import { parseDecimal } from '../types/import-export'
+import type { FieldConfig } from '@/admin/types/import-export'
+import { parseDecimal } from '@/admin/types/import-export'
 
 export const CLIENTS_FIELDS_CONFIG: FieldConfig[] = [
   { key: 'id', label: 'ID', exportable: true, importable: true },

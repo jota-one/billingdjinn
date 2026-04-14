@@ -3,7 +3,7 @@ import {
   getExportableFields,
   getImportableFields,
   getFieldConfig,
-} from '../config/clientsImportExport'
+} from '@/admin/config/clientsImportExport'
 
 export default function useClientsImportExport() {
   return useImportExport('clients', getExportableFields, getImportableFields, getFieldConfig)

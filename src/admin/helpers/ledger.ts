@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import type { TLedgerEntry } from '../composables/useLedger'
+import type { TLedgerEntry } from '@/admin/composables/useLedger'
 
 export function scoreCandidate(
   entry: TLedgerEntry,

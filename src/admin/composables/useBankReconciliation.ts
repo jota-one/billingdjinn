@@ -2,12 +2,12 @@ import { ref } from 'vue'
 import PocketBase from 'pocketbase'
 import dayjs from 'dayjs'
 import config from '@/config'
-import { buildReconciliation } from '../helpers/bankReconciliation'
+import { buildReconciliation } from '@/admin/helpers/bankReconciliation'
 import type { TLedgerEntry } from './useLedger'
-import type { TBankEntry } from '../types/bank-entry'
-import type { TCategory } from '../types/category'
+import type { TBankEntry } from '@/admin/types/bank-entry'
+import type { TCategory } from '@/admin/types/category'
 
-export type { ReconciliationAction, TReconciliationRow } from '../helpers/bankReconciliation'
+export type { ReconciliationAction, TReconciliationRow } from '@/admin/helpers/bankReconciliation'
 
 export default function useBankReconciliation() {
   const pb = new PocketBase(config.apiBaseUrl)
