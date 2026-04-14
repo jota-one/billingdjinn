@@ -20,12 +20,16 @@
       <!-- KPIs -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="card bg-base-200 p-4">
-          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">Revenus {{ selectedYear }}</p>
+          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">
+            Revenus {{ selectedYear }}
+          </p>
           <p class="text-2xl font-bold font-mono">{{ fmt(totalRevenu) }}</p>
           <p class="text-xs text-base-content/40 mt-1">{{ currency }} · encaissé</p>
         </div>
         <div class="card bg-base-200 p-4">
-          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">Charges {{ selectedYear }}</p>
+          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">
+            Charges {{ selectedYear }}
+          </p>
           <p class="text-2xl font-bold font-mono">{{ fmt(totalCharges) }}</p>
           <p class="text-xs text-base-content/40 mt-1">{{ currency }} · décaissé</p>
         </div>
@@ -35,10 +39,18 @@
           <p class="text-xs text-base-content/40 mt-1">{{ currency }} · AVS + LPP + LAA</p>
         </div>
         <div class="card bg-base-200 p-4">
-          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">Ratio charges / revenus</p>
+          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">
+            Ratio charges / revenus
+          </p>
           <p
             class="text-2xl font-bold font-mono"
-            :class="ratioCharges !== null && ratioCharges > 80 ? 'text-error' : ratioCharges !== null && ratioCharges > 60 ? 'text-warning' : ''"
+            :class="
+              ratioCharges !== null && ratioCharges > 80
+                ? 'text-error'
+                : ratioCharges !== null && ratioCharges > 60
+                  ? 'text-warning'
+                  : ''
+            "
           >
             {{ ratioCharges !== null ? `${ratioCharges.toFixed(1)}\u202f%` : '—' }}
           </p>
@@ -54,16 +66,12 @@
             type="doughnut"
             :data="chargesByCategoryChartData"
             :options="donutOptions"
-            style="max-height: 340px;"
+            style="max-height: 340px"
           />
         </div>
         <div class="card bg-base-200 p-5">
           <h3 class="font-semibold mb-4">Évolution des charges par catégorie (5 ans)</h3>
-          <Chart
-            type="line"
-            :data="categoryTrendsChartData"
-            :options="trendOptions"
-          />
+          <Chart type="line" :data="categoryTrendsChartData" :options="trendOptions" />
         </div>
       </div>
     </template>
@@ -99,9 +107,8 @@ const loading = ref(true)
 const fmt = (n: number): string => {
   const sign = n < 0 ? '-' : ''
   const [intPart, decPart] = Math.abs(n).toFixed(2).split('.')
-  const formattedInt = Number(intPart) >= 10000
-    ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
-    : intPart
+  const formattedInt =
+    Number(intPart) >= 10000 ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : intPart
   return `${sign}${formattedInt}.${decPart}`
 }
 

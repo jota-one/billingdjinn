@@ -23,8 +23,9 @@
       <div v-if="isLocked" class="alert alert-warning mb-6">
         <span class="i-fa-solid-lock text-lg"></span>
         <span>
-          Cette facture est <strong>verrouillée</strong> — statut <em>{{ STATUS_LABELS[invoiceStatus!] }}</em>.
-          Le contenu ne peut plus être modifié. Seul le statut reste modifiable.
+          Cette facture est <strong>verrouillée</strong> — statut
+          <em>{{ STATUS_LABELS[invoiceStatus!] }}</em
+          >. Le contenu ne peut plus être modifié. Seul le statut reste modifiable.
         </span>
       </div>
 
@@ -40,8 +41,12 @@
       <div v-if="showConversionField" class="card bg-base-200 p-6 max-w-2xl mt-4">
         <div class="form-control">
           <label class="label">
-            <span class="label-text font-semibold">Montant HT en {{ settings?.currency || 'CHF' }}</span>
-            <span class="label-text-alt text-base-content/40">Facture en {{ effectiveCurrency }}</span>
+            <span class="label-text font-semibold"
+              >Montant HT en {{ settings?.currency || 'CHF' }}</span
+            >
+            <span class="label-text-alt text-base-content/40"
+              >Facture en {{ effectiveCurrency }}</span
+            >
           </label>
           <InputNumber
             v-model="form.converted_amount"
@@ -53,7 +58,9 @@
             placeholder="—"
             class="w-full"
           />
-          <p class="text-xs text-base-content/50 mt-1">Équivalent HT dans la devise principale. À renseigner après encaissement.</p>
+          <p class="text-xs text-base-content/50 mt-1">
+            Équivalent HT dans la devise principale. À renseigner après encaissement.
+          </p>
         </div>
       </div>
 
@@ -137,19 +144,25 @@ const pendingLedgerInvoiceId = ref('')
 const isLocked = computed(() => invoiceStatus.value !== null && invoiceStatus.value !== 'draft')
 
 const effectiveCurrency = computed(() => {
-  if (invoiceRef.value?.company_snapshot?.currency) return invoiceRef.value.company_snapshot.currency
+  if (invoiceRef.value?.company_snapshot?.currency) {
+    return invoiceRef.value.company_snapshot.currency
+  }
   const client = clients.value.find(c => c.id === form.value.client)
   return client?.currency || settings.value?.currency || 'CHF'
 })
 
-const showConversionField = computed(() =>
-  effectiveCurrency.value !== (settings.value?.currency || 'CHF'),
+const showConversionField = computed(
+  () => effectiveCurrency.value !== (settings.value?.currency || 'CHF'),
 )
 
 const effectiveAmount = computed(() => {
-  if (form.value.converted_amount) return form.value.converted_amount
+  if (form.value.converted_amount) {
+    return form.value.converted_amount
+  }
   const totalHt = lines.value.reduce((s, l) => s + (l.quantity ?? 0) * (l.unit_price ?? 0), 0)
-  if (!form.value.tva_enabled || !form.value.tva_rate) return totalHt
+  if (!form.value.tva_enabled || !form.value.tva_rate) {
+    return totalHt
+  }
   return totalHt * (1 + form.value.tva_rate / 100)
 })
 
@@ -182,8 +195,15 @@ const save = async () => {
     invoiceStatus.value = form.value.status
     hasSnapshot.value = hasSnapshot.value || form.value.status !== 'draft'
     // Reload to get snapshot data populated by the server
-    if (wasJustLocked) invoiceRef.value = await loadInvoice(invoiceId)
-    toast.add({ severity: 'success', summary: 'Enregistré', detail: 'La facture a été mise à jour.', life: 3000 })
+    if (wasJustLocked) {
+      invoiceRef.value = await loadInvoice(invoiceId)
+    }
+    toast.add({
+      severity: 'success',
+      summary: 'Enregistré',
+      detail: 'La facture a été mise à jour.',
+      life: 3000,
+    })
 
     if (wasJustPaid) {
       const amount = effectiveAmount.value
@@ -195,7 +215,13 @@ const save = async () => {
         showLedgerMatchModal.value = true
       } else {
         const clientName = clients.value.find(c => c.id === form.value.client)?.name ?? ''
-        await createFromInvoice(invoiceId, form.value.invoice_number, clientName, amount, form.value.date)
+        await createFromInvoice(
+          invoiceId,
+          form.value.invoice_number,
+          clientName,
+          amount,
+          form.value.date,
+        )
       }
     }
   } catch (e) {
@@ -206,7 +232,12 @@ const save = async () => {
 }
 
 const onLedgerLink = async (entryId: string) => {
-  await linkEntryToInvoice(entryId, pendingLedgerInvoiceId.value, pendingLedgerAmount.value, form.value.date)
+  await linkEntryToInvoice(
+    entryId,
+    pendingLedgerInvoiceId.value,
+    pendingLedgerAmount.value,
+    form.value.date,
+  )
   ledgerCandidates.value = []
 }
 
@@ -223,7 +254,9 @@ const onLedgerCreateNew = async () => {
 }
 
 const downloadPdf = async () => {
-  if (!invoiceRef.value) return
+  if (!invoiceRef.value) {
+    return
+  }
   pdfLoading.value = true
   try {
     const invoiceForPdf = {

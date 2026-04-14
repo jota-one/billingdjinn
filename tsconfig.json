@@ -5,14 +5,8 @@
   "compilerOptions": {
     "verbatimModuleSyntax": true,
     "paths": {
-      "@admin/*": ["./src/admin/*"],
-      "@components/*": ["./src/components/*"],
-      "@layouts/*": ["./src/layouts/*"],
-      "@styles/*": ["./src/styles/*"],
-      "@images/*": ["./src/assets/*"],
-      "@config": ["./src/config/index.ts"],
-      "@types": ["./src/types/index.ts"],
+      "@/*": ["./src/*"]
     },
-    "jsx": "preserve",
-  },
+    "jsx": "preserve"
+  }
 }

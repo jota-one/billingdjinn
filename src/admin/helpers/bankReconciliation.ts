@@ -46,10 +46,16 @@ export function buildReconciliation(
 
     for (let ei = 0; ei < plannedEntries.length; ei++) {
       const entry = plannedEntries[ei]
-      if (Math.sign(bank.amount) !== Math.sign(entry.amount)) continue
-      if (entry.date < from || entry.date > to) continue
+      if (Math.sign(bank.amount) !== Math.sign(entry.amount)) {
+        continue
+      }
+      if (entry.date < from || entry.date > to) {
+        continue
+      }
       const score = scoreCandidate(entry, bankDate, bank.amount, DATE_WINDOW_DAYS)
-      if (score > SCORE_THRESHOLD) pairs.push({ bankIdx: bi, entryIdx: ei, score })
+      if (score > SCORE_THRESHOLD) {
+        pairs.push({ bankIdx: bi, entryIdx: ei, score })
+      }
     }
   }
 
@@ -60,7 +66,9 @@ export function buildReconciliation(
   const matchMap = new Map<number, number>()
 
   for (const pair of pairs) {
-    if (assignedBankIdxs.has(pair.bankIdx) || assignedEntryIdxs.has(pair.entryIdx)) continue
+    if (assignedBankIdxs.has(pair.bankIdx) || assignedEntryIdxs.has(pair.entryIdx)) {
+      continue
+    }
     matchMap.set(pair.bankIdx, pair.entryIdx)
     assignedBankIdxs.add(pair.bankIdx)
     assignedEntryIdxs.add(pair.entryIdx)

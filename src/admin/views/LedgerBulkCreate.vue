@@ -19,14 +19,17 @@
     </ul>
 
     <div class="card bg-base-200 p-6 max-w-2xl">
-
       <!-- ── Step 1 : Écriture ───────────────────────────────────────── -->
       <div v-if="currentStep === 1">
         <h3 class="font-semibold text-lg mb-4">Écriture de base</h3>
         <div class="flex flex-col gap-4">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Date de début <span class="text-error">*</span></span></label>
+              <label class="label"
+                ><span class="label-text font-semibold"
+                  >Date de début <span class="text-error">*</span></span
+                ></label
+              >
               <input v-model="entry.startDate" type="date" class="input input-bordered w-full" />
             </div>
             <div class="form-control">
@@ -37,25 +40,51 @@
               </select>
             </div>
             <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Montant <span class="text-error">*</span></span></label>
+              <label class="label"
+                ><span class="label-text font-semibold"
+                  >Montant <span class="text-error">*</span></span
+                ></label
+              >
               <InputNumber
                 v-model="entry.amount"
                 :max-fraction-digits="2"
                 locale="fr-CH"
                 placeholder="0.00"
                 class="w-full"
-                :input-class="entry.amount !== null && entry.amount < 0 ? 'text-error' : entry.amount !== null && entry.amount > 0 ? 'text-success' : ''"
+                :input-class="
+                  entry.amount !== null && entry.amount < 0
+                    ? 'text-error'
+                    : entry.amount !== null && entry.amount > 0
+                      ? 'text-success'
+                      : ''
+                "
               />
-              <span class="label-text-alt text-base-content/40 mt-1">Positif = entrée, négatif = sortie</span>
+              <span class="label-text-alt text-base-content/40 mt-1"
+                >Positif = entrée, négatif = sortie</span
+              >
             </div>
           </div>
           <div class="form-control">
-            <label class="label"><span class="label-text font-semibold">Description <span class="text-error">*</span></span></label>
-            <InputText v-model="entry.description" placeholder="Ex. Salaire — Pierre Dupont" class="w-full" />
+            <label class="label"
+              ><span class="label-text font-semibold"
+                >Description <span class="text-error">*</span></span
+              ></label
+            >
+            <InputText
+              v-model="entry.description"
+              placeholder="Ex. Salaire — Pierre Dupont"
+              class="w-full"
+            />
           </div>
         </div>
         <div class="flex justify-end mt-6">
-          <Button label="Suivant" icon="i-fa-solid-arrow-right" iconPos="right" :disabled="!step1Valid" @click="currentStep = 2" />
+          <Button
+            label="Suivant"
+            icon="i-fa-solid-arrow-right"
+            iconPos="right"
+            :disabled="!step1Valid"
+            @click="currentStep = 2"
+          />
         </div>
       </div>
 
@@ -63,7 +92,6 @@
       <div v-else-if="currentStep === 2">
         <h3 class="font-semibold text-lg mb-4">Récurrence</h3>
         <div class="flex flex-col gap-5">
-
           <div class="form-control max-w-xs">
             <label class="label"><span class="label-text font-semibold">Type</span></label>
             <select v-model="recurrence.type" class="select select-bordered w-full">
@@ -77,7 +105,9 @@
 
           <!-- Hebdomadaire -->
           <div v-if="recurrence.type === 'weekly'" class="form-control max-w-xs">
-            <label class="label"><span class="label-text font-semibold">Jour de la semaine</span></label>
+            <label class="label"
+              ><span class="label-text font-semibold">Jour de la semaine</span></label
+            >
             <select v-model="recurrence.weekday" class="select select-bordered w-full">
               <option :value="1">Lundi</option>
               <option :value="2">Mardi</option>
@@ -90,27 +120,47 @@
           </div>
 
           <!-- Mensuel / Trimestriel -->
-          <div v-if="recurrence.type === 'monthly' || recurrence.type === 'quarterly'" class="form-control">
+          <div
+            v-if="recurrence.type === 'monthly' || recurrence.type === 'quarterly'"
+            class="form-control"
+          >
             <label class="label"><span class="label-text font-semibold">Jour du mois</span></label>
             <div class="flex flex-col gap-2 mt-1">
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" v-model="recurrence.monthMode" value="fixed" class="radio radio-sm" />
+                <input
+                  type="radio"
+                  v-model="recurrence.monthMode"
+                  value="fixed"
+                  class="radio radio-sm"
+                />
                 <span>Jour fixe</span>
               </label>
               <div v-if="recurrence.monthMode === 'fixed'" class="pl-6 flex items-center gap-2">
                 <input
                   v-model.number="recurrence.monthDay"
-                  type="number" min="1" max="28"
+                  type="number"
+                  min="1"
+                  max="28"
                   class="input input-bordered input-sm w-20"
                 />
                 <span class="text-sm text-base-content/60">du mois (1–28)</span>
               </div>
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" v-model="recurrence.monthMode" value="last" class="radio radio-sm" />
+                <input
+                  type="radio"
+                  v-model="recurrence.monthMode"
+                  value="last"
+                  class="radio radio-sm"
+                />
                 <span>Dernier jour du mois</span>
               </label>
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" v-model="recurrence.monthMode" value="lastWorkday" class="radio radio-sm" />
+                <input
+                  type="radio"
+                  v-model="recurrence.monthMode"
+                  value="lastWorkday"
+                  class="radio radio-sm"
+                />
                 <span>Dernier jour ouvrable</span>
               </label>
             </div>
@@ -121,20 +171,39 @@
             <label class="label"><span class="label-text font-semibold">Date annuelle</span></label>
             <div class="flex flex-col gap-2 mt-1">
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" v-model="recurrence.annualMode" value="fixed" class="radio radio-sm" />
+                <input
+                  type="radio"
+                  v-model="recurrence.annualMode"
+                  value="fixed"
+                  class="radio radio-sm"
+                />
                 <span>Même date chaque année</span>
               </label>
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" v-model="recurrence.annualMode" value="lastWorkday" class="radio radio-sm" />
+                <input
+                  type="radio"
+                  v-model="recurrence.annualMode"
+                  value="lastWorkday"
+                  class="radio radio-sm"
+                />
                 <span>Dernier jour ouvrable du mois</span>
               </label>
             </div>
           </div>
-
         </div>
         <div class="flex justify-between mt-6">
-          <Button label="Retour" icon="i-fa-solid-arrow-left" severity="secondary" @click="currentStep = 1" />
-          <Button label="Suivant" icon="i-fa-solid-arrow-right" iconPos="right" @click="currentStep = 3" />
+          <Button
+            label="Retour"
+            icon="i-fa-solid-arrow-left"
+            severity="secondary"
+            @click="currentStep = 1"
+          />
+          <Button
+            label="Suivant"
+            icon="i-fa-solid-arrow-right"
+            iconPos="right"
+            @click="currentStep = 3"
+          />
         </div>
       </div>
 
@@ -144,7 +213,12 @@
         <div class="flex flex-col gap-5">
           <div class="flex gap-6">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="radio" v-model="endCondition.type" value="count" class="radio radio-sm" />
+              <input
+                type="radio"
+                v-model="endCondition.type"
+                value="count"
+                class="radio radio-sm"
+              />
               <span class="font-semibold">Nombre d'occurrences</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
@@ -154,18 +228,42 @@
           </div>
 
           <div v-if="endCondition.type === 'count'" class="form-control max-w-xs">
-            <label class="label"><span class="label-text font-semibold">Nombre d'occurrences</span></label>
-            <InputNumber v-model="endCondition.count" :min="1" :max="120" :use-grouping="false" class="w-full" />
+            <label class="label"
+              ><span class="label-text font-semibold">Nombre d'occurrences</span></label
+            >
+            <InputNumber
+              v-model="endCondition.count"
+              :min="1"
+              :max="120"
+              :use-grouping="false"
+              class="w-full"
+            />
           </div>
 
           <div v-else class="form-control max-w-xs">
             <label class="label"><span class="label-text font-semibold">Date de fin</span></label>
-            <input v-model="endCondition.endDate" type="date" :min="entry.startDate" class="input input-bordered w-full" />
+            <input
+              v-model="endCondition.endDate"
+              type="date"
+              :min="entry.startDate"
+              class="input input-bordered w-full"
+            />
           </div>
         </div>
         <div class="flex justify-between mt-6">
-          <Button label="Retour" icon="i-fa-solid-arrow-left" severity="secondary" @click="currentStep = 2" />
-          <Button label="Aperçu" icon="i-fa-solid-eye" iconPos="right" :disabled="!step3Valid" @click="currentStep = 4" />
+          <Button
+            label="Retour"
+            icon="i-fa-solid-arrow-left"
+            severity="secondary"
+            @click="currentStep = 2"
+          />
+          <Button
+            label="Aperçu"
+            icon="i-fa-solid-eye"
+            iconPos="right"
+            :disabled="!step3Valid"
+            @click="currentStep = 4"
+          />
         </div>
       </div>
 
@@ -190,7 +288,10 @@
                 <td class="font-mono text-sm whitespace-nowrap">{{ formatDate(item.date) }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.category || '—' }}</td>
-                <td class="text-right font-mono whitespace-nowrap" :class="item.amount >= 0 ? 'text-success' : 'text-error'">
+                <td
+                  class="text-right font-mono whitespace-nowrap"
+                  :class="item.amount >= 0 ? 'text-success' : 'text-error'"
+                >
                   {{ fmtAmount(item.amount) }}
                 </td>
               </tr>
@@ -198,7 +299,12 @@
           </table>
         </div>
         <div class="flex justify-between mt-6">
-          <Button label="Retour" icon="i-fa-solid-arrow-left" severity="secondary" @click="currentStep = 3" />
+          <Button
+            label="Retour"
+            icon="i-fa-solid-arrow-left"
+            severity="secondary"
+            @click="currentStep = 3"
+          />
           <Button
             label="Créer les écritures"
             icon="i-fa-solid-check"
@@ -207,7 +313,6 @@
           />
         </div>
       </div>
-
     </div>
   </div>
   <PbErrorToast />
@@ -261,12 +366,14 @@ const endCondition = reactive({
 
 const categories = computed(() => (settings.value?.ledger_categories ?? []).map(c => c.name))
 
-const step1Valid = computed(() =>
-  !!entry.startDate && !!entry.description.trim() && entry.amount !== null
+const step1Valid = computed(
+  () => !!entry.startDate && !!entry.description.trim() && entry.amount !== null,
 )
 
 const step3Valid = computed(() => {
-  if (endCondition.type === 'date') return !!endCondition.endDate && endCondition.endDate > entry.startDate
+  if (endCondition.type === 'date') {
+    return !!endCondition.endDate && endCondition.endDate > entry.startDate
+  }
   return (endCondition.count ?? 0) > 0
 })
 
@@ -275,14 +382,22 @@ const step3Valid = computed(() => {
 function lastWorkday(d: dayjs.Dayjs): dayjs.Dayjs {
   const last = d.endOf('month').startOf('day')
   const dow = last.day() // 0=Sun, 6=Sat
-  if (dow === 6) return last.subtract(1, 'day')
-  if (dow === 0) return last.subtract(2, 'day')
+  if (dow === 6) {
+    return last.subtract(1, 'day')
+  }
+  if (dow === 0) {
+    return last.subtract(2, 'day')
+  }
   return last
 }
 
 function applyMonthMode(d: dayjs.Dayjs): dayjs.Dayjs {
-  if (recurrence.monthMode === 'last') return d.endOf('month').startOf('day')
-  if (recurrence.monthMode === 'lastWorkday') return lastWorkday(d)
+  if (recurrence.monthMode === 'last') {
+    return d.endOf('month').startOf('day')
+  }
+  if (recurrence.monthMode === 'lastWorkday') {
+    return lastWorkday(d)
+  }
   const day = Math.min(recurrence.monthDay || 1, d.daysInMonth())
   return d.date(day)
 }
@@ -299,14 +414,18 @@ function firstOccurrence(): dayjs.Dayjs {
 
   if (recurrence.type === 'monthly' || recurrence.type === 'quarterly') {
     const candidate = applyMonthMode(start)
-    if (!candidate.isBefore(start, 'day')) return candidate
+    if (!candidate.isBefore(start, 'day')) {
+      return candidate
+    }
     const step = recurrence.type === 'quarterly' ? 3 : 1
     return applyMonthMode(start.add(step, 'month'))
   }
 
   if (recurrence.type === 'annual' && recurrence.annualMode === 'lastWorkday') {
     const candidate = lastWorkday(start)
-    if (!candidate.isBefore(start, 'day')) return candidate
+    if (!candidate.isBefore(start, 'day')) {
+      return candidate
+    }
     return lastWorkday(start.add(1, 'year'))
   }
 
@@ -315,10 +434,14 @@ function firstOccurrence(): dayjs.Dayjs {
 
 function nextOccurrence(current: dayjs.Dayjs): dayjs.Dayjs {
   switch (recurrence.type) {
-    case 'daily': return current.add(1, 'day')
-    case 'weekly': return current.add(7, 'day')
-    case 'monthly': return applyMonthMode(current.add(1, 'month'))
-    case 'quarterly': return applyMonthMode(current.add(3, 'month'))
+    case 'daily':
+      return current.add(1, 'day')
+    case 'weekly':
+      return current.add(7, 'day')
+    case 'monthly':
+      return applyMonthMode(current.add(1, 'month'))
+    case 'quarterly':
+      return applyMonthMode(current.add(3, 'month'))
     case 'annual':
       return recurrence.annualMode === 'lastWorkday'
         ? lastWorkday(current.add(1, 'year'))
@@ -346,17 +469,36 @@ function generateDates(): string[] {
   return dates
 }
 
-const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+const MONTHS_FR = [
+  'Janvier',
+  'Février',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Août',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Décembre',
+]
 
 function labelSuffix(date: string): string {
   const d = dayjs(date)
-  if (recurrence.type === 'monthly') return ` - ${MONTHS_FR[d.month()]} ${d.year()}`
-  if (recurrence.type === 'quarterly') return ` - Q${Math.ceil((d.month() + 1) / 3)} ${d.year()}`
+  if (recurrence.type === 'monthly') {
+    return ` - ${MONTHS_FR[d.month()]} ${d.year()}`
+  }
+  if (recurrence.type === 'quarterly') {
+    return ` - Q${Math.ceil((d.month() + 1) / 3)} ${d.year()}`
+  }
   return ''
 }
 
 const preview = computed(() => {
-  if (currentStep.value < 4) return []
+  if (currentStep.value < 4) {
+    return []
+  }
   return generateDates().map(date => ({
     date,
     description: entry.description + labelSuffix(date),
@@ -373,7 +515,8 @@ const fmtAmount = (n: number) => {
   const sign = n >= 0 ? '+' : '−'
   const abs = Math.abs(n)
   const [intPart, decPart] = abs.toFixed(2).split('.')
-  const formatted = Number(intPart) >= 10000 ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : intPart
+  const formatted =
+    Number(intPart) >= 10000 ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : intPart
   return `${sign} ${formatted}.${decPart}`
 }
 
@@ -392,7 +535,12 @@ const createAll = async () => {
         fiscal_year: null,
       })
     }
-    toast.add({ severity: 'success', summary: 'Créé', detail: `${preview.value.length} écriture(s) créée(s).`, life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Créé',
+      detail: `${preview.value.length} écriture(s) créée(s).`,
+      life: 3000,
+    })
     router.push('/ledger')
   } catch (e) {
     showPbError(e)

@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import PocketBase from 'pocketbase'
-import config from '../../config'
+import config from '@/config'
 import type { TInvoiceBase } from './useInvoices'
 
 export interface TInvoiceTotal extends TInvoiceBase {

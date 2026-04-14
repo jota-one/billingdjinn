@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import PocketBase from 'pocketbase'
 import dayjs from 'dayjs'
-import config from '../../config'
+import config from '@/config'
 import { buildReconciliation } from '../helpers/bankReconciliation'
 import type { TLedgerEntry } from './useLedger'
 import type { TBankEntry } from '../types/bank-entry'
@@ -86,7 +86,8 @@ export default function useBankReconciliation() {
         const dateScore = Math.max(0, 1 - daysDiff / 60)
         const invAmount = (inv as any).converted_amount || (inv as any).total_ttc
         const amountDiff = Math.abs(invAmount - amount)
-        const amountScore = amount !== 0 ? Math.max(0, 1 - amountDiff / (Math.abs(amount) * 1.5)) : 0
+        const amountScore =
+          amount !== 0 ? Math.max(0, 1 - amountDiff / (Math.abs(amount) * 1.5)) : 0
         return { id: (inv as any).id, score: dateScore * 0.6 + amountScore * 0.4 }
       })
       .filter(c => c.score > 0.5)

@@ -160,7 +160,7 @@ const save = async () => {
   }
 }
 
-watch(visible, async (newVal) => {
+watch(visible, async newVal => {
   if (newVal) {
     rolesLoading.value = true
     try {

@@ -41,7 +41,7 @@ defineProps<{
 }>()
 
 const hasActiveFilters = computed(
-  () => selectedYears.value.length > 0 || selectedCategories.value.length > 0
+  () => selectedYears.value.length > 0 || selectedCategories.value.length > 0,
 )
 
 const reset = () => {

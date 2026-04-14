@@ -5,7 +5,7 @@
  * Run once: node scripts/generate-pdf-fonts.mjs
  */
 
-import { writeFileSync, mkdirSync, copyFileSync, readFileSync } from 'fs'
+import { writeFileSync, mkdirSync, readFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'

@@ -12,7 +12,6 @@
 
     <div v-else class="card bg-base-200 p-6 max-w-2xl">
       <form @submit.prevent="save" class="flex flex-col gap-5">
-
         <!-- Logo -->
         <div class="form-control">
           <label class="label"><span class="label-text font-semibold">Logo</span></label>
@@ -45,12 +44,7 @@
               Nom de l'entreprise <span class="text-error">*</span>
             </span>
           </label>
-          <InputText
-            v-model="form.company_name"
-            placeholder="Acme Inc."
-            required
-            class="w-full"
-          />
+          <InputText v-model="form.company_name" placeholder="Acme Inc." required class="w-full" />
         </div>
 
         <!-- Adresse -->
@@ -118,7 +112,7 @@
             <InputNumber
               v-model="form.payment_terms"
               :min="0"
-              :only-int="true"
+              only-int
               suffix=" jours"
               placeholder="30"
               class="w-full"
@@ -170,18 +164,25 @@
         <!-- Labels de facture -->
         <div class="form-control">
           <div class="divider mt-2 mb-0"></div>
-          <label class="label mt-2"><span class="label-text font-semibold">Labels de facture</span></label>
-          <p class="text-xs text-base-content/50 mb-4">Personnalisez les textes du PDF. Laissez vide pour utiliser les valeurs par défaut.</p>
+          <label class="label mt-2"
+            ><span class="label-text font-semibold">Labels de facture</span></label
+          >
+          <p class="text-xs text-base-content/50 mb-4">
+            Personnalisez les textes du PDF. Laissez vide pour utiliser les valeurs par défaut.
+          </p>
           <InvoiceLabelsEditor v-model="form.labels" />
         </div>
 
         <!-- Catégories Grand Livre -->
         <div class="form-control">
           <div class="divider mt-2 mb-0"></div>
-          <label class="label mt-2"><span class="label-text font-semibold">Catégories du Grand Livre</span></label>
+          <label class="label mt-2"
+            ><span class="label-text font-semibold">Catégories du Grand Livre</span></label
+          >
           <p class="text-xs text-base-content/50 mb-4">
-            Définissez les catégories et leurs patterns de détection automatique.<br>
-            Un pattern peut être une chaîne de texte (recherche insensible à la casse) ou une regex au format <code class="font-mono">/pattern/flags</code>.
+            Définissez les catégories et leurs patterns de détection automatique.<br />
+            Un pattern peut être une chaîne de texte (recherche insensible à la casse) ou une regex
+            au format <code class="font-mono">/pattern/flags</code>.
           </p>
           <div class="flex flex-col gap-3">
             <div
@@ -194,25 +195,39 @@
                 <button
                   type="button"
                   class="btn btn-xs btn-ghost"
-                  :class="usedCategoryNames.has(cat.name) ? 'text-base-content/30 cursor-not-allowed' : 'text-error'"
-                  v-tooltip.top="{ value: 'Catégorie utilisée dans le ledger', disabled: !usedCategoryNames.has(cat.name) }"
+                  :class="
+                    usedCategoryNames.has(cat.name)
+                      ? 'text-base-content/30 cursor-not-allowed'
+                      : 'text-error'
+                  "
+                  v-tooltip.top="{
+                    value: 'Catégorie utilisée dans le ledger',
+                    disabled: !usedCategoryNames.has(cat.name),
+                  }"
                   @click="removeCategory(i)"
                 >
                   <span class="i-fa6-solid-trash"></span>
                 </button>
               </div>
               <div class="pl-1 flex flex-col gap-1">
-                <p v-if="cat.patterns.length > 0 || newPatternInputs[i] !== undefined" class="text-xs font-medium text-base-content/50">
+                <p
+                  v-if="cat.patterns.length > 0 || newPatternInputs[i] !== undefined"
+                  class="text-xs font-medium text-base-content/50"
+                >
                   Patterns de détection automatique
                 </p>
                 <div v-for="(p, j) in cat.patterns" :key="j" class="flex gap-2 items-center">
                   <InputText
                     v-model="cat.patterns[j]"
                     class="flex-1"
-                    style="font-family: monospace; font-size: 0.8rem;"
+                    style="font-family: monospace; font-size: 0.8rem"
                     placeholder="/regex/ ou texte à chercher"
                   />
-                  <button type="button" class="btn btn-xs btn-ghost text-error" @click="removePattern(i, j)">
+                  <button
+                    type="button"
+                    class="btn btn-xs btn-ghost text-error"
+                    @click="removePattern(i, j)"
+                  >
                     <span class="i-fa6-solid-xmark"></span>
                   </button>
                 </div>
@@ -221,10 +236,21 @@
                     v-model="newPatternInputs[i]"
                     placeholder="Pattern..."
                     class="flex-1"
-                    style="font-family: monospace; font-size: 0.8rem;"
+                    style="font-family: monospace; font-size: 0.8rem"
                     @keydown.enter.prevent="addPattern(i)"
                   />
-                  <button type="button" class="btn btn-xs btn-ghost" :class="newPatternInputs[i]?.trim() ? 'text-success' : 'text-base-content/30 cursor-not-allowed'" @click="addPattern(i)"><span class="i-fa-solid-check"></span></button>
+                  <button
+                    type="button"
+                    class="btn btn-xs btn-ghost"
+                    :class="
+                      newPatternInputs[i]?.trim()
+                        ? 'text-success'
+                        : 'text-base-content/30 cursor-not-allowed'
+                    "
+                    @click="addPattern(i)"
+                  >
+                    <span class="i-fa-solid-check"></span>
+                  </button>
                 </div>
                 <button
                   v-else
@@ -265,7 +291,6 @@
             :loading="saving"
           />
         </div>
-
       </form>
     </div>
   </div>
@@ -351,8 +376,12 @@ const removePattern = (catIdx: number, patIdx: number) => {
 }
 
 const logoUrl = computed(() => {
-  if (logoFile.value) return URL.createObjectURL(logoFile.value)
-  if (settings.value) return getLogoUrl(settings.value)
+  if (logoFile.value) {
+    return URL.createObjectURL(logoFile.value)
+  }
+  if (settings.value) {
+    return getLogoUrl(settings.value)
+  }
   return ''
 })
 
@@ -371,7 +400,12 @@ const save = async () => {
       logo: logoFile.value,
     })
     logoFile.value = null
-    toast.add({ severity: 'success', summary: 'Enregistré', detail: 'Les paramètres ont été sauvegardés.', life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Enregistré',
+      detail: 'Les paramètres ont été sauvegardés.',
+      life: 3000,
+    })
   } catch (e) {
     showPbError(e)
   } finally {
@@ -382,7 +416,9 @@ const save = async () => {
 onMounted(async () => {
   await Promise.all([
     loadSettings(),
-    loadUsedCategories().then(s => { usedCategoryNames.value = s }),
+    loadUsedCategories().then(s => {
+      usedCategoryNames.value = s
+    }),
   ])
   if (settings.value) {
     form.value = {

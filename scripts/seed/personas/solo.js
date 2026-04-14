@@ -20,13 +20,10 @@ export const config = {
     tva_number: '',
     payment_terms: 30,
     currency: 'CHF',
-    ledger_categories: [
-      'Revenu',
-      'Frais',
-      'AVS',
-      'Assurance',
-      'Impôt',
-    ].map(name => ({ name, patterns: [] })),
+    ledger_categories: ['Revenu', 'Frais', 'AVS', 'Assurance', 'Impôt'].map(name => ({
+      name,
+      patterns: [],
+    })),
   },
 
   clients: [

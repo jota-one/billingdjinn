@@ -2,7 +2,7 @@ import pdfMake from 'pdfmake/build/pdfmake'
 import * as pdfFonts from 'pdfmake/build/vfs_fonts'
 import type { TInvoiceBase, TInvoiceLine, TClientSnapshot, TCompanySnapshot } from './useInvoices'
 import PocketBase from 'pocketbase'
-import config from '../../config'
+import config from '@/config'
 import { resolveLabels } from '../utils/invoice-labels'
 import type { TInvoiceLabels } from '../types/invoice-labels'
 import { templates } from '../invoice-templates'
@@ -80,5 +80,5 @@ export async function downloadInvoicePdf(
   const { default: buildDocDef } = await templates[template]()
   const docDef = buildDocDef(invoice, lines, client, company, labels)
   const filename = `facture-${invoice.invoice_number || invoice.id}.pdf`
-  pdfMake.createPdf(docDef).download(filename)
+  return pdfMake.createPdf(docDef).download(filename)
 }

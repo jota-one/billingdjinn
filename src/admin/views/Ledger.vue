@@ -21,10 +21,20 @@
             @click="showImportExportModal = true"
           />
           <RouterLink to="/ledger/reconcile">
-            <Button label="Réconciliation" icon="i-fa6-solid-scale-balanced" size="small" severity="secondary" />
+            <Button
+              label="Réconciliation"
+              icon="i-fa6-solid-scale-balanced"
+              size="small"
+              severity="secondary"
+            />
           </RouterLink>
           <RouterLink to="/ledger/bulk">
-            <Button label="Saisie en série" icon="i-fa-solid-calendar-plus" size="small" severity="secondary" />
+            <Button
+              label="Saisie en série"
+              icon="i-fa-solid-calendar-plus"
+              size="small"
+              severity="secondary"
+            />
           </RouterLink>
           <RouterLink to="/ledger/new">
             <Button label="Nouvelle écriture" icon="i-fa-solid-plus" size="small" />
@@ -41,18 +51,22 @@
         scrollHeight="flex"
         table-style="min-width: 48rem"
       >
-        <Column style="width: 1.5rem; padding: 0;">
+        <Column style="width: 1.5rem; padding: 0">
           <template #body="{ data }">
-            <span v-if="data.isPastBoundary" class="ledger-sep-above">{{ sortOrder === 1 ? 'passé' : 'futur' }}</span>
-            <span v-if="data.isFirstFuture" class="ledger-sep-below">{{ sortOrder === 1 ? 'futur' : 'passé' }}</span>
+            <span v-if="data.isPastBoundary" class="ledger-sep-above">{{
+              sortOrder === 1 ? 'passé' : 'futur'
+            }}</span>
+            <span v-if="data.isFirstFuture" class="ledger-sep-below">{{
+              sortOrder === 1 ? 'futur' : 'passé'
+            }}</span>
           </template>
         </Column>
-        <Column field="date" header="Date" sortable style="width: 110px;">
+        <Column field="date" header="Date" sortable style="width: 110px">
           <template #body="{ data }">
             {{ formatDate(data.date) }}
           </template>
         </Column>
-        <Column field="category" header="Catégorie" style="width: 140px;">
+        <Column field="category" header="Catégorie" style="width: 140px">
           <template #body="{ data }">{{ data.category || '—' }}</template>
         </Column>
         <Column field="description" header="Description">
@@ -61,28 +75,34 @@
             <span
               v-if="!data.is_checked && isPast(data.date)"
               class="badge badge-warning badge-sm ml-2"
-            >À vérifier</span>
-            <span
-              v-else-if="isFuture(data.date)"
-              class="badge badge-ghost badge-sm ml-2"
-            >Prévu</span>
+              >À vérifier</span
+            >
+            <span v-else-if="isFuture(data.date)" class="badge badge-ghost badge-sm ml-2"
+              >Prévu</span
+            >
           </template>
         </Column>
-        <Column field="amount" header="Montant" style="width: 130px; text-align: right;">
+        <Column field="amount" header="Montant" style="width: 130px; text-align: right">
           <template #body="{ data }">
-            <span :class="data.amount >= 0 ? 'text-success' : 'text-error'" class="font-mono font-medium whitespace-nowrap">
+            <span
+              :class="data.amount >= 0 ? 'text-success' : 'text-error'"
+              class="font-mono font-medium whitespace-nowrap"
+            >
               {{ fmtAmount(data.amount) }}
             </span>
           </template>
         </Column>
-        <Column field="balance" header="Solde" style="width: 130px; text-align: right;">
+        <Column field="balance" header="Solde" style="width: 130px; text-align: right">
           <template #body="{ data }">
-            <span :class="data.balance >= 0 ? 'text-success font-semibold' : 'text-error font-semibold'" class="font-mono whitespace-nowrap">
+            <span
+              :class="data.balance >= 0 ? 'text-success font-semibold' : 'text-error font-semibold'"
+              class="font-mono whitespace-nowrap"
+            >
               {{ fmtAmount(data.balance) }}
             </span>
           </template>
         </Column>
-        <Column header="Actions" style="width: 100px;">
+        <Column header="Actions" style="width: 100px">
           <template #body="{ data }">
             <div class="flex gap-1">
               <button
@@ -111,7 +131,10 @@
               (sur {{ entries.length }})
             </span>
           </span>
-          <span class="ml-4 font-mono font-semibold whitespace-nowrap" :class="finalBalance >= 0 ? 'text-success' : 'text-error'">
+          <span
+            class="ml-4 font-mono font-semibold whitespace-nowrap"
+            :class="finalBalance >= 0 ? 'text-success' : 'text-error'"
+          >
             Solde final : {{ fmtAmount(finalBalance) }}
           </span>
         </template>
@@ -182,14 +205,20 @@ const availableYears = computed(() => {
 
 const availableCategories = computed(() => {
   const cats = new Set<string>()
-  entries.value.forEach(e => { if (e.category) cats.add(e.category) })
+  entries.value.forEach(e => {
+    if (e.category) {
+      cats.add(e.category)
+    }
+  })
   return [...cats].sort()
 })
 
 const entriesWithBalance = computed<LedgerEntryWithBoundary[]>(() => {
   const chronological = [...entries.value].sort((a, b) => {
     const d = a.date < b.date ? -1 : a.date > b.date ? 1 : 0
-    if (d !== 0) return d
+    if (d !== 0) {
+      return d
+    }
     return (a.created ?? '') < (b.created ?? '') ? -1 : 1
   })
   let balance = 0
@@ -197,17 +226,24 @@ const entriesWithBalance = computed<LedgerEntryWithBoundary[]>(() => {
     balance += e.amount
     return { ...e, balance } as LedgerEntryWithBoundary & { balance: number }
   })
-  if (filterYears.value.length > 0)
-    filtered = filtered.filter(e => filterYears.value.includes(e.fiscal_year || parseInt(e.date.substring(0, 4))))
-  if (filterCategories.value.length > 0)
+  if (filterYears.value.length > 0) {
+    filtered = filtered.filter(e =>
+      filterYears.value.includes(e.fiscal_year || parseInt(e.date.substring(0, 4))),
+    )
+  }
+  if (filterCategories.value.length > 0) {
     filtered = filtered.filter(e => filterCategories.value.includes(e.category))
+  }
   const dir = sortOrder.value ?? 1
   filtered = filtered.sort((a, b) => {
     const av = (a as any)[sortField.value] ?? ''
     const bv = (b as any)[sortField.value] ?? ''
     const primary = av < bv ? -1 : av > bv ? 1 : 0
-    if (primary !== 0) return primary * dir
-    const sec = (a.created ?? '') < (b.created ?? '') ? -1 : (a.created ?? '') > (b.created ?? '') ? 1 : 0
+    if (primary !== 0) {
+      return primary * dir
+    }
+    const sec =
+      (a.created ?? '') < (b.created ?? '') ? -1 : (a.created ?? '') > (b.created ?? '') ? 1 : 0
     return sec * dir
   })
   // Ajout du flag de séparation passé/futur — uniquement quand on trie par date
@@ -238,14 +274,15 @@ const fmtAmount = (n: number): string => {
   const sign = n >= 0 ? '+' : '−'
   const abs = Math.abs(n)
   const [intPart, decPart] = abs.toFixed(2).split('.')
-  const formattedInt = Number(intPart) >= 10000
-    ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
-    : intPart
+  const formattedInt =
+    Number(intPart) >= 10000 ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : intPart
   return `${sign} ${formattedInt}.${decPart}`
 }
 
 const formatDate = (date?: string) => {
-  if (!date) return '—'
+  if (!date) {
+    return '—'
+  }
   return dayjs(date).format('DD.MM.YYYY')
 }
 
@@ -253,7 +290,10 @@ const isPast = (date?: string) => !!date && dayjs(date).isBefore(dayjs(), 'day')
 const isFuture = (date?: string) => !!date && dayjs(date).isAfter(dayjs(), 'day')
 
 const rowClass = (data: LedgerEntryWithBoundary) => {
-  const transitoire = data.fiscal_year && data.fiscal_year !== parseInt(data.date.substring(0, 4)) ? 'row-transitoire' : ''
+  const transitoire =
+    data.fiscal_year && data.fiscal_year !== parseInt(data.date.substring(0, 4))
+      ? 'row-transitoire'
+      : ''
   const separator = data.isPastBoundary ? 'ledger-row-separator' : ''
   return [transitoire, separator].filter(Boolean).join(' ')
 }
@@ -270,7 +310,9 @@ const confirmDelete = (entry: TLedgerEntry) => {
 }
 
 const deleteConfirmed = async () => {
-  if (!entryToDelete.value) return
+  if (!entryToDelete.value) {
+    return
+  }
   await deleteEntry(entryToDelete.value.id)
   await loadEntries()
   showDeleteModal.value = false
@@ -280,7 +322,9 @@ const deleteConfirmed = async () => {
 const scrollToTarget = () => {
   const focusId = route.query.focus as string | undefined
   const list = entriesWithBalance.value
-  if (!list.length) return
+  if (!list.length) {
+    return
+  }
 
   let idx: number
   if (focusId) {
@@ -291,21 +335,35 @@ const scrollToTarget = () => {
     let closestDiff = Infinity
     list.forEach((e, i) => {
       const diff = Math.abs(new Date(e.date.substring(0, 10)).getTime() - todayMs)
-      if (diff < closestDiff) { closestDiff = diff; closest = i }
+      if (diff < closestDiff) {
+        closestDiff = diff
+        closest = i
+      }
     })
     idx = closest
   }
 
-  if (idx === -1) return
+  if (idx === -1) {
+    return
+  }
   const rows = tableWrapper.value?.querySelectorAll('tbody tr')
   const row = rows?.[idx] as HTMLElement | undefined
-  if (!row) return
+  if (!row) {
+    return
+  }
 
-  const scrollContainer = tableWrapper.value?.querySelector('.p-datatable-table-container') as HTMLElement | null
-  if (!scrollContainer) return
+  const scrollContainer = tableWrapper.value?.querySelector(
+    '.p-datatable-table-container',
+  ) as HTMLElement | null
+  if (!scrollContainer) {
+    return
+  }
 
-  const offset = row.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top
-    - scrollContainer.clientHeight / 2 + row.clientHeight / 2
+  const offset =
+    row.getBoundingClientRect().top -
+    scrollContainer.getBoundingClientRect().top -
+    scrollContainer.clientHeight / 2 +
+    row.clientHeight / 2
   scrollContainer.scrollTop += offset
 }
 
@@ -359,6 +417,10 @@ onMounted(async () => {
   pointer-events: none;
 }
 
-:deep(.ledger-sep-above) { bottom: 6px; }
-:deep(.ledger-sep-below) { top: 6px; }
+:deep(.ledger-sep-above) {
+  bottom: 6px;
+}
+:deep(.ledger-sep-below) {
+  top: 6px;
+}
 </style>

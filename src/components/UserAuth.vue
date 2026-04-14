@@ -24,7 +24,9 @@
             />
           </div>
           <div class="flex flex-col">
-            <span class="text-xs font-medium text-white/70 uppercase tracking-wide">Connecté(e)</span>
+            <span class="text-xs font-medium text-white/70 uppercase tracking-wide"
+              >Connecté(e)</span
+            >
             <span class="text-sm font-semibold text-white">{{ user.name }}</span>
           </div>
           <span class="i-fa-solid-chevron-down text-xs text-white/70"></span>
@@ -66,15 +68,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useTemplateRef } from 'vue'
-import useAuth from '@admin/composables/useAuth'
-import config from '@config'
+import useAuth from '@/admin/composables/useAuth'
+import config from '@/config'
 import LoginModal from './LoginModal.vue'
 
 const { isAuthenticated, isImpersonating, user, logout, exitImpersonation } = useAuth()
 const loginModalRef = useTemplateRef<InstanceType<typeof LoginModal>>('loginModalRef')
 
 const avatarUrl = computed(() => {
-  if (!user.value?.avatar) return ''
+  if (!user.value?.avatar) {
+    return ''
+  }
   return `${config.apiBaseUrl}/api/files/users/${user.value.id}/${user.value.avatar}`
 })
 

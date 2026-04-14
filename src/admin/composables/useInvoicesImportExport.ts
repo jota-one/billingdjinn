@@ -1,11 +1,15 @@
 import { ref } from 'vue'
 import PocketBase from 'pocketbase'
-import config from '../../config'
+import config from '@/config'
 import { buildSnapshots } from './useInvoices'
 import type { TInvoiceStatus, TInvoiceLine } from './useInvoices'
 import type { ImportResult } from '../types/import-export'
 import { parseDecimal } from '../types/import-export'
-import { INVOICE_CSV_COLUMNS, getUniqueFields, getImportableFields } from '../config/invoicesImportExport'
+import {
+  INVOICE_CSV_COLUMNS,
+  getUniqueFields,
+  getImportableFields,
+} from '../config/invoicesImportExport'
 
 export { INVOICE_CSV_COLUMNS }
 export const INVOICE_IMPORT_COLUMNS = getImportableFields().map(f => f.key)
@@ -13,19 +17,29 @@ export const INVOICE_IMPORT_COLUMNS = getImportableFields().map(f => f.key)
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 const isoToDisplay = (iso: string): string => {
-  if (!iso) return ''
+  if (!iso) {
+    return ''
+  }
   const d = new Date(iso)
-  if (isNaN(d.getTime())) return iso
+  if (isNaN(d.getTime())) {
+    return iso
+  }
   const dd = String(d.getUTCDate()).padStart(2, '0')
   const mm = String(d.getUTCMonth() + 1).padStart(2, '0')
   return `${dd}.${mm}.${d.getUTCFullYear()}`
 }
 
 const displayToIso = (v: string): string => {
-  if (!v) return ''
-  if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10) // already ISO
+  if (!v) {
+    return ''
+  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
+    return v.slice(0, 10)
+  } // already ISO
   const [dd, mm, yyyy] = v.split('.')
-  if (!dd || !mm || !yyyy) return ''
+  if (!dd || !mm || !yyyy) {
+    return ''
+  }
   return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`
 }
 
@@ -47,8 +61,12 @@ const parseBool = (v: string): boolean =>
   ['1', 'true', 'oui', 'yes'].includes(v?.toLowerCase().trim())
 
 const escapeCSV = (v: string): string => {
-  if (!v) return ''
-  if (v.includes(',') || v.includes('"') || v.includes('\n')) return `"${v.replace(/"/g, '""')}"`
+  if (!v) {
+    return ''
+  }
+  if (v.includes(',') || v.includes('"') || v.includes('\n')) {
+    return `"${v.replace(/"/g, '""')}"`
+  }
   return v
 }
 
@@ -64,15 +82,21 @@ const parseCSV = (text: string): string[][] => {
       if (inQuotes && next === '"') {
         current += '"'
         i++
-      } else inQuotes = !inQuotes
+      } else {
+        inQuotes = !inQuotes
+      }
       continue
     }
     if (!inQuotes && (c === '\n' || c === '\r')) {
       row.push(current)
       current = ''
-      if (!(row.length === 1 && row[0] === '')) rows.push(row)
+      if (!(row.length === 1 && row[0] === '')) {
+        rows.push(row)
+      }
       row = []
-      if (c === '\r' && next === '\n') i++
+      if (c === '\r' && next === '\n') {
+        i++
+      }
       continue
     }
     if (!inQuotes && c === ',') {
@@ -83,7 +107,9 @@ const parseCSV = (text: string): string[][] => {
     current += c
   }
   row.push(current)
-  if (!(row.length === 1 && row[0] === '')) rows.push(row)
+  if (!(row.length === 1 && row[0] === '')) {
+    rows.push(row)
+  }
   return rows
 }
 
@@ -121,7 +147,9 @@ export default function useInvoicesImportExport() {
       // Group lines by invoice id
       const linesByInvoice = new Map<string, TInvoiceLine[]>()
       for (const line of allLines) {
-        if (!linesByInvoice.has(line.invoice)) linesByInvoice.set(line.invoice, [])
+        if (!linesByInvoice.has(line.invoice)) {
+          linesByInvoice.set(line.invoice, [])
+        }
         linesByInvoice.get(line.invoice)!.push(line)
       }
 
@@ -141,7 +169,7 @@ export default function useInvoicesImportExport() {
           escapeCSV(isoToDisplay(inv.due_date ?? '')),
           escapeCSV(inv.status),
           inv.tva_enabled ? 'oui' : 'non',
-          inv.tva_rate != null ? String(inv.tva_rate) : '',
+          inv.tva_rate !== null && inv.tva_rate !== undefined ? String(inv.tva_rate) : '',
           escapeCSV(inv.notes ?? ''),
           escapeCSV(clientEmail),
           escapeCSV(clientName),
@@ -185,7 +213,9 @@ export default function useInvoicesImportExport() {
 
     try {
       const rows = parseCSV(await file.text())
-      if (rows.length < 2) throw new Error('Fichier CSV vide ou invalide')
+      if (rows.length < 2) {
+        throw new Error('Fichier CSV vide ou invalide')
+      }
 
       const headers = rows[0]
       const col = (row: string[], key: string) => {
@@ -197,10 +227,16 @@ export default function useInvoicesImportExport() {
       const groups = new Map<string, string[][]>()
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i]
-        if (!row || row.every(v => v === '')) continue
+        if (!row || row.every(v => v === '')) {
+          continue
+        }
         const num = col(row, 'invoice_number')
-        if (!num) continue
-        if (!groups.has(num)) groups.set(num, [])
+        if (!num) {
+          continue
+        }
+        if (!groups.has(num)) {
+          groups.set(num, [])
+        }
         groups.get(num)!.push(row)
       }
 
@@ -212,7 +248,9 @@ export default function useInvoicesImportExport() {
         try {
           // Find client by email
           const clientEmail = col(firstRow, 'client_email')
-          if (!clientEmail) throw new Error('client_email requis')
+          if (!clientEmail) {
+            throw new Error('client_email requis')
+          }
 
           let client: any
           try {
@@ -227,10 +265,16 @@ export default function useInvoicesImportExport() {
           let existingInvoice: any = null
           for (const f of getUniqueFields()) {
             const val = col(firstRow, f.key)
-            if (!val) continue
+            if (!val) {
+              continue
+            }
             try {
-              existingInvoice = await pb.collection('invoices').getFirstListItem(`${f.key}="${val}"`)
-            } catch { /* not found → ok to create */ }
+              existingInvoice = await pb
+                .collection('invoices')
+                .getFirstListItem(`${f.key}="${val}"`)
+            } catch {
+              /* not found → ok to create */
+            }
           }
           if (existingInvoice) {
             // Invoice exists — add lines missing from DB (matched by description+quantity+unit_price)
@@ -239,8 +283,7 @@ export default function useInvoicesImportExport() {
               .collection('invoice_lines')
               .getFullList({ filter: `invoice="${existingInvoice.id}"`, sort: 'sort_order' })
 
-            const lineKey = (desc: string, qty: number, price: number) =>
-              `${desc}|${qty}|${price}`
+            const lineKey = (desc: string, qty: number, price: number) => `${desc}|${qty}|${price}`
             const existingKeys = new Set(
               existingLines.map((l: any) => lineKey(l.description, l.quantity, l.unit_price)),
             )
@@ -292,7 +335,9 @@ export default function useInvoicesImportExport() {
           let sortOrder = 1
           for (const row of invoiceRows) {
             const description = col(row, 'description')
-            if (!description) continue
+            if (!description) {
+              continue
+            }
             await pb.collection('invoice_lines').create({
               invoice: invoice.id,
               description,

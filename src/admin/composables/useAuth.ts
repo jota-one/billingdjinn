@@ -1,7 +1,7 @@
 import { useSessionStorage } from '@vueuse/core'
 import PocketBase from 'pocketbase'
 import { ref, computed } from 'vue'
-import config from '../../config'
+import config from '@/config'
 
 const pb = new PocketBase(config.apiBaseUrl)
 
@@ -15,7 +15,11 @@ const user = ref<any>({})
 if (userJwt.value && !pb.authStore.isValid) {
   try {
     const payload = JSON.parse(atob(userJwt.value.split('.')[1]))
-    pb.authStore.save(userJwt.value, { id: payload.id, collectionId: '_pb_users_auth_', collectionName: 'users' } as any)
+    pb.authStore.save(userJwt.value, {
+      id: payload.id,
+      collectionId: '_pb_users_auth_',
+      collectionName: 'users',
+    } as any)
   } catch {
     pb.authStore.save(userJwt.value, null)
   }
@@ -23,7 +27,9 @@ if (userJwt.value && !pb.authStore.isValid) {
 
 // Charge l'utilisateur avec expand:roles pour déterminer les slugs
 const loadUserWithRoles = async (model: any) => {
-  if (!model?.id) return
+  if (!model?.id) {
+    return
+  }
   try {
     const full = await pb.collection('users').getOne(model.id, {
       expand: 'roles',
@@ -61,7 +67,9 @@ export default function useAuth() {
     if (!pb.authStore.isValid && userJwt.value) {
       pb.authStore.save(userJwt.value, null)
     }
-    if (!pb.authStore.isValid) return null
+    if (!pb.authStore.isValid) {
+      return null
+    }
     try {
       const data = await pb.collection('users').authRefresh({ expand: 'roles' })
       userJwt.value = data.token

@@ -20,24 +20,34 @@
       <!-- KPI cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="card bg-base-200 p-4">
-          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">{{ currentMonthLabel }}</p>
+          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">
+            {{ currentMonthLabel }}
+          </p>
           <p class="text-2xl font-bold font-mono">{{ fmt(caCurrentMonth) }}</p>
           <p class="text-xs text-base-content/40 mt-1">{{ currency }} · HT · payé</p>
         </div>
         <div class="card bg-base-200 p-4">
-          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">CA {{ selectedYear }}</p>
+          <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">
+            CA {{ selectedYear }}
+          </p>
           <p class="text-2xl font-bold font-mono">{{ fmt(caCurrentYear) }}</p>
           <p class="text-xs text-base-content/40 mt-1">{{ currency }} · HT · payé</p>
         </div>
         <div class="card bg-base-200 p-4">
           <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">CA total</p>
           <p class="text-2xl font-bold font-mono">{{ fmt(caAllTime) }}</p>
-          <p class="text-xs text-base-content/40 mt-1">{{ currency }} · HT · toutes années · payé</p>
+          <p class="text-xs text-base-content/40 mt-1">
+            {{ currency }} · HT · toutes années · payé
+          </p>
         </div>
         <div class="card bg-base-200 p-4 border border-warning/30">
           <p class="text-xs text-base-content/50 uppercase tracking-wide mb-1">En attente</p>
           <p class="text-2xl font-bold font-mono text-warning">{{ fmt(pendingAmount) }}</p>
-          <p class="text-xs text-base-content/40 mt-1">{{ currency }} · TTC · {{ pendingInvoices.length }} facture{{ pendingInvoices.length !== 1 ? 's' : '' }}</p>
+          <p class="text-xs text-base-content/40 mt-1">
+            {{ currency }} · TTC · {{ pendingInvoices.length }} facture{{
+              pendingInvoices.length !== 1 ? 's' : ''
+            }}
+          </p>
         </div>
       </div>
 
@@ -64,12 +74,19 @@
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold">Top clients (CA HT payé)</h3>
           <div class="flex items-center gap-2 text-sm text-base-content/60">
-            <span :class="!topClientsAllTime ? 'text-base-content font-medium' : ''">{{ selectedYear }}</span>
+            <span :class="!topClientsAllTime ? 'text-base-content font-medium' : ''">{{
+              selectedYear
+            }}</span>
             <input type="checkbox" v-model="topClientsAllTime" class="toggle toggle-sm" />
             <span :class="topClientsAllTime ? 'text-base-content font-medium' : ''">all time</span>
           </div>
         </div>
-        <Chart type="bar" :data="topClientsAllTime ? topClientsAllTimeChartData : topClientsChartData" :options="clientsBarOptions" style="max-height: 260px;" />
+        <Chart
+          type="bar"
+          :data="topClientsAllTime ? topClientsAllTimeChartData : topClientsChartData"
+          :options="clientsBarOptions"
+          style="max-height: 260px"
+        />
       </div>
     </template>
   </div>
@@ -115,9 +132,8 @@ const currentMonthLabel = computed(() =>
 const fmt = (n: number): string => {
   const sign = n < 0 ? '-' : ''
   const [intPart, decPart] = Math.abs(n).toFixed(2).split('.')
-  const formattedInt = Number(intPart) >= 10000
-    ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
-    : intPart
+  const formattedInt =
+    Number(intPart) >= 10000 ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : intPart
   return `${sign}${formattedInt}.${decPart}`
 }
 

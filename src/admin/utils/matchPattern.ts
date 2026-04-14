@@ -49,10 +49,14 @@ export function detectCategory(
       }
     }
   }
-  if (best) return best.name
+  if (best) {
+    return best.name
+  }
 
   for (const cat of categories) {
-    if (matchPattern(cat.name, description)) return cat.name
+    if (matchPattern(cat.name, description)) {
+      return cat.name
+    }
   }
   return null
 }

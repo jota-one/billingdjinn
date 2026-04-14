@@ -6,7 +6,7 @@
       </RouterLink>
       <h2 class="text-2xl font-bold flex items-center gap-2">
         <span class="i-fa-solid-pen text-xl"></span>
-        {{ form.description || 'Modifier l\'écriture' }}
+        {{ form.description || "Modifier l'écriture" }}
       </h2>
     </div>
 
@@ -63,7 +63,12 @@ const save = async () => {
   saving.value = true
   try {
     await updateEntry(entryId, { ...form.value, invoice: entry.value?.invoice })
-    toast.add({ severity: 'success', summary: 'Enregistré', detail: 'L\'écriture a été mise à jour.', life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Enregistré',
+      detail: "L'écriture a été mise à jour.",
+      life: 3000,
+    })
     router.push({ path: '/ledger', query: { focus: entryId } })
   } catch (e) {
     showPbError(e)

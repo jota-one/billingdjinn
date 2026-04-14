@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import useAuth from '@admin/composables/useAuth'
+import useAuth from '@/admin/composables/useAuth'
 
 const { isAdmin } = useAuth()
 </script>

@@ -14,7 +14,9 @@ export default function usePbErrorToast() {
 
   function showPbError(e: any) {
     try {
-      if (!e) return
+      if (!e) {
+        return
+      }
 
       if (typeof e === 'string') {
         toast.add({ severity: 'error', summary: 'Erreur', detail: e, life: 8000 })
@@ -35,12 +37,17 @@ export default function usePbErrorToast() {
           let detail = ''
           if (errVal.message) {
             detail = errVal.message
-            if (errVal.params?.file) detail += ` (${errVal.params.file})`
-            if (errVal.code) detail += ` [${errVal.code}]`
+            if (errVal.params?.file) {
+              detail += ` (${errVal.params.file})`
+            }
+            if (errVal.code) {
+              detail += ` [${errVal.code}]`
+            }
           } else {
             try {
               detail = JSON.stringify(errVal)
-            } catch (e: unknown) {
+            } catch (err) {
+              console.error('Failed to stringify Pb error field detail', err, errVal)
               detail = String(errVal as string)
             }
           }

@@ -1,5 +1,10 @@
 <template>
-  <Dialog v-model:visible="visible" modal header="Modifier l'utilisateur" class="w-[50%]">
+  <Dialog
+    v-model:visible="visible"
+    modal
+    :header="userId ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur'"
+    class="w-[50%]"
+  >
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <label for="email" class="font-semibold">Email *</label>
@@ -18,27 +23,33 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password" class="font-semibold">Nouveau mot de passe</label>
+        <label for="password" class="font-semibold">
+          {{ userId ? 'Nouveau mot de passe' : 'Mot de passe *' }}
+        </label>
         <Password
           id="password"
           v-model="form.password"
-          placeholder="Laisser vide pour ne pas changer"
+          :placeholder="userId ? 'Laisser vide pour ne pas changer' : 'Mot de passe'"
           :feedback="false"
           toggleMask
+          :required="!userId"
         />
-        <p class="text-sm text-gray-500">
+        <p v-if="userId" class="text-sm text-gray-500">
           Laissez vide si vous ne voulez pas changer le mot de passe
         </p>
       </div>
 
-      <div v-if="form.password" class="flex flex-col gap-2">
-        <label for="passwordConfirm" class="font-semibold">Confirmer le mot de passe</label>
+      <div v-if="!userId || form.password" class="flex flex-col gap-2">
+        <label for="passwordConfirm" class="font-semibold">
+          {{ userId ? 'Confirmer le mot de passe' : 'Confirmer le mot de passe *' }}
+        </label>
         <Password
           id="passwordConfirm"
           v-model="form.passwordConfirm"
           placeholder="Confirmer le mot de passe"
           :feedback="false"
           toggleMask
+          :required="!userId"
         />
       </div>
 
@@ -70,11 +81,12 @@
           mode="basic"
           accept="image/*"
           :maxFileSize="1000000"
-          chooseLabel="Changer l'avatar"
+          :chooseLabel="userId ? 'Changer l\'avatar' : 'Choisir un avatar'"
           @select="onAvatarSelect"
         />
         <p v-if="form.avatar" class="text-sm text-gray-500">
-          Nouveau fichier sélectionné : {{ form.avatar.name }}
+          {{ userId ? 'Nouveau fichier sélectionné' : 'Fichier sélectionné' }} :
+          {{ form.avatar.name }}
         </p>
       </div>
     </div>
@@ -99,40 +111,34 @@ import Password from 'primevue/password'
 import MultiSelect from 'primevue/multiselect'
 import FileUpload from 'primevue/fileupload'
 import type { FileUploadSelectEvent } from 'primevue/fileupload'
-import useUsers from '../composables/useUsers'
-import type { TUserForm } from '../composables/useUsers'
-import useRoles from '../composables/useRoles'
+import useUsers from '@/admin/composables/useUsers'
+import type { TUserForm } from '@/admin/composables/useUsers'
+import useRoles from '@/admin/composables/useRoles'
 import PbErrorToast from './PbErrorToast.vue'
-import usePbErrorToast from '../composables/usePbErrorToast'
+import usePbErrorToast from '@/admin/composables/usePbErrorToast'
 
-type Props = {
-  userId: string
-}
-
-type Events = {
-  saved: []
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Events>()
+const props = defineProps<{ userId?: string }>()
+const emit = defineEmits<{ saved: [] }>()
 const visible = defineModel<boolean>({ required: true })
 
-const { updateUser, loadUser, getAvatarUrl } = useUsers()
+const { addUser, updateUser, loadUser, getAvatarUrl } = useUsers()
 const { roles, loadRoles } = useRoles()
 const { showPbError } = usePbErrorToast()
 const saving = ref(false)
 const rolesLoading = ref(false)
 const currentAvatar = ref('')
 
-const form = ref<TUserForm>({
+const emptyForm = (): TUserForm => ({
   email: '',
-  emailVisibility: false,
+  emailVisibility: true,
   password: '',
   passwordConfirm: '',
   name: '',
   avatar: null,
   roles: [],
 })
+
+const form = ref<TUserForm>(emptyForm())
 
 const onAvatarSelect = (event: FileUploadSelectEvent) => {
   const files = event.files
@@ -142,7 +148,7 @@ const onAvatarSelect = (event: FileUploadSelectEvent) => {
 }
 
 const save = async () => {
-  if (!form.value.email) {
+  if (!form.value.email || (!props.userId && !form.value.password)) {
     alert('Veuillez remplir tous les champs obligatoires')
     return
   }
@@ -155,7 +161,12 @@ const save = async () => {
   saving.value = true
 
   try {
-    await updateUser(props.userId, form.value)
+    if (props.userId) {
+      await updateUser(props.userId, form.value)
+    } else {
+      await addUser(form.value)
+      form.value = emptyForm()
+    }
     emit('saved')
     visible.value = false
   } catch (err) {
@@ -165,38 +176,35 @@ const save = async () => {
   }
 }
 
-const loadUserData = async () => {
-  if (!visible.value) return
-
-  const user = await loadUser(props.userId)
-
-  form.value = {
-    email: user.email,
-    emailVisibility: true,
-    password: '',
-    passwordConfirm: '',
-    name: user.name || '',
-    avatar: null,
-    roles: user.roles || [],
-  }
-
-  currentAvatar.value = getAvatarUrl(user)
-}
-
-const loadRolesData = async () => {
-  rolesLoading.value = true
-  try {
-    await loadRoles()
-  } finally {
-    rolesLoading.value = false
-  }
-}
-
 watch(
   visible,
   async isVisible => {
-    if (isVisible) {
-      await Promise.all([loadUserData(), loadRolesData()])
+    if (!isVisible) {
+      if (!props.userId) {
+        form.value = emptyForm()
+      }
+      return
+    }
+
+    rolesLoading.value = true
+    try {
+      await loadRoles()
+    } finally {
+      rolesLoading.value = false
+    }
+
+    if (props.userId) {
+      const user = await loadUser(props.userId)
+      form.value = {
+        email: user.email,
+        emailVisibility: true,
+        password: '',
+        passwordConfirm: '',
+        name: user.name || '',
+        avatar: null,
+        roles: user.roles || [],
+      }
+      currentAvatar.value = getAvatarUrl(user)
     }
   },
   { immediate: true },
@@ -204,8 +212,20 @@ watch(
 
 watch(
   () => props.userId,
-  async () => {
-    await loadUserData()
+  async id => {
+    if (id && visible.value) {
+      const user = await loadUser(id)
+      form.value = {
+        email: user.email,
+        emailVisibility: true,
+        password: '',
+        passwordConfirm: '',
+        name: user.name || '',
+        avatar: null,
+        roles: user.roles || [],
+      }
+      currentAvatar.value = getAvatarUrl(user)
+    }
   },
 )
 </script>

@@ -38,7 +38,11 @@
               class="i-fa-solid-file-arrow-up text-5xl"
               :class="{ 'animate-pulse !text-base-content/70': loading }"
             ></span>
-            <span class="text-sm">{{ loading ? 'Analyse en cours…' : 'Glissez un fichier XML (camt.053) ici ou cliquez pour choisir' }}</span>
+            <span class="text-sm">{{
+              loading
+                ? 'Analyse en cours…'
+                : 'Glissez un fichier XML (camt.053) ici ou cliquez pour choisir'
+            }}</span>
           </div>
         </template>
       </FileUpload>
@@ -49,14 +53,27 @@
     <div v-else-if="step === 2" class="flex flex-col gap-3">
       <div class="flex items-center justify-between">
         <p class="text-base-content/60 text-sm">
-          {{ rows.length }} transaction{{ rows.length !== 1 ? 's' : '' }}
-          &nbsp;&bull;&nbsp;{{ rows.filter(r => r.action === 'link').length }} liées
-          &nbsp;&bull;&nbsp;{{ rows.filter(r => r.action === 'create').length }} à créer
+          {{ rows.length }} transaction{{ rows.length !== 1 ? 's' : '' }} &nbsp;&bull;&nbsp;{{
+            rows.filter(r => r.action === 'link').length
+          }}
+          liées &nbsp;&bull;&nbsp;{{ rows.filter(r => r.action === 'create').length }} à créer
           &nbsp;&bull;&nbsp;{{ rows.filter(r => r.action === 'ignore').length }} ignorées
         </p>
         <div class="flex gap-2">
-          <Button label="Retour" icon="i-fa-solid-arrow-left" severity="secondary" size="small" @click="step = 1" />
-          <Button label="Confirmer" icon="i-fa-solid-check" size="small" :loading="confirming" @click="confirm" />
+          <Button
+            label="Retour"
+            icon="i-fa-solid-arrow-left"
+            severity="secondary"
+            size="small"
+            @click="step = 1"
+          />
+          <Button
+            label="Confirmer"
+            icon="i-fa-solid-check"
+            size="small"
+            :loading="confirming"
+            @click="confirm"
+          />
         </div>
       </div>
 
@@ -78,12 +95,18 @@
               class="hover"
               :class="{ 'opacity-35': row.action === 'ignore' }"
             >
-              <td class="font-mono text-xs whitespace-nowrap">{{ formatDate(row.bankEntry.date) }}</td>
-              <td class="text-xs max-w-xs">
-                <span class="line-clamp-2" :title="row.bankEntry.description">{{ row.bankEntry.description }}</span>
+              <td class="font-mono text-xs whitespace-nowrap">
+                {{ formatDate(row.bankEntry.date) }}
               </td>
-              <td class="text-right font-mono text-sm whitespace-nowrap"
-                :class="row.bankEntry.amount >= 0 ? 'text-success' : 'text-error'">
+              <td class="text-xs max-w-xs">
+                <span class="line-clamp-2" :title="row.bankEntry.description">{{
+                  row.bankEntry.description
+                }}</span>
+              </td>
+              <td
+                class="text-right font-mono text-sm whitespace-nowrap"
+                :class="row.bankEntry.amount >= 0 ? 'text-success' : 'text-error'"
+              >
                 {{ fmtAmount(row.bankEntry.amount) }}
               </td>
               <td>
@@ -118,9 +141,12 @@
                       v-model="row.editedDescription"
                       class="flex-1"
                       size="small"
-                      style="font-size: 0.75rem;"
+                      style="font-size: 0.75rem"
                     />
-                    <select v-model="row.editedCategory" class="select select-xs select-bordered w-36 shrink-0">
+                    <select
+                      v-model="row.editedCategory"
+                      class="select select-xs select-bordered w-36 shrink-0"
+                    >
                       <option value="">— catégorie —</option>
                       <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
                     </select>
@@ -197,21 +223,24 @@ const categories = computed(() => (settings.value?.ledger_categories ?? []).map(
 
 const onFileSelect = async (event: { files: File[] }) => {
   const file = event.files[0]
-  if (!file) return
+  if (!file) {
+    return
+  }
   loading.value = true
   parseError.value = ''
   try {
     const text = await file.text()
     const bankEntries = camt053.parse(text)
     if (!bankEntries.length) {
-      parseError.value = 'Aucune transaction détectée. Vérifiez que le fichier est bien un export camt.053 valide.'
+      parseError.value =
+        'Aucune transaction détectée. Vérifiez que le fichier est bien un export camt.053 valide.'
       return
     }
     await Promise.all([loadEntries(), loadSettings()])
     initReconciliation(bankEntries, entries.value, settings.value?.ledger_categories ?? [])
     step.value = 2
   } catch (e) {
-    parseError.value = e instanceof Error ? e.message : 'Erreur lors de l\'analyse du fichier.'
+    parseError.value = e instanceof Error ? e.message : "Erreur lors de l'analyse du fichier."
   } finally {
     loading.value = false
   }
@@ -248,7 +277,8 @@ const fmtAmount = (n: number) => {
   const sign = n >= 0 ? '+' : '−'
   const abs = Math.abs(n)
   const [intPart, decPart] = abs.toFixed(2).split('.')
-  const formatted = Number(intPart) >= 10000 ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : intPart
+  const formatted =
+    Number(intPart) >= 10000 ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : intPart
   return `${sign} ${formatted}.${decPart}`
 }
 </script>

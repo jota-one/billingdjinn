@@ -2,7 +2,7 @@
   <Dialog
     :visible="modelValue"
     modal
-    :closable="true"
+    closable
     :style="{ width: '48rem' }"
     @update:visible="$emit('update:modelValue', $event)"
   >
@@ -69,8 +69,7 @@
           <span class="i-fa-solid-list-check"></span>
           <span>
             {{ importResult.processed }} {{ entityLabel }} traité(s) —
-            {{ importResult.created }} créé(s),
-            {{ importResult.updated }} mis à jour,
+            {{ importResult.created }} créé(s), {{ importResult.updated }} mis à jour,
             {{ importResult.unchanged }} inchangé(s)
           </span>
         </div>
@@ -111,7 +110,9 @@
           Format attendu
         </h3>
         <div class="text-xs space-y-1">
-          <p><strong>Colonnes :</strong> <code>{{ columns.join(', ') }}</code></p>
+          <p>
+            <strong>Colonnes :</strong> <code>{{ columns.join(', ') }}</code>
+          </p>
           <p v-if="helpText">{{ helpText }}</p>
         </div>
       </div>
@@ -165,16 +166,28 @@ const handleFileSelect = (e: Event) => {
 const handleExport = async () => {
   try {
     await props.exportFn()
-    toast.add({ severity: 'success', summary: 'Export réussi', detail: 'Fichier CSV téléchargé', life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Export réussi',
+      detail: 'Fichier CSV téléchargé',
+      life: 3000,
+    })
   } catch (e: any) {
     toast.add({ severity: 'error', summary: "Erreur d'export", detail: e.message, life: 5000 })
   }
 }
 
 const handleImport = async () => {
-  if (!selectedFile.value) return
+  if (!selectedFile.value) {
+    return
+  }
   if (!selectedFile.value.name.endsWith('.csv')) {
-    toast.add({ severity: 'error', summary: 'Format invalide', detail: 'Fichier .csv attendu', life: 4000 })
+    toast.add({
+      severity: 'error',
+      summary: 'Format invalide',
+      detail: 'Fichier .csv attendu',
+      life: 4000,
+    })
     return
   }
   try {
@@ -185,9 +198,16 @@ const handleImport = async () => {
       toast.add({ severity: 'success', summary: 'Import terminé', detail: summary, life: 5000 })
       emit('saved')
     } else {
-      toast.add({ severity: 'warn', summary: 'Import partiel', detail: `${summary} — ${result.errors.length} erreur(s)`, life: 6000 })
+      toast.add({
+        severity: 'warn',
+        summary: 'Import partiel',
+        detail: `${summary} — ${result.errors.length} erreur(s)`,
+        life: 6000,
+      })
     }
-    if (fileInputRef.value) fileInputRef.value.value = ''
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
     selectedFile.value = null
   } catch (e: any) {
     toast.add({ severity: 'error', summary: "Erreur d'import", detail: e.message, life: 5000 })

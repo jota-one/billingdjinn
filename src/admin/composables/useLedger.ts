@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import config from '../../config'
+import config from '@/config'
 import PocketBase from 'pocketbase'
 import dayjs from 'dayjs'
 import { scoreCandidate } from '../helpers/ledger'
@@ -78,7 +78,9 @@ export default function useLedger() {
     dueDate: string,
     invoiceAmount: number,
   ): Promise<TLedgerCandidateEntry[]> => {
-    if (!dueDate) return []
+    if (!dueDate) {
+      return []
+    }
     const from = dayjs(dueDate).subtract(60, 'day').format('YYYY-MM-DD')
     const to = dayjs(dueDate).add(60, 'day').format('YYYY-MM-DD')
     const results = await pb.collection<TLedgerEntry>('ledger').getFullList({

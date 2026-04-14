@@ -2,8 +2,8 @@
   <Dialog v-model:visible="visible" modal header="Écriture planifiée trouvée" class="w-[44rem]">
     <div class="py-4">
       <p class="text-sm text-base-content/70 mb-4">
-        La facture correspond-elle à l'une de ces écritures planifiées ?
-        Choisissez-en une pour la convertir en écriture réelle, ou créez-en une nouvelle.
+        La facture correspond-elle à l'une de ces écritures planifiées ? Choisissez-en une pour la
+        convertir en écriture réelle, ou créez-en une nouvelle.
       </p>
 
       <div class="flex flex-col gap-3">
@@ -20,29 +20,23 @@
             </div>
           </div>
           <div class="text-right shrink-0">
-            <div class="font-mono font-semibold text-success">{{ fmtAmount(candidate.amount) }}</div>
-            <div class="text-xs text-base-content/40 mt-0.5">vs {{ fmtAmount(props.invoiceAmount) }}</div>
+            <div class="font-mono font-semibold text-success">
+              {{ fmtAmount(candidate.amount) }}
+            </div>
+            <div class="text-xs text-base-content/40 mt-0.5">
+              vs {{ fmtAmount(props.invoiceAmount) }}
+            </div>
           </div>
           <span class="badge badge-sm shrink-0" :class="scoreBadgeClass(candidate.score)">
             {{ scoreBadgeLabel(candidate.score) }}
           </span>
-          <Button
-            label="Lier"
-            icon="i-fa-solid-link"
-            size="small"
-            @click="link(candidate.id)"
-          />
+          <Button label="Lier" icon="i-fa-solid-link" size="small" @click="link(candidate.id)" />
         </div>
       </div>
     </div>
 
     <div class="flex justify-between gap-2 pt-4 border-t border-base-300">
-      <Button
-        type="button"
-        label="Ignorer"
-        severity="secondary"
-        @click="skip"
-      />
+      <Button type="button" label="Ignorer" severity="secondary" @click="skip" />
       <Button
         type="button"
         label="Créer une nouvelle écriture"
@@ -97,14 +91,22 @@ const fmtAmount = (n: number): string => {
 }
 
 const scoreBadgeClass = (score: number) => {
-  if (score >= 0.7) return 'badge-success'
-  if (score >= 0.4) return 'badge-warning'
+  if (score >= 0.7) {
+    return 'badge-success'
+  }
+  if (score >= 0.4) {
+    return 'badge-warning'
+  }
   return 'badge-neutral'
 }
 
 const scoreBadgeLabel = (score: number) => {
-  if (score >= 0.7) return 'Haute'
-  if (score >= 0.4) return 'Moyenne'
+  if (score >= 0.7) {
+    return 'Haute'
+  }
+  if (score >= 0.4) {
+    return 'Moyenne'
+  }
   return 'Basse'
 }
 </script>

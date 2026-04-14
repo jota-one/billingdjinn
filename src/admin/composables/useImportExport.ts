@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import config from '../../config'
+import config from '@/config'
 import PocketBase from 'pocketbase'
 import type { FieldConfig, ImportResult } from '../types/import-export'
 
@@ -18,7 +18,7 @@ export default function useImportExport(
 
   const log = (level: 'info' | 'warn' | 'error', msg: string, payload?: Record<string, any>) => {
     const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log
-    payload ? fn(`[${collectionName}] ${msg}`, payload) : fn(`[${collectionName}] ${msg}`)
+    return payload ? fn(`[${collectionName}] ${msg}`, payload) : fn(`[${collectionName}] ${msg}`)
   }
 
   // ─── export ────────────────────────────────────────────────────────────────
@@ -73,20 +73,26 @@ export default function useImportExport(
 
     try {
       const rows = parseCSV(await file.text())
-      if (rows.length < 2) throw new Error('Fichier CSV vide ou invalide')
+      if (rows.length < 2) {
+        throw new Error('Fichier CSV vide ou invalide')
+      }
 
       const headers = rows[0]
 
       for (let i = 1; i < rows.length; i++) {
         const values = rows[i]
-        if (!values || values.every(v => v === '')) continue
+        if (!values || values.every(v => v === '')) {
+          continue
+        }
 
         try {
           const record: any = {}
 
           for (const [idx, header] of headers.entries()) {
             const fieldConfig = getFieldConfig(header)
-            if (!fieldConfig?.importable) continue
+            if (!fieldConfig?.importable) {
+              continue
+            }
             const raw = values[idx] || ''
             record[header] = fieldConfig.formatter?.import
               ? await fieldConfig.formatter.import(raw, record)
@@ -132,7 +138,9 @@ export default function useImportExport(
             const fieldErrors = Object.entries(pbErr.data)
               .map(([f, e]: [string, any]) => `${f}: ${e?.message || String(e)}`)
               .join('; ')
-            if (fieldErrors) msg = fieldErrors
+            if (fieldErrors) {
+              msg = fieldErrors
+            }
           } else if (pbErr?.message) {
             msg = pbErr.message
           }
@@ -158,13 +166,19 @@ export default function useImportExport(
   // ─── utilities ─────────────────────────────────────────────────────────────
 
   const escapeCSV = (v: string): string => {
-    if (!v) return ''
-    if (v.includes(',') || v.includes('"') || v.includes('\n')) return `"${v.replace(/"/g, '""')}"`
+    if (!v) {
+      return ''
+    }
+    if (v.includes(',') || v.includes('"') || v.includes('\n')) {
+      return `"${v.replace(/"/g, '""')}"`
+    }
     return v
   }
 
   const unescapeCSV = (v: string): string => {
-    if (v.startsWith('"') && v.endsWith('"')) return v.slice(1, -1).replace(/""/g, '"')
+    if (v.startsWith('"') && v.endsWith('"')) {
+      return v.slice(1, -1).replace(/""/g, '"')
+    }
     return v
   }
 
@@ -181,15 +195,21 @@ export default function useImportExport(
         if (inQuotes && next === '"') {
           current += '"'
           i++
-        } else inQuotes = !inQuotes
+        } else {
+          inQuotes = !inQuotes
+        }
         continue
       }
       if (!inQuotes && (c === '\n' || c === '\r')) {
         row.push(current)
         current = ''
-        if (!(row.length === 1 && row[0] === '')) rows.push(row)
+        if (!(row.length === 1 && row[0] === '')) {
+          rows.push(row)
+        }
         row = []
-        if (c === '\r' && next === '\n') i++
+        if (c === '\r' && next === '\n') {
+          i++
+        }
         continue
       }
       if (!inQuotes && c === ',') {
@@ -200,7 +220,9 @@ export default function useImportExport(
       current += c
     }
     row.push(current)
-    if (!(row.length === 1 && row[0] === '')) rows.push(row)
+    if (!(row.length === 1 && row[0] === '')) {
+      rows.push(row)
+    }
     return rows
   }
 
@@ -219,8 +241,9 @@ export default function useImportExport(
   const recordDiff = (incoming: Record<string, any>, existing: Record<string, any>) => {
     const diffs: Array<{ key: string; incoming: any; existing: any }> = []
     for (const key of Object.keys(incoming).filter(k => k !== 'id')) {
-      if (!isEqualValue(incoming[key], existing[key], key))
+      if (!isEqualValue(incoming[key], existing[key], key)) {
         diffs.push({ key, incoming: incoming[key], existing: existing[key] })
+      }
     }
     return { hasChanges: diffs.length > 0, diffs }
   }
@@ -231,7 +254,9 @@ export default function useImportExport(
         await pb.collection(collectionName).getFirstListItem(`${f.key}="${record[f.key]}"`)
         throw new Error(`${f.label} "${record[f.key]}" existe déjà`)
       } catch (e: any) {
-        if (e?.status === 404) continue
+        if (e?.status === 404) {
+          continue
+        }
         throw e
       }
     }
@@ -239,10 +264,16 @@ export default function useImportExport(
 
   const isEqualValue = (a: any, b: any, key?: string): boolean => {
     const norm = (v: any) => {
-      if (v === '') return null
+      if (v === '') {
+        return null
+      }
       const fc = key ? getFieldConfig(key) : undefined
-      if (Array.isArray(v)) return [...v].sort()
-      if (fc?.formatter?.import) return fc.formatter.import(String(v ?? ''))
+      if (Array.isArray(v)) {
+        return [...v].sort((a, b) => a - b)
+      }
+      if (fc?.formatter?.import) {
+        return fc.formatter.import(String(v ?? ''))
+      }
       return v ?? null
     }
     const na = norm(a),

@@ -21,7 +21,7 @@ export const DEFAULT_LABELS: Required<TInvoiceLabels> = {
 function cleanLabels(labels?: TInvoiceLabels | null): TInvoiceLabels {
   if (!labels) return {}
   return Object.fromEntries(
-    Object.entries(labels).filter(([, v]) => v !== '' && v != null),
+    Object.entries(labels).filter(([, v]) => v !== '' && v !== null && v !== undefined),
   ) as TInvoiceLabels
 }
 

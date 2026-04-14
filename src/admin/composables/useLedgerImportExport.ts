@@ -1,6 +1,6 @@
 import PocketBase from 'pocketbase'
 import useImportExport from './useImportExport'
-import config from '../../config'
+import config from '@/config'
 import {
   getExportableFields,
   getImportableFields,
@@ -25,7 +25,9 @@ async function syncNewCategoriesToSettings(): Promise<void> {
   const pb = new PocketBase(config.apiBaseUrl)
   const [entries, settings] = await Promise.all([
     pb.collection<{ category: string }>('ledger').getFullList({ fields: 'category' }),
-    pb.collection<{ id: string; ledger_categories: string[] }>('company_settings').getFirstListItem(''),
+    pb
+      .collection<{ id: string; ledger_categories: string[] }>('company_settings')
+      .getFirstListItem(''),
   ])
 
   const usedCategories = [...new Set(entries.map(e => e.category ?? '').filter(Boolean))]
