@@ -20,7 +20,7 @@
     "@primeuix/themes": "^2.0.3",
     "@tailwindcss/vite": "^4.1.4",
     "@vueuse/core": "^14.1.0",
-    "astro": "^5.17.1",
+    "astro": "^5.18.1",
     "chart.js": "^4.5.1",
     "dayjs": "^1.11.19",
     "marked": "^17.0.1",
