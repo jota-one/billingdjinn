@@ -32,11 +32,11 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import PbErrorToast from '../components/PbErrorToast.vue'
-import LedgerEntryForm from '../components/LedgerEntryForm.vue'
-import useLedger from '../composables/useLedger'
-import usePbErrorToast from '../composables/usePbErrorToast'
-import type { TLedgerEntry } from '../composables/useLedger'
+import PbErrorToast from '@/admin/components/PbErrorToast.vue'
+import LedgerEntryForm from '@/admin/components/LedgerEntryForm.vue'
+import useLedger from '@/admin/composables/useLedger'
+import usePbErrorToast from '@/admin/composables/usePbErrorToast'
+import type { TLedgerEntry } from '@/admin/composables/useLedger'
 
 const { loadEntry, updateEntry } = useLedger()
 const { showPbError } = usePbErrorToast()
@@ -54,6 +54,7 @@ const form = ref({
   date: '',
   description: '',
   category_id: '',
+  profit_center_id: '',
   amount: null as number | null,
   is_checked: false,
   fiscal_year: null as number | null,
@@ -85,6 +86,7 @@ onMounted(async () => {
       date: loaded.date ? loaded.date.substring(0, 10) : '',
       description: loaded.description || '',
       category_id: loaded.category_id || '',
+      profit_center_id: loaded.profit_center_id || '',
       amount: loaded.amount ?? null,
       is_checked: loaded.is_checked ?? false,
       fiscal_year: loaded.fiscal_year || null,

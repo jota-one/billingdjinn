@@ -16,6 +16,8 @@ Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organis
 
 ## Historique (fait)
 
+- [2026-04-14] Comptabilité analytique — collection `profit_centers`, clés de répartition par catégorie (`allocation_keys`), override direct sur les écritures du Grand Livre (`profit_center_id`). Logique 3 niveaux : Tier 1 (direct), Tier 2 (clés de répartition), Tier 3 (ratio CA). Vue `/analytics` avec tableau et graphique en barres. Personas seed mis à jour (small-biz : Tier 3 pur, pme : 3 tiers avec overrides).
+
 - [2026-04-14] Refactoring catégories du Grand Livre — `ledger.category` (texte libre) remplacé par une relation vers une collection `categories` dédiée (nom + patterns). CRUD des catégories dans les Settings. Migration en deux temps : migrations PocketBase (1776211200 + 1776211201) puis script `migrate-categories.js --commit`, puis migration 1776211202 qui supprime l'ancien champ et recrée la vue `ledger_stats` avec JOIN.
 
 - [2026-04-12] Rapprochement bancaire → matching automatique des factures — Lors de la confirmation d'une réconciliation, les écritures de catégorie « Facture » déclenchent une recherche automatique dans les factures envoyées (scoring date+montant via `invoice_totals`). Si un candidat dépasse le seuil de confiance (0.5), la facture est marquée payée et liée à l'écriture du ledger.

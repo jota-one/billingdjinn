@@ -21,10 +21,10 @@
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import PbErrorToast from '../components/PbErrorToast.vue'
-import LedgerEntryForm from '../components/LedgerEntryForm.vue'
-import useLedger from '../composables/useLedger'
-import usePbErrorToast from '../composables/usePbErrorToast'
+import PbErrorToast from '@/admin/components/PbErrorToast.vue'
+import LedgerEntryForm from '@/admin/components/LedgerEntryForm.vue'
+import useLedger from '@/admin/composables/useLedger'
+import usePbErrorToast from '@/admin/composables/usePbErrorToast'
 
 const { createEntry } = useLedger()
 const { showPbError } = usePbErrorToast()
@@ -37,6 +37,7 @@ const form = ref({
   date: new Date().toISOString().substring(0, 10),
   description: '',
   category_id: '',
+  profit_center_id: '',
   amount: null as number | null,
   is_checked: false,
   fiscal_year: null as number | null,

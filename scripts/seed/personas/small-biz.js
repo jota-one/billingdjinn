@@ -21,20 +21,18 @@ export const config = {
     tva_number: 'CHE-412.345.678 TVA',
     payment_terms: 30,
     currency: 'CHF',
-    ledger_categories: [
-      'Revenu',
-      'Frais',
-      'Salaire',
-      'AVS',
-      'LPP',
-      'LAA',
-      'Assurance',
-      'TVA',
-      'Fiduciaire',
-      'Mastercard',
-      'Impôt',
-    ].map(name => ({ name, patterns: [] })),
   },
+
+  categories: [
+    'Revenu', 'Frais', 'Salaire', 'AVS', 'LPP', 'LAA',
+    'Assurance', 'TVA', 'Fiduciaire', 'Mastercard', 'Impôt',
+  ],
+
+  profitCenters: [
+    { name: 'Conseil',   color: '#3b82f6' },
+    { name: 'Formation', color: '#22c55e' },
+  ],
+  // Pas d'allocationKeys → tout passe par le ratio CA (Tier 3)
 
   clients: [
     // Retainer clients (fixed monthly amount)
