@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue'
-import useAuth from '@admin/composables/useAuth'
+import useAuth from '@/admin/composables/useAuth'
 
 const emit = defineEmits<{
   loginSuccess: []

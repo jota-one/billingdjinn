@@ -3,7 +3,7 @@ import { scoreCandidate } from './ledger'
 import { detectCategory } from '../utils/matchPattern'
 import type { TLedgerEntry, TLedgerCandidateEntry } from '../composables/useLedger'
 import type { TBankEntry } from '../types/bank-entry'
-import type { TLedgerCategory } from '../types/ledger-category'
+import type { TCategory } from '../types/category'
 
 export type ReconciliationAction = 'link' | 'create' | 'ignore'
 
@@ -13,7 +13,7 @@ export interface TReconciliationRow {
   action: ReconciliationAction
   linkedEntryId: string | null
   editedDescription: string
-  editedCategory: string
+  editedCategoryId: string
   editedDate: string
   editedAmount: number
 }
@@ -29,7 +29,7 @@ const DATE_WINDOW_DAYS = 15
 export function buildReconciliation(
   bankEntries: TBankEntry[],
   plannedEntries: TLedgerEntry[],
-  categories: TLedgerCategory[],
+  categories: TCategory[],
 ): TReconciliationRow[] {
   interface Pair {
     bankIdx: number
@@ -46,10 +46,16 @@ export function buildReconciliation(
 
     for (let ei = 0; ei < plannedEntries.length; ei++) {
       const entry = plannedEntries[ei]
-      if (Math.sign(bank.amount) !== Math.sign(entry.amount)) continue
-      if (entry.date < from || entry.date > to) continue
+      if (Math.sign(bank.amount) !== Math.sign(entry.amount)) {
+        continue
+      }
+      if (entry.date < from || entry.date > to) {
+        continue
+      }
       const score = scoreCandidate(entry, bankDate, bank.amount, DATE_WINDOW_DAYS)
-      if (score > SCORE_THRESHOLD) pairs.push({ bankIdx: bi, entryIdx: ei, score })
+      if (score > SCORE_THRESHOLD) {
+        pairs.push({ bankIdx: bi, entryIdx: ei, score })
+      }
     }
   }
 
@@ -60,7 +66,9 @@ export function buildReconciliation(
   const matchMap = new Map<number, number>()
 
   for (const pair of pairs) {
-    if (assignedBankIdxs.has(pair.bankIdx) || assignedEntryIdxs.has(pair.entryIdx)) continue
+    if (assignedBankIdxs.has(pair.bankIdx) || assignedEntryIdxs.has(pair.entryIdx)) {
+      continue
+    }
     matchMap.set(pair.bankIdx, pair.entryIdx)
     assignedBankIdxs.add(pair.bankIdx)
     assignedEntryIdxs.add(pair.entryIdx)
@@ -80,7 +88,7 @@ export function buildReconciliation(
 
     const matchedEntryIdx = matchMap.get(bi) ?? null
     const linkedEntryId = matchedEntryIdx !== null ? plannedEntries[matchedEntryIdx].id : null
-    const suggestedCategory = detectCategory(bank.description, categories)
+    const suggestedCategoryId = detectCategory(bank.description, categories)
 
     const matchedEntry = matchedEntryIdx !== null ? plannedEntries[matchedEntryIdx] : null
     const action: ReconciliationAction = matchedEntry
@@ -95,7 +103,7 @@ export function buildReconciliation(
       action,
       linkedEntryId,
       editedDescription: matchedEntry?.description ?? bank.description,
-      editedCategory: matchedEntry?.category ?? suggestedCategory ?? '',
+      editedCategoryId: matchedEntry?.category_id ?? suggestedCategoryId ?? '',
       editedDate: bank.date,
       editedAmount: bank.amount,
     } satisfies TReconciliationRow

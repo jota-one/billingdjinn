@@ -1,6 +1,6 @@
 import { computed, ref, type Ref } from 'vue'
 import PocketBase from 'pocketbase'
-import config from '../../config'
+import config from '@/config'
 import type { TInvoiceTotal } from './useInvoiceTotals'
 
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
@@ -207,12 +207,21 @@ export default function useDashboard(selectedYear: Ref<number>) {
     const sorted = [...map.values()].sort((a, b) => b.ca - a.ca).slice(0, 8)
     return {
       labels: sorted.map(c => c.name),
-      datasets: [{ label: 'CA HT payé', data: sorted.map(c => Math.round(c.ca * 100) / 100), backgroundColor: CLIENT_COLORS, borderRadius: 4 }],
+      datasets: [
+        {
+          label: 'CA HT payé',
+          data: sorted.map(c => Math.round(c.ca * 100) / 100),
+          backgroundColor: CLIENT_COLORS,
+          borderRadius: 4,
+        },
+      ],
     }
   }
 
   const topClientsChartData = computed(() => {
-    const list = invoices.value.filter(i => i.status === 'paid' && i.date?.startsWith(String(selectedYear.value)))
+    const list = invoices.value.filter(
+      i => i.status === 'paid' && i.date?.startsWith(String(selectedYear.value)),
+    )
     return buildTopClientsChart(list)
   })
 

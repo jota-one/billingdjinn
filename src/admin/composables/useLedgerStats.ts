@@ -1,6 +1,6 @@
 import { computed, ref, type Ref } from 'vue'
 import PocketBase from 'pocketbase'
-import config from '../../config'
+import config from '@/config'
 
 interface TLedgerStatRow {
   id: string
@@ -61,7 +61,9 @@ export default function useLedgerStats(selectedYear: Ref<number>) {
   )
 
   const ratioCharges = computed(() => {
-    if (totalRevenu.value === 0) return null
+    if (totalRevenu.value === 0) {
+      return null
+    }
     return Math.round((totalCharges.value / totalRevenu.value) * 1000) / 10
   })
 

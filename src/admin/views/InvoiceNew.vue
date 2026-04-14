@@ -10,7 +10,13 @@
       </h2>
     </div>
 
-    <InvoiceForm v-model:form="form" v-model:lines="lines" :clients="clients" :default-rate="defaultRate" :currency="defaultCurrency" />
+    <InvoiceForm
+      v-model:form="form"
+      v-model:lines="lines"
+      :clients="clients"
+      :default-rate="defaultRate"
+      :currency="defaultCurrency"
+    />
 
     <div class="flex justify-end mt-6">
       <Button
@@ -60,47 +66,72 @@ const form = ref<TInvoiceForm>({
   converted_amount: null,
 })
 
-const lines = ref<TInvoiceLineForm[]>([
-  { description: '', quantity: 1, unit_price: 0 },
-])
+const lines = ref<TInvoiceLineForm[]>([{ description: '', quantity: 1, unit_price: 0 }])
 
 const selectedClient = computed(() => clients.value.find(c => c.id === form.value.client))
-const defaultRate = computed(() => selectedClient.value?.hourly_rate ?? settings.value?.hourly_rate ?? 0)
-const defaultCurrency = computed(() => selectedClient.value?.currency || settings.value?.currency || 'CHF')
+const defaultRate = computed(
+  () => selectedClient.value?.hourly_rate ?? settings.value?.hourly_rate ?? 0,
+)
+const defaultCurrency = computed(
+  () => selectedClient.value?.currency || settings.value?.currency || 'CHF',
+)
 
 const computeDueDate = (baseDate: string, terms: number | undefined): string => {
-  if (!baseDate || !terms) return ''
+  if (!baseDate || !terms) {
+    return ''
+  }
   const due = new Date(baseDate)
   due.setDate(due.getDate() + terms)
   return due.toISOString().substring(0, 10)
 }
 
 // Quand le client change : appliquer son tarif horaire sur les lignes vides + recalculer l'échéance
-watch(() => form.value.client, () => {
-  const client = selectedClient.value
-  const rate = client?.hourly_rate ?? settings.value?.hourly_rate ?? 0
-  lines.value.forEach(line => {
-    if (!line.unit_price) line.unit_price = rate
-  })
-  const terms = client?.payment_terms ?? settings.value?.payment_terms
-  form.value.due_date = computeDueDate(form.value.date, terms)
-})
+watch(
+  () => form.value.client,
+  () => {
+    const client = selectedClient.value
+    const rate = client?.hourly_rate ?? settings.value?.hourly_rate ?? 0
+    lines.value.forEach(line => {
+      if (!line.unit_price) {
+        line.unit_price = rate
+      }
+    })
+    const terms = client?.payment_terms ?? settings.value?.payment_terms
+    form.value.due_date = computeDueDate(form.value.date, terms)
+  },
+)
 
 // Quand la date change : recalculer l'échéance
-watch(() => form.value.date, (newDate) => {
-  const terms = selectedClient.value?.payment_terms ?? settings.value?.payment_terms
-  form.value.due_date = computeDueDate(newDate, terms)
-})
+watch(
+  () => form.value.date,
+  newDate => {
+    const terms = selectedClient.value?.payment_terms ?? settings.value?.payment_terms
+    form.value.due_date = computeDueDate(newDate, terms)
+  },
+)
 
 const save = async () => {
   if (!form.value.client) {
-    toast.add({ severity: 'warn', summary: 'Client requis', detail: 'Veuillez sélectionner un client.', life: 3000 })
+    toast.add({
+      severity: 'warn',
+      summary: 'Client requis',
+      detail: 'Veuillez sélectionner un client.',
+      life: 3000,
+    })
     return
   }
   saving.value = true
   try {
-    await createInvoice(form.value, lines.value.filter(l => l.description.trim()))
-    toast.add({ severity: 'success', summary: 'Créée', detail: `Facture ${form.value.invoice_number} créée.`, life: 3000 })
+    await createInvoice(
+      form.value,
+      lines.value.filter(l => l.description.trim()),
+    )
+    toast.add({
+      severity: 'success',
+      summary: 'Créée',
+      detail: `Facture ${form.value.invoice_number} créée.`,
+      life: 3000,
+    })
     router.push('/invoices')
   } catch (e) {
     showPbError(e)

@@ -11,7 +11,9 @@ import type { TInvoiceLabels } from '../types/invoice-labels'
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 export const formatDate = (iso?: string) => {
-  if (!iso) return ''
+  if (!iso) {
+    return ''
+  }
   const d = new Date(iso)
   return d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
@@ -23,18 +25,6 @@ export const formatCurrency = (n: number, currency: string) =>
     .replace(/\u00A0/g, ' ')
 
 const lineTotal = (l: { quantity: number; unit_price: number }) => l.quantity * l.unit_price
-
-const logoContent = (logo: string | null | undefined): Content => {
-  if (!logo) return { text: '' }
-  if (/^data:image\/svg\+xml/i.test(logo)) {
-    const svgString = atob(logo.split(',')[1])
-    return { svg: svgString, width: 90, margin: [0, 0, 0, 4] }
-  }
-  if (/^data:image\/(jpeg|jpg|png)/i.test(logo)) {
-    return { image: logo, width: 60, margin: [0, 0, 0, 4] }
-  }
-  return { text: '' }
-}
 
 // ─── design tokens ───────────────────────────────────────────────────────────
 
@@ -86,8 +76,12 @@ export default function buildDocDef(
 
   // ── client + meta side by side ──
   const clientLines = [client.name]
-  if (client.contact_person) clientLines.push(client.contact_person)
-  if (client.address) clientLines.push(client.address)
+  if (client.contact_person) {
+    clientLines.push(client.contact_person)
+  }
+  if (client.address) {
+    clientLines.push(client.address)
+  }
 
   const metaRows: Content[] = [
     {

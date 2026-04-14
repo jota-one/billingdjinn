@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import config from '../../config'
+import config from '@/config'
 import PocketBase from 'pocketbase'
 import type { TInvoiceLabels } from '../types/invoice-labels'
 
@@ -90,19 +90,35 @@ export default function useClients() {
 function buildFormData(payload: TClientForm): FormData {
   const fd = new FormData()
   fd.append('name', payload.name.trim())
-  if (payload.address !== undefined) fd.append('address', payload.address)
-  if (payload.email !== undefined) fd.append('email', payload.email)
-  if (payload.phone !== undefined) fd.append('phone', payload.phone)
-  if (payload.contact_person !== undefined) fd.append('contact_person', payload.contact_person)
+  if (payload.address !== undefined) {
+    fd.append('address', payload.address)
+  }
+  if (payload.email !== undefined) {
+    fd.append('email', payload.email)
+  }
+  if (payload.phone !== undefined) {
+    fd.append('phone', payload.phone)
+  }
+  if (payload.contact_person !== undefined) {
+    fd.append('contact_person', payload.contact_person)
+  }
   if (payload.hourly_rate !== null && payload.hourly_rate !== undefined) {
     fd.append('hourly_rate', String(payload.hourly_rate))
   }
   if (payload.payment_terms !== null && payload.payment_terms !== undefined) {
     fd.append('payment_terms', String(payload.payment_terms))
   }
-  if (payload.currency) fd.append('currency', payload.currency)
-  if (payload.notes !== undefined) fd.append('notes', payload.notes)
-  if (payload.date_acquisition) fd.append('date_acquisition', payload.date_acquisition)
-  if (payload.labels !== undefined) fd.append('labels', JSON.stringify(payload.labels))
+  if (payload.currency) {
+    fd.append('currency', payload.currency)
+  }
+  if (payload.notes !== undefined) {
+    fd.append('notes', payload.notes)
+  }
+  if (payload.date_acquisition) {
+    fd.append('date_acquisition', payload.date_acquisition)
+  }
+  if (payload.labels !== undefined) {
+    fd.append('labels', JSON.stringify(payload.labels))
+  }
   return fd
 }

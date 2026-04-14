@@ -1,7 +1,7 @@
 {
   "name": "billingdjinn",
-  "type": "module",
   "version": "0.0.1",
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
@@ -9,7 +9,8 @@
     "astro": "astro",
     "lint": "oxlint --type-aware",
     "format": "oxfmt",
-    "db": "cd pb && ./pocketbase serve --http=127.0.0.1:8092"
+    "db": "cd pb && ./pocketbase serve --http=127.0.0.1:8092",
+    "seed-demo": "node scripts/seed-demo.js"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",

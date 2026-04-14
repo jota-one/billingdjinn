@@ -11,11 +11,7 @@
     </div>
 
     <div class="card bg-base-200 p-6 max-w-2xl">
-      <LedgerEntryForm
-        v-model:form="form"
-        :saving="saving"
-        @submit="save"
-      />
+      <LedgerEntryForm v-model:form="form" :saving="saving" @submit="save" />
     </div>
   </div>
   <PbErrorToast />
@@ -40,7 +36,7 @@ const saving = ref(false)
 const form = ref({
   date: new Date().toISOString().substring(0, 10),
   description: '',
-  category: '',
+  category_id: '',
   amount: null as number | null,
   is_checked: false,
   fiscal_year: null as number | null,
@@ -50,7 +46,12 @@ const save = async () => {
   saving.value = true
   try {
     const created = await createEntry({ ...form.value })
-    toast.add({ severity: 'success', summary: 'Enregistré', detail: 'L\'écriture a été créée.', life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Enregistré',
+      detail: "L'écriture a été créée.",
+      life: 3000,
+    })
     router.push({ path: '/ledger', query: { focus: created.id } })
   } catch (e) {
     showPbError(e)

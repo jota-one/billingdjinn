@@ -11,7 +11,9 @@ import type { TInvoiceLabels } from '../types/invoice-labels'
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 export const formatDate = (iso?: string) => {
-  if (!iso) return ''
+  if (!iso) {
+    return ''
+  }
   const d = new Date(iso)
   return d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
@@ -25,7 +27,9 @@ export const formatCurrency = (n: number, currency: string) =>
 const lineTotal = (l: { quantity: number; unit_price: number }) => l.quantity * l.unit_price
 
 const logoContent = (logo: string | null | undefined): Content => {
-  if (!logo) return { text: '' }
+  if (!logo) {
+    return { text: '' }
+  }
   if (/^data:image\/svg\+xml/i.test(logo)) {
     const svgString = atob(logo.split(',')[1])
     return { svg: svgString, width: 100, margin: [0, 0, 0, 0] }
@@ -71,9 +75,15 @@ export default function buildDocDef(
 
   // ── client block ──
   const clientLines = [client.name]
-  if (client.contact_person) clientLines.push(client.contact_person)
-  if (client.address) clientLines.push(client.address)
-  if (client.email) clientLines.push(client.email)
+  if (client.contact_person) {
+    clientLines.push(client.contact_person)
+  }
+  if (client.address) {
+    clientLines.push(client.address)
+  }
+  if (client.email) {
+    clientLines.push(client.email)
+  }
 
   const clientBlock: Content = {
     stack: [

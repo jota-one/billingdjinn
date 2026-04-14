@@ -26,7 +26,9 @@
           :feedback="false"
           toggleMask
         />
-        <p class="text-sm text-gray-500">Laissez vide si vous ne voulez pas changer le mot de passe</p>
+        <p class="text-sm text-gray-500">
+          Laissez vide si vous ne voulez pas changer le mot de passe
+        </p>
       </div>
 
       <div v-if="form.password" class="flex flex-col gap-2">
@@ -190,13 +192,20 @@ const loadRolesData = async () => {
   }
 }
 
-watch(visible, async (isVisible) => {
-  if (isVisible) {
-    await Promise.all([loadUserData(), loadRolesData()])
-  }
-}, { immediate: true })
+watch(
+  visible,
+  async isVisible => {
+    if (isVisible) {
+      await Promise.all([loadUserData(), loadRolesData()])
+    }
+  },
+  { immediate: true },
+)
 
-watch(() => props.userId, async () => {
-  await loadUserData()
-})
+watch(
+  () => props.userId,
+  async () => {
+    await loadUserData()
+  },
+)
 </script>

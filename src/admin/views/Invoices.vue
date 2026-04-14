@@ -17,7 +17,12 @@
           <Button label="Nouvelle facture" icon="i-fa-solid-plus" size="small" />
         </RouterLink>
       </div>
-      <DataTable :value="invoices" sort-field="date" :sort-order="-1" table-style="min-width: 50rem">
+      <DataTable
+        :value="invoices"
+        sort-field="date"
+        :sort-order="-1"
+        table-style="min-width: 50rem"
+      >
         <Column field="invoice_number" header="N° Facture" sortable>
           <template #body="{ data }">
             <RouterLink :to="`/invoices/${data.id}`" class="link link-hover font-mono font-medium">
@@ -38,24 +43,24 @@
             </span>
           </template>
         </Column>
-        <Column header="Total HT" style="width: 110px;" class="text-right">
+        <Column header="Total HT" style="width: 110px" class="text-right">
           <template #body="{ data }">
             <span class="font-mono text-sm">{{ formatAmount(data.total_ht) }}</span>
           </template>
         </Column>
-        <Column header="Total TTC" style="width: 110px;" class="text-right">
+        <Column header="Total TTC" style="width: 110px" class="text-right">
           <template #body="{ data }">
             <span class="font-mono text-sm">{{ formatAmount(data.total_ttc) }}</span>
           </template>
         </Column>
-        <Column field="status" header="Statut" style="width: 110px;">
+        <Column field="status" header="Statut" style="width: 110px">
           <template #body="{ data }">
             <span class="badge badge-sm" :class="STATUS_BADGE[data.status as TInvoiceStatus]">
               {{ STATUS_LABELS[data.status as TInvoiceStatus] }}
             </span>
           </template>
         </Column>
-        <Column header="Actions" style="width: 115px;">
+        <Column header="Actions" style="width: 115px">
           <template #body="{ data }">
             <div class="flex gap-2">
               <RouterLink :to="`/invoices/${data.id}`">
@@ -69,7 +74,13 @@
                 :disabled="downloadingId === data.id"
                 @click="downloadPdf(data)"
               >
-                <span :class="downloadingId === data.id ? 'i-fa-solid-spinner animate-spin' : 'i-fa6-solid-file-arrow-down'"></span>
+                <span
+                  :class="
+                    downloadingId === data.id
+                      ? 'i-fa-solid-spinner animate-spin'
+                      : 'i-fa6-solid-file-arrow-down'
+                  "
+                ></span>
               </button>
               <button class="btn btn-xs btn-ghost" title="Supprimer" @click="confirmDelete(data)">
                 <span class="i-fa-solid-trash"></span>
@@ -77,7 +88,9 @@
             </div>
           </template>
         </Column>
-        <template #footer>{{ invoices.length }} facture{{ invoices.length !== 1 ? 's' : '' }}</template>
+        <template #footer
+          >{{ invoices.length }} facture{{ invoices.length !== 1 ? 's' : '' }}</template
+        >
       </DataTable>
     </div>
 
@@ -112,9 +125,15 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ImportExportModal from '../components/ImportExportModal.vue'
-import useInvoices, { STATUS_BADGE, STATUS_LABELS, type TInvoiceStatus } from '../composables/useInvoices'
+import useInvoices, {
+  STATUS_BADGE,
+  STATUS_LABELS,
+  type TInvoiceStatus,
+} from '../composables/useInvoices'
 import useInvoiceTotals, { type TInvoiceTotal } from '../composables/useInvoiceTotals'
-import useInvoicesImportExport, { INVOICE_IMPORT_COLUMNS } from '../composables/useInvoicesImportExport'
+import useInvoicesImportExport, {
+  INVOICE_IMPORT_COLUMNS,
+} from '../composables/useInvoicesImportExport'
 import { downloadInvoicePdf } from '../composables/useInvoicePdf'
 
 const { deleteInvoice, loadInvoiceLines } = useInvoices()
@@ -143,7 +162,9 @@ const formatAmount = (n: number) =>
   new Intl.NumberFormat('fr-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
 
 const isOverdue = (invoice: TInvoiceTotal) => {
-  if (!invoice.due_date || invoice.status === 'paid') return false
+  if (!invoice.due_date || invoice.status === 'paid') {
+    return false
+  }
   return dayjs(invoice.due_date).isBefore(dayjs(), 'day')
 }
 
@@ -154,7 +175,9 @@ const confirmDelete = (invoice: TInvoiceTotal) => {
 }
 
 const deleteConfirmed = async () => {
-  if (!invoiceToDelete.value) return
+  if (!invoiceToDelete.value) {
+    return
+  }
   await deleteInvoice(invoiceToDelete.value.id)
   await loadInvoiceTotals()
   showDeleteModal.value = false

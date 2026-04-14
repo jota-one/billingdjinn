@@ -14,7 +14,7 @@
         />
       </div>
       <DataTable :value="users" sortField="created" :sortOrder="-1" tableStyle="min-width: 50rem">
-        <Column style="width: 80px;" :header="''">
+        <Column style="width: 80px" :header="''">
           <template #body="slotProps">
             <img
               v-if="slotProps.data.avatar"
@@ -64,7 +64,7 @@
             <span>{{ formatDate(slotProps.data.created) }}</span>
           </template>
         </Column>
-        <Column header="Actions" style="width: 120px;">
+        <Column header="Actions" style="width: 120px">
           <template #body="slotProps">
             <div class="flex gap-2">
               <button
@@ -95,8 +95,8 @@
         <template #footer>Nombre total d'utilisateurs : {{ users ? users.length : 0 }}</template>
       </DataTable>
     </div>
-    <UserAddModal v-model="showAddModal" @saved="loadUsers" />
-    <UserEditModal
+    <UserFormModal v-model="showAddModal" @saved="loadUsers" />
+    <UserFormModal
       v-if="editedUser?.id"
       v-model="showEditModal"
       :user-id="editedUser.id"
@@ -120,8 +120,7 @@ import type { TUser } from '../composables/useUsers'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
-import UserAddModal from '../components/UserAddModal.vue'
-import UserEditModal from '../components/UserEditModal.vue'
+import UserFormModal from '../components/UserFormModal.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 
 const { users, loadUsers, deleteUser, getAvatarUrl } = useUsers()
@@ -152,7 +151,9 @@ const confirmDelete = (user: TUser) => {
 }
 
 const deleteUserConfirmed = async () => {
-  if (!editedUser.value) return
+  if (!editedUser.value) {
+    return
+  }
   try {
     await deleteUser(editedUser.value.id)
     await loadUsers()

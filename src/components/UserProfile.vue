@@ -10,18 +10,17 @@
         <div v-if="avatarUrl" class="flex-shrink-0">
           <img :src="avatarUrl" :alt="user.name" class="w-20 h-20 rounded-full object-cover" />
         </div>
-        <div v-else class="w-20 h-20 rounded-full bg-base-300 flex items-center justify-center flex-shrink-0">
+        <div
+          v-else
+          class="w-20 h-20 rounded-full bg-base-300 flex items-center justify-center flex-shrink-0"
+        >
           <span class="i-fa-solid-user text-3xl text-base-content/40"></span>
         </div>
         <div>
           <p class="text-xl font-semibold">{{ user.name || '—' }}</p>
           <p class="text-base-content/70 text-sm">{{ user.email }}</p>
           <div class="flex gap-1 mt-1">
-            <span
-              v-for="role in expandedRoles"
-              :key="role.id"
-              class="badge badge-primary badge-sm"
-            >
+            <span v-for="role in expandedRoles" :key="role.id" class="badge badge-primary badge-sm">
               {{ role.name }}
             </span>
           </div>
@@ -48,15 +47,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import useAuth from '@admin/composables/useAuth'
-import config from '@config'
+import useAuth from '@/admin/composables/useAuth'
+import config from '@/config'
 
 const { user, isAdmin, logout, refreshAuth } = useAuth()
 
 refreshAuth()
 
 const avatarUrl = computed(() => {
-  if (!user.value?.avatar) return ''
+  if (!user.value?.avatar) {
+    return ''
+  }
   return `${config.apiBaseUrl}/api/files/_pb_users_auth_/${user.value.id}/${user.value.avatar}`
 })
 

@@ -1,7 +1,7 @@
 ---
-import BaseLayout from '@layouts/BaseLayout.astro'
-import UserAuth from '@components/UserAuth.vue'
-import AdminLink from '@components/AdminLink.vue'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import UserAuth from '@/components/UserAuth.vue'
+import AdminLink from '@/components/AdminLink.vue'
 const isHome = Astro.url.pathname === '/';
 const { navBg = 'bg-transparent' } = Astro.props;
 

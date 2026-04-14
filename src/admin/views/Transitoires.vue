@@ -15,7 +15,8 @@
 
     <div v-else-if="groups.length === 0" class="alert">
       <span class="i-fa-solid-info-circle"></span>
-      Aucun compte de régularisation enregistré. Les transitoires apparaissent ici lorsqu'une écriture porte un exercice fiscal différent de son année de date.
+      Aucun compte de régularisation enregistré. Les transitoires apparaissent ici lorsqu'une
+      écriture porte un exercice fiscal différent de son année de date.
     </div>
 
     <div v-else class="flex flex-col gap-10">
@@ -24,13 +25,17 @@
           <span class="i-fa-solid-calendar-alt text-base-content/40"></span>
           Exercice {{ group.year }}
           <span class="badge badge-neutral badge-sm font-normal">
-            {{ group.entrants.length + group.sortants.length }} écriture{{ group.entrants.length + group.sortants.length !== 1 ? 's' : '' }}
+            {{ group.entrants.length + group.sortants.length }} écriture{{
+              group.entrants.length + group.sortants.length !== 1 ? 's' : ''
+            }}
           </span>
         </h3>
 
         <!-- Entrants -->
         <div v-if="group.entrants.length > 0" class="mb-6">
-          <h4 class="text-xs font-semibold text-base-content/50 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+          <h4
+            class="text-xs font-semibold text-base-content/50 uppercase tracking-widest mb-2 flex items-center gap-1.5"
+          >
             <span class="i-fa-solid-arrow-right-to-bracket text-success text-sm"></span>
             Entrants — cash encaissé avant {{ group.year }}
           </h4>
@@ -50,10 +55,15 @@
                   <td class="font-mono text-sm whitespace-nowrap">{{ formatDate(entry.date) }}</td>
                   <td>{{ entry.description }}</td>
                   <td>
-                    <span v-if="entry.category" class="badge badge-ghost badge-sm">{{ entry.category }}</span>
+                    <span v-if="entry.expand?.category_id?.name" class="badge badge-ghost badge-sm">{{
+                      entry.expand?.category_id?.name
+                    }}</span>
                     <span v-else class="text-base-content/30">—</span>
                   </td>
-                  <td class="text-right font-mono font-medium whitespace-nowrap" :class="entry.amount >= 0 ? 'text-success' : 'text-error'">
+                  <td
+                    class="text-right font-mono font-medium whitespace-nowrap"
+                    :class="entry.amount >= 0 ? 'text-success' : 'text-error'"
+                  >
                     {{ fmtAmount(entry.amount) }}
                   </td>
                   <td class="text-right">
@@ -66,7 +76,10 @@
               <tfoot>
                 <tr>
                   <td colspan="3" class="text-xs text-base-content/40">Total entrants</td>
-                  <td class="text-right font-mono font-semibold whitespace-nowrap" :class="sumOf(group.entrants) >= 0 ? 'text-success' : 'text-error'">
+                  <td
+                    class="text-right font-mono font-semibold whitespace-nowrap"
+                    :class="sumOf(group.entrants) >= 0 ? 'text-success' : 'text-error'"
+                  >
                     {{ fmtAmount(sumOf(group.entrants)) }}
                   </td>
                   <td></td>
@@ -78,7 +91,9 @@
 
         <!-- Sortants -->
         <div v-if="group.sortants.length > 0">
-          <h4 class="text-xs font-semibold text-base-content/50 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+          <h4
+            class="text-xs font-semibold text-base-content/50 uppercase tracking-widest mb-2 flex items-center gap-1.5"
+          >
             <span class="i-fa-solid-arrow-right-from-bracket text-warning text-sm"></span>
             Sortants — cash encaissé après {{ group.year }}
           </h4>
@@ -98,10 +113,15 @@
                   <td class="font-mono text-sm whitespace-nowrap">{{ formatDate(entry.date) }}</td>
                   <td>{{ entry.description }}</td>
                   <td>
-                    <span v-if="entry.category" class="badge badge-ghost badge-sm">{{ entry.category }}</span>
+                    <span v-if="entry.expand?.category_id?.name" class="badge badge-ghost badge-sm">{{
+                      entry.expand?.category_id?.name
+                    }}</span>
                     <span v-else class="text-base-content/30">—</span>
                   </td>
-                  <td class="text-right font-mono font-medium whitespace-nowrap" :class="entry.amount >= 0 ? 'text-success' : 'text-error'">
+                  <td
+                    class="text-right font-mono font-medium whitespace-nowrap"
+                    :class="entry.amount >= 0 ? 'text-success' : 'text-error'"
+                  >
                     {{ fmtAmount(entry.amount) }}
                   </td>
                   <td class="text-right">
@@ -114,7 +134,10 @@
               <tfoot>
                 <tr>
                   <td colspan="3" class="text-xs text-base-content/40">Total sortants</td>
-                  <td class="text-right font-mono font-semibold whitespace-nowrap" :class="sumOf(group.sortants) >= 0 ? 'text-success' : 'text-error'">
+                  <td
+                    class="text-right font-mono font-semibold whitespace-nowrap"
+                    :class="sumOf(group.sortants) >= 0 ? 'text-success' : 'text-error'"
+                  >
                     {{ fmtAmount(sumOf(group.sortants)) }}
                   </td>
                   <td></td>
@@ -148,9 +171,11 @@ onMounted(async () => {
 
 const transitoires = computed(() =>
   entries.value.filter(e => {
-    if (!e.fiscal_year) return false
+    if (!e.fiscal_year) {
+      return false
+    }
     return e.fiscal_year !== parseInt(e.date.substring(0, 4))
-  })
+  }),
 )
 
 interface TransitoireGroup {
@@ -163,7 +188,9 @@ const groups = computed<TransitoireGroup[]>(() => {
   const byYear = new Map<number, TransitoireGroup>()
   for (const entry of transitoires.value) {
     const y = entry.fiscal_year!
-    if (!byYear.has(y)) byYear.set(y, { year: y, entrants: [], sortants: [] })
+    if (!byYear.has(y)) {
+      byYear.set(y, { year: y, entrants: [], sortants: [] })
+    }
     const group = byYear.get(y)!
     const cashYear = parseInt(entry.date.substring(0, 4))
     if (cashYear < y) {
@@ -181,14 +208,15 @@ const fmtAmount = (n: number): string => {
   const sign = n >= 0 ? '+' : '−'
   const abs = Math.abs(n)
   const [intPart, decPart] = abs.toFixed(2).split('.')
-  const formattedInt = Number(intPart) >= 10000
-    ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
-    : intPart
+  const formattedInt =
+    Number(intPart) >= 10000 ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : intPart
   return `${sign} ${formattedInt}.${decPart}`
 }
 
 const formatDate = (date?: string) => {
-  if (!date) return '—'
+  if (!date) {
+    return '—'
+  }
   return dayjs(date).format('DD.MM.YYYY')
 }
 </script>

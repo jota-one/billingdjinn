@@ -25,7 +25,7 @@ daisyUI 5 provides class names for common UI components
 5. A CSS file with Tailwind CSS and daisyUI looks like this (if it's a node dependency)
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "daisyui";
 ```
 
@@ -76,11 +76,13 @@ daisyUI with all the default configs:
 
 ```css
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
-  root: ":root";
-  include: ;
-  exclude: ;
-  prefix: ;
+  themes:
+    light --default,
+    dark --prefersdark;
+  root: ':root';
+  include:;
+  exclude:;
+  prefix:;
   logs: true;
 }
 ```
@@ -92,9 +94,44 @@ root scrollbar gutter is excluded. `daisy-` prefix is used for all daisyUI class
 
 ```css
 @plugin "daisyui" {
-  themes: light, dark, cupcake, bumblebee --default, emerald, corporate, synthwave --prefersdark, retro, cyberpunk, valentine, halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter, dim, nord, sunset, caramellatte, abyss, silk;
-  root: ":root";
-  include: ;
+  themes:
+    light,
+    dark,
+    cupcake,
+    bumblebee --default,
+    emerald,
+    corporate,
+    synthwave --prefersdark,
+    retro,
+    cyberpunk,
+    valentine,
+    halloween,
+    garden,
+    forest,
+    aqua,
+    lofi,
+    pastel,
+    fantasy,
+    wireframe,
+    black,
+    luxury,
+    dracula,
+    cmyk,
+    autumn,
+    business,
+    acid,
+    lemonade,
+    night,
+    coffee,
+    winter,
+    dim,
+    nord,
+    sunset,
+    caramellatte,
+    abyss,
+    silk;
+  root: ':root';
+  include:;
   exclude: rootscrollgutter, checkbox;
   prefix: daisy-;
   logs: false;
@@ -144,10 +181,10 @@ root scrollbar gutter is excluded. `daisy-` prefix is used for all daisyUI class
 A CSS file with Tailwind CSS, daisyUI and a custom daisyUI theme looks like this:
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "daisyui";
 @plugin "daisyui/theme" {
-  name: "mytheme";
+  name: 'mytheme';
   default: true; /* set as default */
   prefersdark: false; /* set as default dark mode (prefers-color-scheme:dark) */
   color-scheme: light; /* color of browser-provided UI */
@@ -321,7 +358,9 @@ Breadcrumbs helps users to navigate
 
 ```html
 <div class="breadcrumbs">
-  <ul><li><a>Link</a></li></ul>
+  <ul>
+    <li><a>Link</a></li>
+  </ul>
 </div>
 ```
 
@@ -383,13 +422,13 @@ For Cally:
 For Pikaday:
 
 ```html
-<input type="text" class="input pika-single">
+<input type="text" class="input pika-single" />
 ```
 
 For React Day Picker:
 
 ```html
-<DayPicker className="react-day-picker">
+<DayPicker className="react-day-picker"></DayPicker>
 ```
 
 #### Rules
@@ -630,8 +669,8 @@ where content is a list of buttons:
 
 ```html
 <button>
-    <svg>{icon}</svg>
-    <span class="dock-label">Text</span>
+  <svg>{icon}</svg>
+  <span class="dock-label">Text</span>
 </button>
 ```
 
@@ -703,7 +742,9 @@ Using details and summary
 ```html
 <details class="dropdown">
   <summary>Button</summary>
-  <ul class="dropdown-content">{CONTENT}</ul>
+  <ul class="dropdown-content">
+    {CONTENT}
+  </ul>
 </details>
 ```
 
@@ -711,7 +752,9 @@ Using popover API
 
 ```html
 <button popovertarget="{id}" style="anchor-name:--{anchor}">{button}</button>
-<ul class="dropdown-content" popover id="{id}" style="position-anchor:--{anchor}">{CONTENT}</ul>
+<ul class="dropdown-content" popover id="{id}" style="position-anchor:--{anchor}">
+  {CONTENT}
+</ul>
 ```
 
 Using CSS focus
@@ -719,7 +762,9 @@ Using CSS focus
 ```html
 <div class="dropdown">
   <div tabindex="0" role="button">Button</div>
-  <ul tabindex="0" class="dropdown-content">{CONTENT}</ul>
+  <ul tabindex="0" class="dropdown-content">
+    {CONTENT}
+  </ul>
 </div>
 ```
 
@@ -795,9 +840,9 @@ Using HTML form
 
 ```html
 <form class="filter">
-  <input class="btn btn-square" type="reset" value="×"/>
-  <input class="btn" type="radio" name="{NAME}" aria-label="Tab 1 title"/>
-  <input class="btn" type="radio" name="{NAME}" aria-label="Tab 2 title"/>
+  <input class="btn btn-square" type="reset" value="×" />
+  <input class="btn" type="radio" name="{NAME}" aria-label="Tab 1 title" />
+  <input class="btn" type="radio" name="{NAME}" aria-label="Tab 2 title" />
 </form>
 ```
 
@@ -805,9 +850,9 @@ Without HTML form
 
 ```html
 <div class="filter">
-  <input class="btn filter-reset" type="radio" name="{NAME}" aria-label="×"/>
-  <input class="btn" type="radio" name="{NAME}" aria-label="Tab 1 title"/>
-  <input class="btn" type="radio" name="{NAME}" aria-label="Tab 2 title"/>
+  <input class="btn filter-reset" type="radio" name="{NAME}" aria-label="×" />
+  <input class="btn" type="radio" name="{NAME}" aria-label="Tab 1 title" />
+  <input class="btn" type="radio" name="{NAME}" aria-label="Tab 2 title" />
 </div>
 ```
 
@@ -1148,9 +1193,7 @@ Browser mockup shows a box that looks like a browser window
 
 ```html
 <div class="mockup-browser">
-  <div class="mockup-browser-toolbar">
-    {toolbar content}
-  </div>
+  <div class="mockup-browser-toolbar">{toolbar content}</div>
   <div>{CONTENT}</div>
 </div>
 ```

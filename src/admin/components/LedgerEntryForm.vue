@@ -1,24 +1,22 @@
 <template>
   <div>
-    <div v-if="invoiceLinked" class="alert alert-info mb-5 text-sm">
+    <div v-if="invoiceId" class="alert alert-info mb-5 text-sm">
       <span class="i-fa-solid-link"></span>
-      Cette écriture a été créée automatiquement lors de l'encaissement d'une facture.
+      Cette écriture est liée à l'encaissement de la facture
+      <RouterLink :to="`/invoices/${invoiceId}`" class="font-semibold underline">{{
+        invoiceNumber || invoiceId
+      }}</RouterLink
+      >.
     </div>
 
     <form @submit.prevent="$emit('submit')" class="flex flex-col gap-5">
-
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <!-- Date -->
         <div class="form-control">
           <label class="label">
             <span class="label-text font-semibold">Date <span class="text-error">*</span></span>
           </label>
-          <input
-            v-model="form.date"
-            type="date"
-            required
-            class="input input-bordered w-full"
-          />
+          <input v-model="form.date" type="date" required class="input input-bordered w-full" />
         </div>
 
         <!-- Catégorie -->
@@ -26,9 +24,9 @@
           <label class="label">
             <span class="label-text font-semibold">Catégorie</span>
           </label>
-          <select v-model="form.category" class="select select-bordered w-full">
+          <select v-model="form.category_id" class="select select-bordered w-full">
             <option value="">— aucune —</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
           </select>
         </div>
 
@@ -43,9 +41,17 @@
             locale="fr-CH"
             placeholder="0.00"
             class="w-full"
-            :input-class="form.amount !== null && form.amount < 0 ? 'text-error' : form.amount !== null && form.amount > 0 ? 'text-success' : ''"
+            :input-class="
+              form.amount !== null && form.amount < 0
+                ? 'text-error'
+                : form.amount !== null && form.amount > 0
+                  ? 'text-success'
+                  : ''
+            "
           />
-          <span class="label-text-alt text-base-content/40 mt-1">Positif = entrée, négatif = sortie</span>
+          <span class="label-text-alt text-base-content/40 mt-1"
+            >Positif = entrée, négatif = sortie</span
+          >
         </div>
       </div>
 
@@ -66,14 +72,17 @@
           class="input input-bordered w-full"
         />
         <span class="label-text-alt text-base-content/40 mt-1">
-          Laisser vide si identique à l'année de la date. À renseigner uniquement pour les comptes de régularisation (transitoires).
+          Laisser vide si identique à l'année de la date. À renseigner uniquement pour les comptes
+          de régularisation (transitoires).
         </span>
       </div>
 
       <!-- Description -->
       <div class="form-control">
         <label class="label">
-          <span class="label-text font-semibold">Description <span class="text-error">*</span></span>
+          <span class="label-text font-semibold"
+            >Description <span class="text-error">*</span></span
+          >
         </label>
         <InputText
           v-model="form.description"
@@ -104,7 +113,6 @@
           :loading="saving"
         />
       </div>
-
     </form>
   </div>
 </template>
@@ -114,25 +122,25 @@ import { computed, onMounted } from 'vue'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
-import useSettings from '../composables/useSettings'
+import useCategories from '../composables/useCategories'
 import type { TLedgerEntryForm } from '../composables/useLedger'
 
-defineProps<{ saving: boolean; invoiceLinked?: boolean }>()
+defineProps<{ saving: boolean; invoiceId?: string; invoiceNumber?: string }>()
 defineEmits<{ submit: [] }>()
 
 const form = defineModel<TLedgerEntryForm>('form', { required: true })
 
-const { settings, loadSettings } = useSettings()
-onMounted(() => loadSettings())
-
-const categories = computed(() => (settings.value?.ledger_categories ?? []).map(c => c.name))
+const { categories, loadCategories } = useCategories()
+onMounted(() => loadCategories())
 
 const inferredYear = computed(() => {
-  if (form.value.date) return parseInt(form.value.date.substring(0, 4))
+  if (form.value.date) {
+    return parseInt(form.value.date.substring(0, 4))
+  }
   return new Date().getFullYear()
 })
 
-const isTransitoire = computed(() =>
-  !!form.value.fiscal_year && form.value.fiscal_year !== inferredYear.value
+const isTransitoire = computed(
+  () => !!form.value.fiscal_year && form.value.fiscal_year !== inferredYear.value,
 )
 </script>

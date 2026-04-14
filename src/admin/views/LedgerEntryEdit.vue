@@ -6,7 +6,7 @@
       </RouterLink>
       <h2 class="text-2xl font-bold flex items-center gap-2">
         <span class="i-fa-solid-pen text-xl"></span>
-        {{ form.description || 'Modifier l\'écriture' }}
+        {{ form.description || "Modifier l'écriture" }}
       </h2>
     </div>
 
@@ -19,7 +19,8 @@
       <LedgerEntryForm
         v-model:form="form"
         :saving="saving"
-        :invoice-linked="!!entry?.invoice"
+        :invoice-id="entry?.invoice"
+        :invoice-number="entry?.expand?.invoice?.invoice_number"
         @submit="save"
       />
     </div>
@@ -52,7 +53,7 @@ const entry = ref<TLedgerEntry | null>(null)
 const form = ref({
   date: '',
   description: '',
-  category: '',
+  category_id: '',
   amount: null as number | null,
   is_checked: false,
   fiscal_year: null as number | null,
@@ -62,7 +63,12 @@ const save = async () => {
   saving.value = true
   try {
     await updateEntry(entryId, { ...form.value, invoice: entry.value?.invoice })
-    toast.add({ severity: 'success', summary: 'Enregistré', detail: 'L\'écriture a été mise à jour.', life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Enregistré',
+      detail: "L'écriture a été mise à jour.",
+      life: 3000,
+    })
     router.push({ path: '/ledger', query: { focus: entryId } })
   } catch (e) {
     showPbError(e)
@@ -78,7 +84,7 @@ onMounted(async () => {
     form.value = {
       date: loaded.date ? loaded.date.substring(0, 10) : '',
       description: loaded.description || '',
-      category: loaded.category || '',
+      category_id: loaded.category_id || '',
       amount: loaded.amount ?? null,
       is_checked: loaded.is_checked ?? false,
       fiscal_year: loaded.fiscal_year || null,

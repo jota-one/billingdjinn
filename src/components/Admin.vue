@@ -6,8 +6,8 @@
 
 <script setup lang="ts">
 import { onBeforeMount, getCurrentInstance, type App } from 'vue'
-import router from '../admin/router'
-import Sidebar from '../admin/layouts/Sidebar.vue'
+import router from '@/admin/router'
+import Sidebar from '@/admin/layouts/Sidebar.vue'
 import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
 

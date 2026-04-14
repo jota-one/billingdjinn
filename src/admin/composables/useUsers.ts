@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import config from '../../config'
+import config from '@/config'
 import PocketBase from 'pocketbase'
 
 export interface TUser {
