@@ -31,31 +31,31 @@ function patternSpecificity(pattern: string): number {
 }
 
 /**
- * Returns the name of the category whose most specific pattern matches the given description.
+ * Returns the ID of the category whose most specific pattern matches the given description.
  * Specificity = number of words (primary) + total length (tiebreaker).
  * Falls back to matching the category name itself as a substring if no pattern matched.
  */
 export function detectCategory(
   description: string,
-  categories: Array<{ name: string; patterns: string[] }>,
+  categories: Array<{ id: string; name: string; patterns: string[] }>,
 ): string | null {
-  let best: { name: string; specificity: number } | null = null
+  let best: { id: string; specificity: number } | null = null
 
   for (const cat of categories) {
     for (const pattern of cat.patterns) {
       const specificity = patternSpecificity(pattern)
       if (matchPattern(pattern, description) && specificity > (best?.specificity ?? -1)) {
-        best = { name: cat.name, specificity }
+        best = { id: cat.id, specificity }
       }
     }
   }
   if (best) {
-    return best.name
+    return best.id
   }
 
   for (const cat of categories) {
     if (matchPattern(cat.name, description)) {
-      return cat.name
+      return cat.id
     }
   }
   return null

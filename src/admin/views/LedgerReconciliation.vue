@@ -144,11 +144,11 @@
                       style="font-size: 0.75rem"
                     />
                     <select
-                      v-model="row.editedCategory"
+                      v-model="row.editedCategoryId"
                       class="select select-xs select-bordered w-36 shrink-0"
                     >
                       <option value="">— catégorie —</option>
-                      <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                      <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                     </select>
                   </div>
                 </template>
@@ -192,7 +192,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue'
+import { ref, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
@@ -200,13 +200,13 @@ import FileUpload from 'primevue/fileupload'
 import InputText from 'primevue/inputtext'
 import PbErrorToast from '../components/PbErrorToast.vue'
 import useLedger from '../composables/useLedger'
-import useSettings from '../composables/useSettings'
+import useCategories from '../composables/useCategories'
 import useBankReconciliation from '../composables/useBankReconciliation'
 import usePbErrorToast from '../composables/usePbErrorToast'
 import camt053 from '../utils/bank-adapters/camt053'
 
 const { entries, loadEntries } = useLedger()
-const { settings, loadSettings } = useSettings()
+const { categories, loadCategories } = useCategories()
 const { rows, confirming, initReconciliation, confirmReconciliation } = useBankReconciliation()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
@@ -218,8 +218,6 @@ const step = ref(1)
 const loading = ref(false)
 const parseError = ref('')
 const result = ref({ linked: 0, created: 0, ignored: 0, invoiceMatched: 0 })
-
-const categories = computed(() => (settings.value?.ledger_categories ?? []).map(c => c.name))
 
 const onFileSelect = async (event: { files: File[] }) => {
   const file = event.files[0]
@@ -236,8 +234,8 @@ const onFileSelect = async (event: { files: File[] }) => {
         'Aucune transaction détectée. Vérifiez que le fichier est bien un export camt.053 valide.'
       return
     }
-    await Promise.all([loadEntries(), loadSettings()])
-    initReconciliation(bankEntries, entries.value, settings.value?.ledger_categories ?? [])
+    await Promise.all([loadEntries(), loadCategories()])
+    initReconciliation(bankEntries, entries.value, categories.value)
     step.value = 2
   } catch (e) {
     parseError.value = e instanceof Error ? e.message : "Erreur lors de l'analyse du fichier."

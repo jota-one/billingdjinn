@@ -53,7 +53,7 @@ const entry = ref<TLedgerEntry | null>(null)
 const form = ref({
   date: '',
   description: '',
-  category: '',
+  category_id: '',
   amount: null as number | null,
   is_checked: false,
   fiscal_year: null as number | null,
@@ -84,7 +84,7 @@ onMounted(async () => {
     form.value = {
       date: loaded.date ? loaded.date.substring(0, 10) : '',
       description: loaded.description || '',
-      category: loaded.category || '',
+      category_id: loaded.category_id || '',
       amount: loaded.amount ?? null,
       is_checked: loaded.is_checked ?? false,
       fiscal_year: loaded.fiscal_year || null,

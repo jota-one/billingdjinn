@@ -66,8 +66,8 @@
             {{ formatDate(data.date) }}
           </template>
         </Column>
-        <Column field="category" header="Catégorie" style="width: 140px">
-          <template #body="{ data }">{{ data.category || '—' }}</template>
+        <Column field="category_id" header="Catégorie" style="width: 140px">
+          <template #body="{ data }">{{ data.expand?.category_id?.name || '—' }}</template>
         </Column>
         <Column field="description" header="Description">
           <template #body="{ data }">
@@ -206,8 +206,9 @@ const availableYears = computed(() => {
 const availableCategories = computed(() => {
   const cats = new Set<string>()
   entries.value.forEach(e => {
-    if (e.category) {
-      cats.add(e.category)
+    const name = e.expand?.category_id?.name
+    if (name) {
+      cats.add(name)
     }
   })
   return [...cats].sort()
@@ -232,7 +233,9 @@ const entriesWithBalance = computed<LedgerEntryWithBoundary[]>(() => {
     )
   }
   if (filterCategories.value.length > 0) {
-    filtered = filtered.filter(e => filterCategories.value.includes(e.category))
+    filtered = filtered.filter(e =>
+      filterCategories.value.includes(e.expand?.category_id?.name ?? ''),
+    )
   }
   const dir = sortOrder.value ?? 1
   filtered = filtered.sort((a, b) => {

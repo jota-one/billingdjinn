@@ -55,8 +55,8 @@
                   <td class="font-mono text-sm whitespace-nowrap">{{ formatDate(entry.date) }}</td>
                   <td>{{ entry.description }}</td>
                   <td>
-                    <span v-if="entry.category" class="badge badge-ghost badge-sm">{{
-                      entry.category
+                    <span v-if="entry.expand?.category_id?.name" class="badge badge-ghost badge-sm">{{
+                      entry.expand?.category_id?.name
                     }}</span>
                     <span v-else class="text-base-content/30">—</span>
                   </td>
@@ -113,8 +113,8 @@
                   <td class="font-mono text-sm whitespace-nowrap">{{ formatDate(entry.date) }}</td>
                   <td>{{ entry.description }}</td>
                   <td>
-                    <span v-if="entry.category" class="badge badge-ghost badge-sm">{{
-                      entry.category
+                    <span v-if="entry.expand?.category_id?.name" class="badge badge-ghost badge-sm">{{
+                      entry.expand?.category_id?.name
                     }}</span>
                     <span v-else class="text-base-content/30">—</span>
                   </td>

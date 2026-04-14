@@ -5,20 +5,19 @@ import config from '@/config'
 import { buildReconciliation } from '../helpers/bankReconciliation'
 import type { TLedgerEntry } from './useLedger'
 import type { TBankEntry } from '../types/bank-entry'
-import type { TLedgerCategory } from '../types/ledger-category'
-import type { TReconciliationRow } from '../helpers/bankReconciliation'
+import type { TCategory } from '../types/category'
 
 export type { ReconciliationAction, TReconciliationRow } from '../helpers/bankReconciliation'
 
 export default function useBankReconciliation() {
   const pb = new PocketBase(config.apiBaseUrl)
-  const rows = ref<TReconciliationRow[]>([])
+  const rows = ref<ReturnType<typeof buildReconciliation>>([])
   const confirming = ref(false)
 
   function initReconciliation(
     bankEntries: TBankEntry[],
     plannedEntries: TLedgerEntry[],
-    categories: TLedgerCategory[],
+    categories: TCategory[],
   ) {
     rows.value = buildReconciliation(bankEntries, plannedEntries, categories)
   }
@@ -43,7 +42,7 @@ export default function useBankReconciliation() {
 
         const payload = {
           description: row.editedDescription.trim(),
-          category: row.editedCategory,
+          category_id: row.editedCategoryId || null,
           date: row.editedDate,
           amount: row.editedAmount,
           is_checked: true,

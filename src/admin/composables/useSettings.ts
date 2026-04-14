@@ -2,30 +2,6 @@ import { ref } from 'vue'
 import config from '@/config'
 import PocketBase from 'pocketbase'
 import type { TInvoiceLabels } from '../types/invoice-labels'
-import type { TLedgerCategory } from '../types/ledger-category'
-
-export type { TLedgerCategory }
-
-/** Normalizes ledger_categories that may be plain strings (legacy) to TLedgerCategory[] */
-function normalizeLedgerCategories(raw: unknown): TLedgerCategory[] {
-  if (!Array.isArray(raw)) {
-    return []
-  }
-  return raw
-    .map(item => {
-      if (typeof item === 'string') {
-        return { name: item, patterns: [] }
-      }
-      if (item && typeof item === 'object' && 'name' in item) {
-        return {
-          name: String(item.name),
-          patterns: Array.isArray((item as any).patterns) ? (item as any).patterns : [],
-        }
-      }
-      return null
-    })
-    .filter(Boolean) as TLedgerCategory[]
-}
 
 export interface TSettings {
   id: string
@@ -42,7 +18,6 @@ export interface TSettings {
   payment_terms?: number
   currency?: string
   labels?: TInvoiceLabels
-  ledger_categories?: TLedgerCategory[]
   created: string
   updated: string
 }
@@ -61,7 +36,6 @@ export interface TSettingsForm {
   payment_terms?: number | null
   currency?: string
   labels?: TInvoiceLabels
-  ledger_categories?: TLedgerCategory[]
 }
 
 export default function useSettings() {
@@ -72,7 +46,6 @@ export default function useSettings() {
   const loadSettings = async () => {
     try {
       const raw = await pb.collection('company_settings').getFirstListItem<TSettings>('')
-      raw.ledger_categories = normalizeLedgerCategories(raw.ledger_categories)
       settings.value = raw
     } catch {
       settings.value = null
@@ -120,9 +93,6 @@ export default function useSettings() {
     }
     if (payload.labels !== undefined) {
       formData.append('labels', JSON.stringify(payload.labels))
-    }
-    if (payload.ledger_categories !== undefined) {
-      formData.append('ledger_categories', JSON.stringify(payload.ledger_categories))
     }
 
     settings.value = await pb

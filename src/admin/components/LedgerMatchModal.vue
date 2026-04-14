@@ -16,7 +16,7 @@
             <div class="font-medium truncate">{{ candidate.description }}</div>
             <div class="flex gap-3 text-xs text-base-content/50 mt-1">
               <span>{{ formatDate(candidate.date) }}</span>
-              <span v-if="candidate.category">{{ candidate.category }}</span>
+              <span v-if="candidate.expand?.category_id?.name">{{ candidate.expand?.category_id?.name }}</span>
             </div>
           </div>
           <div class="text-right shrink-0">

@@ -36,7 +36,7 @@ const saving = ref(false)
 const form = ref({
   date: new Date().toISOString().substring(0, 10),
   description: '',
-  category: '',
+  category_id: '',
   amount: null as number | null,
   is_checked: false,
   fiscal_year: null as number | null,

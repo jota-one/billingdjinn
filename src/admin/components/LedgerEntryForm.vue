@@ -24,9 +24,9 @@
           <label class="label">
             <span class="label-text font-semibold">Catégorie</span>
           </label>
-          <select v-model="form.category" class="select select-bordered w-full">
+          <select v-model="form.category_id" class="select select-bordered w-full">
             <option value="">— aucune —</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
           </select>
         </div>
 
@@ -122,7 +122,7 @@ import { computed, onMounted } from 'vue'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
-import useSettings from '../composables/useSettings'
+import useCategories from '../composables/useCategories'
 import type { TLedgerEntryForm } from '../composables/useLedger'
 
 defineProps<{ saving: boolean; invoiceId?: string; invoiceNumber?: string }>()
@@ -130,10 +130,8 @@ defineEmits<{ submit: [] }>()
 
 const form = defineModel<TLedgerEntryForm>('form', { required: true })
 
-const { settings, loadSettings } = useSettings()
-onMounted(() => loadSettings())
-
-const categories = computed(() => (settings.value?.ledger_categories ?? []).map(c => c.name))
+const { categories, loadCategories } = useCategories()
+onMounted(() => loadCategories())
 
 const inferredYear = computed(() => {
   if (form.value.date) {

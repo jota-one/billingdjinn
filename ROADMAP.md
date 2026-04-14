@@ -16,6 +16,8 @@ Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organis
 
 ## Historique (fait)
 
+- [2026-04-14] Refactoring catégories du Grand Livre — `ledger.category` (texte libre) remplacé par une relation vers une collection `categories` dédiée (nom + patterns). CRUD des catégories dans les Settings. Migration en deux temps : migrations PocketBase (1776211200 + 1776211201) puis script `migrate-categories.js --commit`, puis migration 1776211202 qui supprime l'ancien champ et recrée la vue `ledger_stats` avec JOIN.
+
 - [2026-04-12] Rapprochement bancaire → matching automatique des factures — Lors de la confirmation d'une réconciliation, les écritures de catégorie « Facture » déclenchent une recherche automatique dans les factures envoyées (scoring date+montant via `invoice_totals`). Si un candidat dépasse le seuil de confiance (0.5), la facture est marquée payée et liée à l'écriture du ledger.
 
 - [2026-04-10] Rapprochement bancaire camt.053 — Import de relevés bancaires XML (ISO 20022), algorithme de matching date+montant avec les écritures du ledger, confirmation en lot. Entrées non matchées créables directement depuis l'import. Adaptateur unique camt.053 (CSV supprimés).

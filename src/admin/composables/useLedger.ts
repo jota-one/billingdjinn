@@ -3,12 +3,13 @@ import config from '@/config'
 import PocketBase from 'pocketbase'
 import dayjs from 'dayjs'
 import { scoreCandidate } from '../helpers/ledger'
+import type { TCategory } from '../types/category'
 
 export interface TLedgerEntry {
   id: string
   date: string
   description: string
-  category: string
+  category_id?: string
   amount: number
   is_checked: boolean
   invoice?: string
@@ -17,13 +18,14 @@ export interface TLedgerEntry {
   updated: string
   expand?: {
     invoice?: { id: string; invoice_number: string }
+    category_id?: TCategory
   }
 }
 
 export interface TLedgerEntryForm {
   date: string
   description: string
-  category: string
+  category_id?: string
   amount: number | null
   is_checked: boolean
   invoice?: string
@@ -42,16 +44,17 @@ export default function useLedger() {
   const loadEntries = async () => {
     entries.value = await pb.collection<TLedgerEntry>('ledger').getFullList({
       sort: 'date,created',
+      expand: 'category_id',
     })
   }
 
   const loadEntry = async (id: string): Promise<TLedgerEntry> => {
-    return pb.collection<TLedgerEntry>('ledger').getOne(id, { expand: 'invoice' })
+    return pb.collection<TLedgerEntry>('ledger').getOne(id, { expand: 'invoice,category_id' })
   }
 
-  const loadUsedCategories = async (): Promise<Set<string>> => {
-    const records = await pb.collection('ledger_stats').getFullList({ fields: 'category' })
-    return new Set(records.map(r => r['category'] as string).filter(Boolean))
+  const loadUsedCategoryIds = async (): Promise<Set<string>> => {
+    const records = await pb.collection('ledger').getFullList({ fields: 'category_id' })
+    return new Set(records.map(r => r['category_id'] as string).filter(Boolean))
   }
 
   const createEntry = async (payload: TLedgerEntryForm): Promise<TLedgerEntry> => {
@@ -131,10 +134,21 @@ export default function useLedger() {
       : `Facture ${invoiceNumber}`
     const invoiceYear = dayjs(invoiceDate).year()
     const todayYear = dayjs().year()
+
+    let revenuCategoryId: string | null = null
+    try {
+      const cat = await pb
+        .collection('categories')
+        .getFirstListItem('name="Revenu"', { requestKey: null })
+      revenuCategoryId = cat.id
+    } catch {
+      // category not found — entry will be created without category
+    }
+
     await pb.collection('ledger').create({
       date: dayjs().format('YYYY-MM-DD'),
       description,
-      category: 'Revenu',
+      category_id: revenuCategoryId,
       amount,
       is_checked: true,
       invoice: invoiceId,
@@ -146,7 +160,7 @@ export default function useLedger() {
     entries,
     loadEntries,
     loadEntry,
-    loadUsedCategories,
+    loadUsedCategoryIds,
     createEntry,
     updateEntry,
     deleteEntry,
@@ -161,7 +175,7 @@ function buildData(payload: TLedgerEntryForm): Record<string, unknown> {
   return {
     date: payload.date,
     description: payload.description.trim(),
-    category: payload.category || '',
+    category_id: payload.category_id || null,
     amount: payload.amount ?? 0,
     is_checked: payload.is_checked,
     invoice: payload.invoice || null,

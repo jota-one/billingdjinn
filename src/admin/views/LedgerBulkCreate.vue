@@ -34,9 +34,9 @@
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text font-semibold">Catégorie</span></label>
-              <select v-model="entry.category" class="select select-bordered w-full">
+              <select v-model="entry.category_id" class="select select-bordered w-full">
                 <option value="">— aucune —</option>
-                <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
               </select>
             </div>
             <div class="form-control">
@@ -287,7 +287,7 @@
               <tr v-for="(item, i) in preview" :key="i" class="hover">
                 <td class="font-mono text-sm whitespace-nowrap">{{ formatDate(item.date) }}</td>
                 <td>{{ item.description }}</td>
-                <td>{{ item.category || '—' }}</td>
+                <td>{{ categoryName(item.category_id) }}</td>
                 <td
                   class="text-right font-mono whitespace-nowrap"
                   :class="item.amount >= 0 ? 'text-success' : 'text-error'"
@@ -328,14 +328,14 @@ import Button from 'primevue/button'
 import dayjs from 'dayjs'
 import PbErrorToast from '../components/PbErrorToast.vue'
 import useLedger from '../composables/useLedger'
-import useSettings from '../composables/useSettings'
+import useCategories from '../composables/useCategories'
 import usePbErrorToast from '../composables/usePbErrorToast'
 
 type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual'
 type MonthMode = 'fixed' | 'last' | 'lastWorkday'
 
 const { createEntry } = useLedger()
-const { settings, loadSettings } = useSettings()
+const { categories, loadCategories } = useCategories()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
 const router = useRouter()
@@ -346,7 +346,7 @@ const saving = ref(false)
 const entry = reactive({
   startDate: new Date().toISOString().substring(0, 10),
   description: '',
-  category: '',
+  category_id: '',
   amount: null as number | null,
 })
 
@@ -364,7 +364,7 @@ const endCondition = reactive({
   count: 12,
 })
 
-const categories = computed(() => (settings.value?.ledger_categories ?? []).map(c => c.name))
+const categoryName = (id: string) => categories.value.find(c => c.id === id)?.name ?? '—'
 
 const step1Valid = computed(
   () => !!entry.startDate && !!entry.description.trim() && entry.amount !== null,
@@ -502,7 +502,7 @@ const preview = computed(() => {
   return generateDates().map(date => ({
     date,
     description: entry.description + labelSuffix(date),
-    category: entry.category,
+    category_id: entry.category_id,
     amount: entry.amount ?? 0,
   }))
 })
@@ -529,7 +529,7 @@ const createAll = async () => {
       await createEntry({
         date: item.date,
         description: item.description,
-        category: item.category,
+        category_id: item.category_id,
         amount: item.amount,
         is_checked: false,
         fiscal_year: null,
@@ -549,5 +549,5 @@ const createAll = async () => {
   }
 }
 
-onMounted(() => loadSettings())
+onMounted(() => loadCategories())
 </script>
