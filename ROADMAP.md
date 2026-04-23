@@ -8,11 +8,22 @@ Format recommandé pour le suivi: `- [AAAA-MM-JJ] Titre — note courte`.
 
 Liste des petites améliorations et refactorings potentiels.
 
+- Pouvoir définir le template pour le numéro de facture qui va être automatiquement incrémenté
+
 ## Nouvelles fonctionnalités
 
 ### Personnalisation du layout de facture
 
 Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
+
+### Envoi des factures par email
+Configurer pocketbase pour qu'il soit capable d'envoyer des emails avec pièce jointe (génération PDF de facture sur node va être nécessaire). Envoi de la facture déclenché manuellement s'il s'agit d'une facture isolée. Envoi automatique s'il s'agit d'une facture récurrente (voir point suivant).
+
+### Génération de factures récurrentes
+Il faut pouvoir configurer la génération de factures récurrentes pour un client donné. Il faut pouvoir définir quel jour chaque facture va être crée, probablement qu'il faudra un CRON au niveau pocketbase pour vérifier si une facture doit être émise.
+
+### Amélioration de l'intégration mobile
+Il faut que chaque screen soit parfaitement exploitable sur un téléphone portable, y-compris la réconciliation des données bancaires (upload de fichier) et les statistiques.
 
 ## Historique (fait)
 
