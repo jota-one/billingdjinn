@@ -14,12 +14,7 @@ Liste des petites améliorations et refactorings potentiels.
 
 ### Personnalisation du layout de facture
 
-Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
-
-### Option Facture QR-code
-Il faut absolument pouvoir générer des factures QR-code (nouvelle norme Suisse depuis 2020). Pour ce faire il y a une libraire node [swissqrbill](https://github.com/schoero/swissqrbill).
-
-L'idée est de fournir une UI qui permette facilement de switcher sur un modèle QR ou pas QR. Pour la configuration de la version QR, à voir si on a besoin d'une UI ou si tout peut être automatisé en fonction du destinataire et de nos coordonnées bancaires définies dans les settings de l'entreprise.
+La sélection du template est disponible dans les Settings (4 templates : classique, graphique, classique+QR, graphique+QR). Reste à implémenter : options d'organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), couleur d'accent.
 
 ### Envoi des factures par email
 Configurer pocketbase pour qu'il soit capable d'envoyer des emails avec pièce jointe (génération PDF de facture sur node va être nécessaire). Envoi de la facture déclenché manuellement s'il s'agit d'une facture isolée. Envoi automatique s'il s'agit d'une facture récurrente (voir point suivant).
@@ -31,6 +26,8 @@ Il faut pouvoir configurer la génération de factures récurrentes pour un clie
 Il faut que chaque screen soit parfaitement exploitable sur un téléphone portable, y-compris la réconciliation des données bancaires (upload de fichier) et les statistiques.
 
 ## Historique (fait)
+
+- [2026-04-25] Factures QR suisse — bordereau QR (swissqrbill) intégré en SVG dans pdfmake. Adresses structurées (street/zip/city/country) dans clients et company_settings, avec migration de données inline. Templates `qr-default` et `qr-graphic`. Sélection du template dans les Settings. Fix viewBox : coordonnées internes swissqrbill en CSS px (96dpi), pas en pt.
 
 - [2026-04-14] Comptabilité analytique — collection `profit_centers`, clés de répartition par catégorie (`allocation_keys`), override direct sur les écritures du Grand Livre (`profit_center_id`). Logique 3 niveaux : Tier 1 (direct), Tier 2 (clés de répartition), Tier 3 (ratio CA). Vue `/analytics` avec tableau et graphique en barres. Personas seed mis à jour (small-biz : Tier 3 pur, pme : 3 tiers avec overrides).
 
