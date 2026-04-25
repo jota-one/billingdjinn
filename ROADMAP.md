@@ -16,6 +16,11 @@ Liste des petites améliorations et refactorings potentiels.
 
 Templates PDF prédéfinis (ex. `template_id` dans `company_settings`) : organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), éventuellement couleur d'accent. À préciser : nombre de templates, options exposées.
 
+### Option Facture QR-code
+Il faut absolument pouvoir générer des factures QR-code (nouvelle norme Suisse depuis 2020). Pour ce faire il y a une libraire node [swissqrbill](https://github.com/schoero/swissqrbill).
+
+L'idée est de fournir une UI qui permette facilement de switcher sur un modèle QR ou pas QR. Pour la configuration de la version QR, à voir si on a besoin d'une UI ou si tout peut être automatisé en fonction du destinataire et de nos coordonnées bancaires définies dans les settings de l'entreprise.
+
 ### Envoi des factures par email
 Configurer pocketbase pour qu'il soit capable d'envoyer des emails avec pièce jointe (génération PDF de facture sur node va être nécessaire). Envoi de la facture déclenché manuellement s'il s'agit d'une facture isolée. Envoi automatique s'il s'agit d'une facture récurrente (voir point suivant).
 

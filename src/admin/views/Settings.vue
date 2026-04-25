@@ -47,15 +47,26 @@
           <InputText v-model="form.company_name" placeholder="Acme Inc." required class="w-full" />
         </div>
 
-        <!-- Adresse -->
+        <!-- Adresse structurée -->
         <div class="form-control">
-          <label class="label"><span class="label-text font-semibold">Adresse</span></label>
-          <Textarea
-            v-model="form.address"
-            placeholder="Rue de la Paix 1&#10;1000 Lausanne"
-            :rows="3"
-            class="w-full"
-          />
+          <label class="label"><span class="label-text font-semibold">Rue</span></label>
+          <InputText v-model="form.street" placeholder="Rue de la Paix 1" class="w-full" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold">NPA</span></label>
+            <InputText v-model="form.zip" placeholder="1000" class="w-full" />
+          </div>
+          <div class="form-control sm:col-span-2">
+            <label class="label"><span class="label-text font-semibold">Ville</span></label>
+            <InputText v-model="form.city" placeholder="Lausanne" class="w-full" />
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text font-semibold">Pays</span></label>
+          <InputText v-model="form.country" placeholder="CH" class="w-full" />
         </div>
 
         <!-- Téléphone / Email -->
@@ -159,6 +170,23 @@
               />
             </div>
           </div>
+        </div>
+
+        <!-- Labels de facture -->
+        <div class="form-control">
+          <div class="divider mt-2 mb-0"></div>
+          <label class="label mt-2"
+            ><span class="label-text font-semibold">Template de facture</span></label
+          >
+          <p class="text-xs text-base-content/50 mb-2">
+            Définit le modèle PDF utilisé pour toutes les factures.
+            Les templates QR incluent le bordereau de paiement QR suisse.
+          </p>
+          <select v-model="form.invoice_template" class="select select-bordered w-full">
+            <option v-for="t in availableTemplates" :key="t.value" :value="t.value">
+              {{ t.label }}
+            </option>
+          </select>
         </div>
 
         <!-- Labels de facture -->
@@ -444,7 +472,6 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import InputText from 'primevue/inputtext'
-import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
 import PbErrorToast from '@/admin/components/PbErrorToast.vue'
@@ -454,6 +481,7 @@ import useSettings from '@/admin/composables/useSettings'
 import useCategories from '@/admin/composables/useCategories'
 import useProfitCenters from '@/admin/composables/useProfitCenters'
 import useLedger from '@/admin/composables/useLedger'
+import { templates } from '@/admin/invoice-templates'
 import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
 import type { TAllocationKey } from '@/admin/types/allocation-key'
 
@@ -465,6 +493,18 @@ const { profitCenters, loadProfitCenters, createProfitCenter, updateProfitCenter
 const { loadUsedCategoryIds } = useLedger()
 const { showPbError } = usePbErrorToast()
 const toast = useToast()
+
+const TEMPLATE_LABELS: Record<string, string> = {
+  default: 'Classique',
+  graphic: 'Graphique',
+  'qr-default': 'Classique + QR',
+  'qr-graphic': 'Graphique + QR',
+}
+
+const availableTemplates = Object.keys(templates).map(key => ({
+  value: key,
+  label: TEMPLATE_LABELS[key] ?? key,
+}))
 
 const saving = ref(false)
 const logoFile = ref<File | null>(null)
@@ -515,13 +555,17 @@ watch(
 
 const form = ref({
   company_name: '',
-  address: '',
+  street: '',
+  zip: '',
+  city: '',
+  country: 'CH',
   phone: '',
   email: '',
   bank_account: '',
   hourly_rate: null as number | null,
   payment_terms: null as number | null,
   currency: 'CHF',
+  invoice_template: 'default',
   tva_enabled: false,
   tva_number: '',
   tva_rate: null as number | null,
@@ -698,13 +742,17 @@ onMounted(async () => {
   if (settings.value) {
     form.value = {
       company_name: settings.value.company_name || '',
-      address: settings.value.address || '',
+      street: settings.value.street || '',
+      zip: settings.value.zip || '',
+      city: settings.value.city || '',
+      country: settings.value.country || 'CH',
       phone: settings.value.phone || '',
       email: settings.value.email || '',
       bank_account: settings.value.bank_account || '',
       hourly_rate: settings.value.hourly_rate ?? null,
       payment_terms: settings.value.payment_terms ?? null,
       currency: settings.value.currency || 'CHF',
+      invoice_template: settings.value.invoice_template || 'default',
       tva_enabled: settings.value.tva_enabled ?? false,
       tva_number: settings.value.tva_number || '',
       tva_rate: settings.value.tva_rate ?? null,
