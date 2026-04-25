@@ -6,7 +6,10 @@ import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
 export interface TClient {
   id: string
   name: string
-  address?: string
+  street?: string
+  zip?: string
+  city?: string
+  country?: string
   email?: string
   phone?: string
   contact_person?: string
@@ -22,7 +25,10 @@ export interface TClient {
 
 export interface TClientForm {
   name: string
-  address?: string
+  street?: string
+  zip?: string
+  city?: string
+  country?: string
   email?: string
   phone?: string
   contact_person?: string
@@ -90,8 +96,17 @@ export default function useClients() {
 function buildFormData(payload: TClientForm): FormData {
   const fd = new FormData()
   fd.append('name', payload.name.trim())
-  if (payload.address !== undefined) {
-    fd.append('address', payload.address)
+  if (payload.street !== undefined) {
+    fd.append('street', payload.street)
+  }
+  if (payload.zip !== undefined) {
+    fd.append('zip', payload.zip)
+  }
+  if (payload.city !== undefined) {
+    fd.append('city', payload.city)
+  }
+  if (payload.country !== undefined) {
+    fd.append('country', payload.country)
   }
   if (payload.email !== undefined) {
     fd.append('email', payload.email)

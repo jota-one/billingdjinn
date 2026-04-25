@@ -7,7 +7,10 @@ export type TInvoiceStatus = 'draft' | 'sent' | 'paid'
 
 export interface TClientSnapshot {
   name: string
-  address: string
+  street: string
+  zip: string
+  city: string
+  country: string
   email: string
   phone: string
   contact_person: string
@@ -15,7 +18,10 @@ export interface TClientSnapshot {
 
 export interface TCompanySnapshot {
   name: string
-  address: string
+  street: string
+  zip: string
+  city: string
+  country: string
   phone: string
   email: string
   bank_account: string
@@ -205,7 +211,10 @@ export async function buildSnapshots(
 
   const clientSnapshot: TClientSnapshot = {
     name: client.name || '',
-    address: client.address || '',
+    street: client.street || '',
+    zip: client.zip || '',
+    city: client.city || '',
+    country: client.country || 'CH',
     email: client.email || '',
     phone: client.phone || '',
     contact_person: client.contact_person || '',
@@ -225,7 +234,10 @@ export async function buildSnapshots(
 
   const companySnapshot: TCompanySnapshot = {
     name: settings.company_name || '',
-    address: settings.address || '',
+    street: settings.street || '',
+    zip: settings.zip || '',
+    city: settings.city || '',
+    country: settings.country || 'CH',
     phone: settings.phone || '',
     email: settings.email || '',
     bank_account: settings.bank_account || '',

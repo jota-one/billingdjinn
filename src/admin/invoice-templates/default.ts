@@ -40,6 +40,14 @@ const logoContent = (logo: string | null | undefined): Content => {
   return { text: '' }
 }
 
+export function formatAddressLines(obj: TClientSnapshot | TCompanySnapshot): string[] {
+  const lines: string[] = []
+  if (obj.street) lines.push(obj.street)
+  const zipCity = [obj.zip, obj.city].filter(Boolean).join(' ')
+  if (zipCity) lines.push(zipCity)
+  return lines
+}
+
 // ─── template ────────────────────────────────────────────────────────────────
 
 export default function buildDocDef(
@@ -62,7 +70,7 @@ export default function buildDocDef(
       {
         stack: [
           { text: company.name, style: 'companyName' },
-          { text: company.address || '', style: 'small' },
+          ...formatAddressLines(company).map(l => ({ text: l, style: 'small' })),
           company.phone ? { text: company.phone, style: 'small' } : '',
           company.email ? { text: company.email, style: 'small' } : '',
           company.tva_number ? { text: company.tva_number, style: 'small' } : '',
@@ -78,9 +86,7 @@ export default function buildDocDef(
   if (client.contact_person) {
     clientLines.push(client.contact_person)
   }
-  if (client.address) {
-    clientLines.push(client.address)
-  }
+  clientLines.push(...formatAddressLines(client))
   if (client.email) {
     clientLines.push(client.email)
   }
@@ -194,7 +200,7 @@ export default function buildDocDef(
     : []
 
   // ── footer company line ──
-  const footerLine = [company.name, company.address, company.phone, company.email]
+  const footerLine = [company.name, ...formatAddressLines(company), company.phone, company.email]
     .filter(Boolean)
     .join('  ·  ')
 
