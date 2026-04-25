@@ -23,15 +23,26 @@
           <InputText v-model="form.contact_person" placeholder="Jean Dupont" class="w-full" />
         </div>
 
-        <!-- Adresse -->
+        <!-- Adresse structurée -->
         <div class="form-control">
-          <label class="label"><span class="label-text font-semibold">Adresse</span></label>
-          <Textarea
-            v-model="form.address"
-            placeholder="Rue de la Paix 1&#10;1000 Lausanne"
-            :rows="3"
-            class="w-full"
-          />
+          <label class="label"><span class="label-text font-semibold">Rue</span></label>
+          <InputText v-model="form.street" placeholder="Rue du Moulin 5" class="w-full" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold">NPA</span></label>
+            <InputText v-model="form.zip" placeholder="8001" class="w-full" />
+          </div>
+          <div class="form-control sm:col-span-2">
+            <label class="label"><span class="label-text font-semibold">Ville</span></label>
+            <InputText v-model="form.city" placeholder="Zurich" class="w-full" />
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text font-semibold">Pays</span></label>
+          <InputText v-model="form.country" placeholder="CH" class="w-full" />
         </div>
 
         <!-- Téléphone / Email -->
@@ -177,7 +188,10 @@ const saving = ref(false)
 const form = ref({
   name: '',
   contact_person: '',
-  address: '',
+  street: '',
+  zip: '',
+  city: '',
+  country: 'CH',
   phone: '',
   email: '',
   hourly_rate: null as number | null,
@@ -219,7 +233,10 @@ onMounted(async () => {
       form.value = {
         name: client.name || '',
         contact_person: client.contact_person || '',
-        address: client.address || '',
+        street: client.street || '',
+        zip: client.zip || '',
+        city: client.city || '',
+        country: client.country || 'CH',
         phone: client.phone || '',
         email: client.email || '',
         hourly_rate: client.hourly_rate ?? null,

@@ -7,48 +7,21 @@ import type {
 } from '@/admin/composables/useInvoices'
 import { label } from '@/admin/utils/invoice-labels'
 import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
-
-// ─── helpers ────────────────────────────────────────────────────────────────
-
-export const formatDate = (iso?: string) => {
-  if (!iso) {
-    return ''
-  }
-  const d = new Date(iso)
-  return d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
-
-export const formatCurrency = (n: number, currency: string) =>
-  new Intl.NumberFormat('fr-CH', { style: 'currency', currency })
-    .format(n)
-    .replace(/\u202F/g, "'") // narrow no-break space (thousands sep) → apostrophe
-    .replace(/\u00A0/g, ' ') // no-break space (before symbol) → regular space
+import { formatDate, formatCurrency, formatAddressLines } from './default'
+import { buildQrBillSvg } from '@/admin/utils/qr-bill'
 
 const lineTotal = (l: { quantity: number; unit_price: number }) => l.quantity * l.unit_price
 
 const logoContent = (logo: string | null | undefined): Content => {
-  if (!logo) {
-    return { text: '' }
-  }
+  if (!logo) return { text: '' }
   if (/^data:image\/svg\+xml/i.test(logo)) {
-    const svgString = atob(logo.split(',')[1])
-    return { svg: svgString, width: 100, margin: [0, 0, 0, 0] }
+    return { svg: atob(logo.split(',')[1]), width: 100, margin: [0, 0, 0, 0] }
   }
   if (/^data:image\/(jpeg|jpg|png)/i.test(logo)) {
     return { image: logo, width: 100, margin: [0, 0, 0, 0] }
   }
   return { text: '' }
 }
-
-export function formatAddressLines(obj: TClientSnapshot | TCompanySnapshot): string[] {
-  const lines: string[] = []
-  if (obj.street) lines.push(obj.street)
-  const zipCity = [obj.zip, obj.city].filter(Boolean).join(' ')
-  if (zipCity) lines.push(zipCity)
-  return lines
-}
-
-// ─── template ────────────────────────────────────────────────────────────────
 
 export default function buildDocDef(
   invoice: TInvoiceBase,
@@ -83,13 +56,9 @@ export default function buildDocDef(
 
   // ── client block ──
   const clientLines = [client.name]
-  if (client.contact_person) {
-    clientLines.push(client.contact_person)
-  }
+  if (client.contact_person) clientLines.push(client.contact_person)
   clientLines.push(...formatAddressLines(client))
-  if (client.email) {
-    clientLines.push(client.email)
-  }
+  if (client.email) clientLines.push(client.email)
 
   const clientBlock: Content = {
     stack: [
@@ -135,11 +104,7 @@ export default function buildDocDef(
   ]
 
   const linesTable: Content = {
-    table: {
-      headerRows: 1,
-      widths: ['*', 'auto', 'auto', 'auto'],
-      body: tableBody,
-    },
+    table: { headerRows: 1, widths: ['*', 'auto', 'auto', 'auto'], body: tableBody },
     layout: 'lightHorizontalLines',
     margin: [0, 0, 0, 16],
   }
@@ -204,6 +169,35 @@ export default function buildDocDef(
     .filter(Boolean)
     .join('  ·  ')
 
+  // ── QR slip ──
+  const qrSvg = buildQrBillSvg(invoice, lines, client, company)
+  const QR_H = 298
+  const PAGE_H = 842
+  const QR_Y = PAGE_H - QR_H
+  const hasQr = qrSvg !== null
+  const qrSlip: Content[] = qrSvg
+    ? [
+        { text: '', pageBreak: 'before' } as Content,
+        {
+          text: footerLine,
+          style: 'footer',
+          alignment: 'center',
+          absolutePosition: { x: 56, y: QR_Y - 30 },
+        } as Content,
+        {
+          canvas: [
+            { type: 'line', x1: 0, y1: 0, x2: 595, y2: 0, lineWidth: 0.5, lineColor: '#000000' },
+          ],
+          absolutePosition: { x: 0, y: QR_Y },
+        } as Content,
+        {
+          svg: qrSvg,
+          width: 595,
+          absolutePosition: { x: 0, y: QR_Y },
+        } as Content,
+      ]
+    : []
+
   return {
     pageSize: 'A4',
     pageMargins: [50, 50, 50, 70],
@@ -215,13 +209,12 @@ export default function buildDocDef(
       totalsTable,
       ...paymentStack,
       notesBlock,
+      ...qrSlip,
     ],
-    footer: (_currentPage: number, _pageCount: number): Content => ({
-      text: footerLine,
-      alignment: 'center',
-      style: 'footer',
-      margin: [50, 0],
-    }),
+    footer: (currentPage: number, pageCount: number): Content =>
+      hasQr && currentPage === pageCount
+        ? { text: '' }
+        : { text: footerLine, alignment: 'center', style: 'footer', margin: [50, 0] },
     styles: {
       companyName: { fontSize: 13, bold: true, color: '#111827' },
       invoiceTitle: { fontSize: 18, bold: true, color: '#111827', margin: [0, 0, 0, 6] },

@@ -6,7 +6,10 @@ import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
 export interface TSettings {
   id: string
   company_name: string
-  address?: string
+  street?: string
+  zip?: string
+  city?: string
+  country?: string
   phone?: string
   email?: string
   bank_account?: string
@@ -17,6 +20,7 @@ export interface TSettings {
   hourly_rate?: number
   payment_terms?: number
   currency?: string
+  invoice_template?: string
   labels?: TInvoiceLabels
   created: string
   updated: string
@@ -24,7 +28,10 @@ export interface TSettings {
 
 export interface TSettingsForm {
   company_name: string
-  address?: string
+  street?: string
+  zip?: string
+  city?: string
+  country?: string
   phone?: string
   email?: string
   bank_account?: string
@@ -35,6 +42,7 @@ export interface TSettingsForm {
   hourly_rate?: number | null
   payment_terms?: number | null
   currency?: string
+  invoice_template?: string
   labels?: TInvoiceLabels
 }
 
@@ -60,8 +68,17 @@ export default function useSettings() {
     const formData = new FormData()
     formData.append('company_name', payload.company_name.trim())
 
-    if (payload.address !== undefined) {
-      formData.append('address', payload.address)
+    if (payload.street !== undefined) {
+      formData.append('street', payload.street)
+    }
+    if (payload.zip !== undefined) {
+      formData.append('zip', payload.zip)
+    }
+    if (payload.city !== undefined) {
+      formData.append('city', payload.city)
+    }
+    if (payload.country !== undefined) {
+      formData.append('country', payload.country)
     }
     if (payload.phone !== undefined) {
       formData.append('phone', payload.phone)
@@ -90,6 +107,9 @@ export default function useSettings() {
     }
     if (payload.currency) {
       formData.append('currency', payload.currency)
+    }
+    if (payload.invoice_template !== undefined) {
+      formData.append('invoice_template', payload.invoice_template)
     }
     if (payload.labels !== undefined) {
       formData.append('labels', JSON.stringify(payload.labels))

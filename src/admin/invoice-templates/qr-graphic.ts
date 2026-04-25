@@ -7,34 +7,15 @@ import type {
 } from '@/admin/composables/useInvoices'
 import { label } from '@/admin/utils/invoice-labels'
 import type { TInvoiceLabels } from '@/admin/types/invoice-labels'
-import { formatAddressLines } from './default'
-
-// ─── helpers ────────────────────────────────────────────────────────────────
-
-export const formatDate = (iso?: string) => {
-  if (!iso) {
-    return ''
-  }
-  const d = new Date(iso)
-  return d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
-
-export const formatCurrency = (n: number, currency: string) =>
-  new Intl.NumberFormat('fr-CH', { style: 'currency', currency })
-    .format(n)
-    .replace(/\u202F/g, "'")
-    .replace(/\u00A0/g, ' ')
+import { formatDate, formatCurrency, formatAddressLines } from './default'
+import { buildQrBillSvg } from '@/admin/utils/qr-bill'
 
 const lineTotal = (l: { quantity: number; unit_price: number }) => l.quantity * l.unit_price
-
-// ─── design tokens ───────────────────────────────────────────────────────────
 
 const ACCENT = '#000000'
 const ACCENT_LIGHT = '#EEF1F7'
 const MUTED = '#6b7280'
 const INK = '#111827'
-
-// ─── template ────────────────────────────────────────────────────────────────
 
 export default function buildDocDef(
   invoice: TInvoiceBase,
@@ -77,9 +58,7 @@ export default function buildDocDef(
 
   // ── client + meta side by side ──
   const clientLines = [client.name]
-  if (client.contact_person) {
-    clientLines.push(client.contact_person)
-  }
+  if (client.contact_person) clientLines.push(client.contact_person)
   clientLines.push(...formatAddressLines(client))
 
   const metaRows: Content[] = [
@@ -109,10 +88,7 @@ export default function buildDocDef(
           { text: clientLines.join('\n'), style: 'body' },
         ],
       },
-      {
-        stack: metaRows,
-        alignment: 'right',
-      },
+      { stack: metaRows, alignment: 'right' },
     ],
     margin: [0, 0, 0, 24],
   }
@@ -149,9 +125,7 @@ export default function buildDocDef(
         fillColor: i % 2 === 0 ? undefined : ACCENT_LIGHT,
       },
     ]),
-    // spacer
     [{ text: '', colSpan: 4 }, {}, {}, {}],
-    // total HT
     [
       { text: labels.total_ht, colSpan: 3, alignment: 'right', style: 'body' },
       {},
@@ -196,11 +170,7 @@ export default function buildDocDef(
   ])
 
   const linesTable: Content = {
-    table: {
-      headerRows: 1,
-      widths: ['*', 'auto', 'auto', 'auto'],
-      body: tableBody,
-    },
+    table: { headerRows: 1, widths: ['*', 'auto', 'auto', 'auto'], body: tableBody },
     layout: {
       hLineWidth: () => 0,
       vLineWidth: () => 0,
@@ -244,6 +214,35 @@ export default function buildDocDef(
     .filter(Boolean)
     .join('  ·  ')
 
+  // ── QR slip ──
+  const qrSvg = buildQrBillSvg(invoice, lines, client, company)
+  const QR_H = 298
+  const PAGE_H = 842
+  const QR_Y = PAGE_H - QR_H
+  const hasQr = qrSvg !== null
+  const qrSlip: Content[] = qrSvg
+    ? [
+        { text: '', pageBreak: 'before' } as Content,
+        {
+          text: footerLine,
+          style: 'footer',
+          alignment: 'center',
+          absolutePosition: { x: 56, y: QR_Y - 30 },
+        } as Content,
+        {
+          canvas: [
+            { type: 'line', x1: 0, y1: 0, x2: 595, y2: 0, lineWidth: 0.5, lineColor: '#000000' },
+          ],
+          absolutePosition: { x: 0, y: QR_Y },
+        } as Content,
+        {
+          svg: qrSvg,
+          width: 595,
+          absolutePosition: { x: 0, y: QR_Y },
+        } as Content,
+      ]
+    : []
+
   return {
     pageSize: 'A4',
     pageMargins: [56, 110, 50, 70],
@@ -251,13 +250,11 @@ export default function buildDocDef(
       svg: `<svg fill="none" height="80" viewBox="0 0 82 120" xmlns="http://www.w3.org/2000/svg"><path d="m81.3128 0v38.6871l-81.3128 81.3129v-120z" fill="#000"/><path clip-rule="evenodd" d="m31.8578 41.2802c-1.8 0-3.1778-.5171-4.1333-1.5512-.9556-1.0342-1.4334-2.4955-1.4334-4.3839v-12.4099c0-1.8885.4778-3.3498 1.4334-4.384.9555-1.0341 2.3333-1.5512 4.1333-1.5512s3.1778.5171 4.1333 1.5512c.9556 1.0342 1.4333 2.4955 1.4333 4.384v12.4099c0 1.8884-.4777 3.3497-1.4333 4.3839-.9555 1.0341-2.3333 1.5512-4.1333 1.5512zm0-3.3722c1.2667 0 1.9-.7757 1.9-2.3269v-12.882c0-1.5512-.6333-2.3268-1.9-2.3268s-1.9.7756-1.9 2.3268v12.882c0 1.5512.6333 2.3269 1.9 2.3269zm-14.1578 3.1699c-.6667 0-1.7 0-1.7 0v-3.3723h1.2c.7333 0 1.2778-.1798 1.6333-.5395.3556-.3822.5334-.9555.5334-1.7199v-9.2068l3.6666-3.7095v12.8152c0 1.9334-.4444 3.3722-1.3333 4.3164-.8667.9443-2.2 1.4164-4 1.4164zm5.3333-21.9758v-1.7649h-3.6666v5.4744zm19.1537 1.6074h-3.8333v-3.3723h11.3333v3.3723h-3.8333v20.2335h-3.6667zm10.1437-3.3723h4.9667l3.8 23.6058h-3.6667l-.6667-4.6874v.0674h-4.1666l-.6667 4.62h-3.4zm4 15.7822-1.6333-11.668h-.0667l-1.6 11.668z" fill="#fff" fill-rule="evenodd"/></svg>`,
       absolutePosition: { x: 42, y: 0 },
     }),
-    content: [header, separator, clientMeta, linesTable, ...paymentStack, notesBlock],
-    footer: (_currentPage: number, _pageCount: number): Content => ({
-      text: footerLine,
-      alignment: 'center',
-      style: 'footer',
-      margin: [56, 0, 50, 0],
-    }),
+    content: [header, separator, clientMeta, linesTable, ...paymentStack, notesBlock, ...qrSlip],
+    footer: (currentPage: number, pageCount: number): Content =>
+      hasQr && currentPage === pageCount
+        ? { text: '' }
+        : { text: footerLine, alignment: 'center', style: 'footer', margin: [56, 0, 50, 0] },
     styles: {
       invoiceTitle: { fontSize: 20, bold: true, color: ACCENT },
       invoiceNumber: { fontSize: 10, color: ACCENT, margin: [0, 2, 0, 0] },

@@ -17,6 +17,7 @@ async function resolveData(invoice: TInvoiceBase): Promise<{
   client: TClientSnapshot
   company: TCompanySnapshot
   labels: Required<TInvoiceLabels>
+  template: string
 }> {
   const pb = new PocketBase(config.apiBaseUrl)
   const [clientRaw, settingsRaw] = await Promise.all([
@@ -25,9 +26,10 @@ async function resolveData(invoice: TInvoiceBase): Promise<{
   ])
 
   const labels = resolveLabels(settingsRaw.labels, clientRaw.labels)
+  const template = settingsRaw.invoice_template || 'default'
 
   if (invoice.client_snapshot && invoice.company_snapshot) {
-    return { client: invoice.client_snapshot, company: invoice.company_snapshot, labels }
+    return { client: invoice.client_snapshot, company: invoice.company_snapshot, labels, template }
   }
 
   // Draft fallback: build snapshots from live data
@@ -50,14 +52,20 @@ async function resolveData(invoice: TInvoiceBase): Promise<{
   return {
     client: {
       name: clientRaw.name || '',
-      address: clientRaw.address || '',
+      street: clientRaw.street || '',
+      zip: clientRaw.zip || '',
+      city: clientRaw.city || '',
+      country: clientRaw.country || 'CH',
       email: clientRaw.email || '',
       phone: clientRaw.phone || '',
       contact_person: clientRaw.contact_person || '',
     },
     company: {
       name: settingsRaw.company_name || '',
-      address: settingsRaw.address || '',
+      street: settingsRaw.street || '',
+      zip: settingsRaw.zip || '',
+      city: settingsRaw.city || '',
+      country: settingsRaw.country || 'CH',
       phone: settingsRaw.phone || '',
       email: settingsRaw.email || '',
       bank_account: settingsRaw.bank_account || '',
@@ -66,18 +74,16 @@ async function resolveData(invoice: TInvoiceBase): Promise<{
       currency: clientRaw.currency || settingsRaw.currency || 'CHF',
     },
     labels,
+    template,
   }
 }
 
 // ─── public API ─────────────────────────────────────────────────────────────
 
-export async function downloadInvoicePdf(
-  invoice: TInvoiceBase,
-  lines: TInvoiceLine[],
-  template: TemplateName = 'default',
-) {
-  const { client, company, labels } = await resolveData(invoice)
-  const { default: buildDocDef } = await templates[template]()
+export async function downloadInvoicePdf(invoice: TInvoiceBase, lines: TInvoiceLine[]) {
+  const { client, company, labels, template } = await resolveData(invoice)
+  const templateKey = template in templates ? (template as TemplateName) : 'default'
+  const { default: buildDocDef } = await templates[templateKey]()
   const docDef = buildDocDef(invoice, lines, client, company, labels)
   const filename = `facture-${invoice.invoice_number || invoice.id}.pdf`
   return pdfMake.createPdf(docDef).download(filename)
