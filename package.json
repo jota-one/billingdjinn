@@ -9,7 +9,7 @@
     "astro": "astro",
     "lint": "oxlint --type-aware",
     "format": "oxfmt",
-    "db": "cd pb && ./pocketbase serve --http=127.0.0.1:8092",
+    "db": "set -a && . ./.env.local && set +a && cd pb && ./pocketbase serve --http=127.0.0.1:8092",
     "seed-demo": "node scripts/seed-demo.js"
   },
   "dependencies": {

@@ -16,9 +16,6 @@ Liste des petites améliorations et refactorings potentiels.
 
 La sélection du template est disponible dans les Settings (4 templates : classique, graphique, classique+QR, graphique+QR). Reste à implémenter : options d'organisation de l'entête (logo gauche/droite/centré), densité (compact vs aéré), couleur d'accent.
 
-### Envoi des factures par email
-Configurer pocketbase pour qu'il soit capable d'envoyer des emails avec pièce jointe (génération PDF de facture sur node va être nécessaire). Envoi de la facture déclenché manuellement s'il s'agit d'une facture isolée. Envoi automatique s'il s'agit d'une facture récurrente (voir point suivant).
-
 ### Génération de factures récurrentes
 Il faut pouvoir configurer la génération de factures récurrentes pour un client donné. Il faut pouvoir définir quel jour chaque facture va être crée, probablement qu'il faudra un CRON au niveau pocketbase pour vérifier si une facture doit être émise.
 
@@ -26,6 +23,8 @@ Il faut pouvoir configurer la génération de factures récurrentes pour un clie
 Il faut que chaque screen soit parfaitement exploitable sur un téléphone portable, y-compris la réconciliation des données bancaires (upload de fichier) et les statistiques.
 
 ## Historique (fait)
+
+- [2026-04-26] Envoi des factures par email — hook PocketBase `mailer.pb.js` déclenché manuellement depuis la page de détail. Génération PDF côté Node.js via endpoint Astro SSR `/pdf` (pdfmake, `createRequire`, fonts VFS). Pièce jointe PDF. Mode test via `SEND_TO_TEST_EMAIL`. Badge "Envoyé le …" sur la facture (`emailed_at`). Migration `migrate-invoice-snapshots-address.js` pour convertir les snapshots anciens (champ `address` → `street`/`zip`/`city`).
 
 - [2026-04-25] Factures QR suisse — bordereau QR (swissqrbill) intégré en SVG dans pdfmake. Adresses structurées (street/zip/city/country) dans clients et company_settings, avec migration de données inline. Templates `qr-default` et `qr-graphic`. Sélection du template dans les Settings. Fix viewBox : coordonnées internes swissqrbill en CSS px (96dpi), pas en pt.
 
