@@ -28,6 +28,7 @@ export interface TCompanySnapshot {
   tva_number: string
   logo_base64: string | null
   currency: string
+  invoice_template?: string
 }
 
 export interface TInvoiceBase {
@@ -43,6 +44,7 @@ export interface TInvoiceBase {
   converted_amount?: number | null
   client_snapshot?: TClientSnapshot
   company_snapshot?: TCompanySnapshot
+  emailed_at?: string | null
 }
 
 export interface TInvoice extends TInvoiceBase {
@@ -244,6 +246,7 @@ export async function buildSnapshots(
     tva_number: settings.tva_number || '',
     logo_base64,
     currency: client.currency || settings.currency || 'CHF',
+    invoice_template: settings.invoice_template || 'default',
   }
 
   return { clientSnapshot, companySnapshot }

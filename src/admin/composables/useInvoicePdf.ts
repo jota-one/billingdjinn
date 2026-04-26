@@ -29,7 +29,13 @@ async function resolveData(invoice: TInvoiceBase): Promise<{
   const template = settingsRaw.invoice_template || 'default'
 
   if (invoice.client_snapshot && invoice.company_snapshot) {
-    return { client: invoice.client_snapshot, company: invoice.company_snapshot, labels, template }
+    // Merge live settings for fields missing in older snapshots
+    const company: TCompanySnapshot = {
+      ...invoice.company_snapshot,
+      bank_account: invoice.company_snapshot.bank_account || settingsRaw.bank_account || '',
+    }
+    const template = company.invoice_template || settingsRaw.invoice_template || 'default'
+    return { client: invoice.client_snapshot, company, labels, template }
   }
 
   // Draft fallback: build snapshots from live data

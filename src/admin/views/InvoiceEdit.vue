@@ -64,7 +64,16 @@
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 mt-6">
+      <!-- Statut envoi email -->
+      <div
+        v-if="emailedAt"
+        class="flex items-center gap-2 text-sm text-base-content/50 mt-6 justify-end"
+      >
+        <span class="i-fa-solid-check text-success"></span>
+        Envoyé par email le {{ emailedAt }}
+      </div>
+
+      <div class="flex justify-end gap-3 mt-3">
         <Button
           type="button"
           label="Télécharger PDF"
@@ -72,6 +81,15 @@
           severity="secondary"
           :loading="pdfLoading"
           @click="downloadPdf"
+        />
+        <Button
+          v-if="canSendEmail"
+          type="button"
+          label="Envoyer par email"
+          icon="i-fa-solid-paper-plane"
+          severity="secondary"
+          :loading="emailSending"
+          @click="showEmailModal = true"
         />
         <Button
           type="button"
@@ -83,6 +101,7 @@
       </div>
     </template>
   </div>
+
   <PbErrorToast />
   <LedgerMatchModal
     v-model="showLedgerMatchModal"
@@ -92,6 +111,38 @@
     @create-new="onLedgerCreateNew"
     @skip="ledgerCandidates = []"
   />
+
+  <!-- Modal confirmation envoi email -->
+  <Dialog
+    v-model:visible="showEmailModal"
+    modal
+    header="Envoyer la facture par email"
+    :style="{ width: '28rem' }"
+  >
+    <div class="flex flex-col gap-4">
+      <div v-if="testEmail" class="flex items-start gap-3 text-sm bg-warning/10 border border-warning/30 rounded-lg p-3">
+        <span class="i-fa-solid-triangle-exclamation text-warning mt-0.5 shrink-0"></span>
+        <span>
+          Mode test — l'email sera envoyé à <strong>{{ testEmail }}</strong> au lieu du client.
+        </span>
+      </div>
+      <div class="flex items-start gap-3 text-sm">
+        <span class="i-fa-solid-circle-info text-info mt-0.5 shrink-0"></span>
+        <span>
+          La facture sera envoyée à <strong>{{ clientEmail }}</strong> en pièce jointe (PDF).
+        </span>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <Button label="Annuler" severity="secondary" @click="showEmailModal = false" />
+        <Button
+          label="Envoyer"
+          icon="i-fa-solid-paper-plane"
+          :loading="emailSending"
+          @click="sendEmail"
+        />
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -99,6 +150,7 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import PbErrorToast from '@/admin/components/PbErrorToast.vue'
 import InvoiceForm from '@/admin/components/InvoiceForm.vue'
@@ -118,6 +170,8 @@ import useSettings from '@/admin/composables/useSettings'
 import useLedger from '@/admin/composables/useLedger'
 import { downloadInvoicePdf } from '@/admin/composables/useInvoicePdf'
 import type { TLedgerCandidateEntry } from '@/admin/composables/useLedger'
+import PocketBase from 'pocketbase'
+import config from '@/config'
 
 const { loadInvoice, loadInvoiceLines, updateInvoice } = useInvoices()
 const { clients, loadClients } = useClients()
@@ -128,10 +182,13 @@ const toast = useToast()
 const route = useRoute()
 
 const invoiceId = route.params.id as string
+const testEmail = import.meta.env.PUBLIC_SEND_TO_TEST_EMAIL || null
 
 const loading = ref(true)
 const saving = ref(false)
 const pdfLoading = ref(false)
+const emailSending = ref(false)
+const showEmailModal = ref(false)
 const invoiceRef = ref<TInvoice | null>(null)
 const invoiceStatus = ref<TInvoiceStatus | null>(null)
 const hasSnapshot = ref(false)
@@ -142,6 +199,27 @@ const pendingLedgerAmount = ref(0)
 const pendingLedgerInvoiceId = ref('')
 
 const isLocked = computed(() => invoiceStatus.value !== null && invoiceStatus.value !== 'draft')
+
+const canSendEmail = computed(() => {
+  if (invoiceStatus.value !== 'sent') return false
+  const client = clients.value.find(c => c.id === form.value.client)
+  return !!(client?.email || invoiceRef.value?.client_snapshot?.email)
+})
+
+const clientEmail = computed(() => {
+  const client = clients.value.find(c => c.id === form.value.client)
+  return client?.email || invoiceRef.value?.client_snapshot?.email || ''
+})
+
+const emailedAt = computed(() => {
+  const raw = invoiceRef.value?.emailed_at
+  if (!raw) return null
+  return new Date(raw).toLocaleDateString('fr-CH', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+})
 
 const effectiveCurrency = computed(() => {
   if (invoiceRef.value?.company_snapshot?.currency) {
@@ -254,9 +332,7 @@ const onLedgerCreateNew = async () => {
 }
 
 const downloadPdf = async () => {
-  if (!invoiceRef.value) {
-    return
-  }
+  if (!invoiceRef.value) return
   pdfLoading.value = true
   try {
     const invoiceForPdf = {
@@ -265,11 +341,38 @@ const downloadPdf = async () => {
       tva_rate: form.value.tva_rate ?? undefined,
     }
     const linesForPdf = lines.value.map(l => ({ ...l, invoice: invoiceId })) as TInvoiceLine[]
-    await downloadInvoicePdf(invoiceForPdf, linesForPdf, 'graphic')
+    await downloadInvoicePdf(invoiceForPdf, linesForPdf)
   } catch (e) {
     showPbError(e)
   } finally {
     pdfLoading.value = false
+  }
+}
+
+const sendEmail = async () => {
+  emailSending.value = true
+  try {
+    const pb = new PocketBase(config.apiBaseUrl)
+    const res = await fetch(`${config.apiBaseUrl}/api/send-invoice/${invoiceId}`, {
+      method: 'POST',
+      headers: { Authorization: pb.authStore.token },
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(data.message || `Erreur ${res.status}`)
+    }
+    showEmailModal.value = false
+    invoiceRef.value = await loadInvoice(invoiceId)
+    toast.add({
+      severity: 'success',
+      summary: 'Email envoyé',
+      detail: `La facture a été envoyée à ${testEmail || clientEmail.value}.`,
+      life: 4000,
+    })
+  } catch (e) {
+    showPbError(e)
+  } finally {
+    emailSending.value = false
   }
 }
 
