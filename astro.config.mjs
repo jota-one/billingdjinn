@@ -10,9 +10,10 @@ import node from '@astrojs/node'
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
-    ...(process.env.NODE_ENV === 'production'
-      ? {
-          ssr: {
+    ssr: {
+      external: ['pdfmake'],
+      ...(process.env.NODE_ENV === 'production'
+        ? {
             noExternal: [
               'vue',
               'pocketbase',
@@ -21,9 +22,9 @@ export default defineConfig({
               'marked',
               'dayjs',
             ],
-          },
-        }
-      : {}),
+          }
+        : {}),
+    },
   },
 
   integrations: [vue({ appEntrypoint: '/src/pages/_app' })],
