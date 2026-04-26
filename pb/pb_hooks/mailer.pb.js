@@ -156,7 +156,7 @@ routerAdd(
       }
 
       // Call Astro for PDF generation
-      const astroUrl = $os.getenv('ASTRO_INTERNAL_URL') || 'http://127.0.0.1:4321'
+      const astroUrl = $os.getenv('ASTRO_INTERNAL_URL') || 'http://127.0.0.1:8194'
       const pdfSecret = $os.getenv('ASTRO_PDF_SECRET') || ''
 
       const res = $http.send({
